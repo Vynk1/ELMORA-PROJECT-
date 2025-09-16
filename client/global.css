@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 355 100% 98%;
+    --foreground: 345 15% 25%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 345 15% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 345 15% 25%;
+
+    --primary: 340 75% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 330 40% 92%;
+    --secondary-foreground: 345 15% 25%;
+
+    --muted: 320 25% 95%;
+    --muted-foreground: 340 10% 55%;
+
+    --accent: 315 60% 88%;
+    --accent-foreground: 345 15% 25%;
+
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 320 25% 88%;
+    --input: 320 25% 88%;
+    --ring: 340 75% 70%;
+
+    --radius: 1rem;
+
+    /* Mood colors - Light mode */
+    --mood-sad: 220 15% 25%;
+    --mood-mid: 35 45% 55%;
+    --mood-amazing: 150 70% 50%;
+
+    /* Additional soft colors */
+    --soft-pink: 340 75% 85%;
+    --soft-blue: 210 50% 80%;
+    --soft-green: 150 45% 75%;
+    --soft-purple: 280 40% 80%;
+    --soft-yellow: 45 85% 85%;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 345 20% 8%;
+    --foreground: 340 25% 90%;
+
+    --card: 345 20% 10%;
+    --card-foreground: 340 25% 90%;
+
+    --popover: 345 20% 10%;
+    --popover-foreground: 340 25% 90%;
+
+    --primary: 340 75% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 15% 15%;
+    --secondary-foreground: 340 25% 90%;
+
+    --muted: 340 15% 15%;
+    --muted-foreground: 340 10% 65%;
+
+    --accent: 340 15% 15%;
+    --accent-foreground: 340 25% 90%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 340 15% 20%;
+    --input: 340 15% 20%;
+    --ring: 340 75% 65%;
+
+    /* Dark mode mood colors */
+    --mood-sad: 220 20% 15%;
+    --mood-mid: 35 35% 35%;
+    --mood-amazing: 150 60% 40%;
+
+    /* Dark mode soft colors */
+    --soft-pink: 340 60% 65%;
+    --soft-blue: 210 40% 60%;
+    --soft-green: 150 35% 55%;
+    --soft-purple: 280 30% 60%;
+    --soft-yellow: 45 70% 65%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+
+  /* Smooth animations for mood transitions */
+  .mood-transition {
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Gentle hover effects */
+  .gentle-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .gentle-hover:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Cloud floating animation */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    33% {
+      transform: translateY(-10px) translateX(5px);
+    }
+    66% {
+      transform: translateY(5px) translateX(-3px);
+    }
+  }
+
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .float-animation-delayed {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  .float-animation-slow {
+    animation: float 8s ease-in-out infinite;
+    animation-delay: 4s;
+  }
+
+  /* Mood-specific themes */
+  .mood-sad {
+    --background: 220 15% 12%;
+    --foreground: 220 10% 85%;
+    --card: 220 15% 15%;
+    --card-foreground: 220 10% 85%;
+    --primary: 220 20% 25%;
+    --primary-foreground: 220 10% 90%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 8% 65%;
+    --accent: 220 15% 20%;
+    --accent-foreground: 220 10% 85%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+  }
+
+  .mood-mid {
+    --background: 35 25% 92%;
+    --foreground: 35 20% 20%;
+    --card: 35 20% 95%;
+    --card-foreground: 35 20% 20%;
+    --primary: 35 45% 45%;
+    --primary-foreground: 35 5% 95%;
+    --muted: 35 15% 88%;
+    --muted-foreground: 35 10% 50%;
+    --accent: 35 20% 85%;
+    --accent-foreground: 35 20% 25%;
+    --border: 35 15% 82%;
+    --input: 35 15% 82%;
+  }
+
+  .mood-amazing {
+    --background: 150 60% 96%;
+    --foreground: 150 30% 15%;
+    --card: 150 40% 98%;
+    --card-foreground: 150 30% 15%;
+    --primary: 150 70% 40%;
+    --primary-foreground: 150 5% 98%;
+    --muted: 150 30% 92%;
+    --muted-foreground: 150 15% 45%;
+    --accent: 150 40% 88%;
+    --accent-foreground: 150 30% 20%;
+    --border: 150 25% 85%;
+    --input: 150 25% 85%;
+  }
+}

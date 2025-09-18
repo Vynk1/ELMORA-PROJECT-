@@ -16,7 +16,10 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import Help from "./pages/Help";
 import TestModal from "./pages/TestModal";
+import CheckIn from "./pages/CheckIn";
+import FlowerDemo from "./pages/FlowerDemo";
 import NotFound from "./pages/NotFound";
+import ElmoraChat from "./components/ElmoraChat";
 import { type MoodType } from "./components/MoodColorSwitcher";
 import { type MoodColors } from "./components/MoodColorPicker";
 
@@ -119,13 +122,31 @@ function AppContent() {
             <Route path="/journal" element={<Journal />} />
             <Route path="/meditation" element={<Meditation />} />
             <Route path="/goals" element={<Goals />} />
+            <Route 
+              path="/checkin" 
+              element={
+                <CheckIn 
+                  currentMood={currentMood}
+                  userPoints={userPoints}
+                  onPointsUpdate={handlePointsUpdate}
+                />
+              } 
+            />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/help" element={<Help />} />
             <Route path="/test-modal" element={<TestModal />} />
+            <Route path="/flower-demo" element={<FlowerDemo />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        
+        {/* Elmora Chat - Available on all pages after mood selection */}
+        <ElmoraChat
+          currentMood={currentMood}
+          userPoints={userPoints}
+          onPointsUpdate={handlePointsUpdate}
+        />
       </div>
     </BrowserRouter>
   );

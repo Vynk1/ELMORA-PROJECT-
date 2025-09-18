@@ -1,0 +1,190 @@
+{
+  "name": "elmora-wellness-chatbot",
+  "description": "Wellness companion chatbot for mood check-ins, journaling, meditation, goals, and rewards",
+  "intents": [
+    {
+      "displayName": "Default Welcome Intent",
+      "trainingPhrases": [
+        "Hi",
+        "Hello",
+        "Hey there",
+        "Good morning",
+        "Good afternoon",
+        "Good evening"
+      ],
+      "responses": [
+        "Hi there! I'm Elmora, your wellness companion 🌿. I'm here to help you with mood check-ins, journaling, meditation, goal tracking, and celebrating your progress. How are you feeling today?",
+        "Hello! It's wonderful to see you. I'm Elmora, and I'm here to support your wellness journey. What would you like to focus on today?",
+        "Welcome! I'm Elmora, your personal wellness companion. Whether you need to check in with your emotions, write in your journal, meditate, or work on your goals, I'm here to help. How can I support you today?"
+      ]
+    },
+    {
+      "displayName": "Mood Check-in Intent",
+      "trainingPhrases": [
+        "How are you feeling?",
+        "I want to do a mood check-in",
+        "Let's check my mood",
+        "I'm feeling sad",
+        "I'm feeling happy",
+        "I'm feeling anxious",
+        "I'm feeling stressed",
+        "I feel great today",
+        "I'm not doing well",
+        "My mood is low",
+        "I'm having a rough day",
+        "I feel amazing",
+        "I'm feeling overwhelmed"
+      ],
+      "responses": [
+        "Thank you for sharing how you're feeling with me. Your emotional awareness is a sign of strength. Tell me more about what's contributing to how you feel today?",
+        "I appreciate you checking in with your emotions. All feelings are valid and temporary. What's one thing that might help you feel a bit better right now?",
+        "It takes courage to acknowledge our feelings. I'm here to support you. What would be most helpful for you in this moment - some gentle breathing, journaling, or maybe just talking through what's on your mind?"
+      ],
+      "parameters": [
+        {
+          "displayName": "mood-type",
+          "entityType": "@sys.any",
+          "isList": false
+        }
+      ]
+    },
+    {
+      "displayName": "Journaling Intent",
+      "trainingPhrases": [
+        "Help me journal",
+        "I want to write",
+        "Let's journal",
+        "I need to write down my thoughts",
+        "Can you give me a writing prompt",
+        "I want to reflect",
+        "Help me process my thoughts",
+        "I need to write about my day",
+        "Give me something to write about"
+      ],
+      "responses": [
+        "Journaling is such a powerful tool for self-reflection. Let's start with this: What are three things you're grateful for today, no matter how small they might seem?",
+        "Writing can be incredibly therapeutic. Here's a gentle prompt: What emotions have you experienced today, and what do you think triggered them?",
+        "I love that you want to journal! Try writing about this: What's one challenge you're facing right now, and what's one small step you could take to address it?",
+        "Journaling helps us understand ourselves better. Consider reflecting on: What's something you've learned about yourself recently?"
+      ]
+    },
+    {
+      "displayName": "Meditation Intent",
+      "trainingPhrases": [
+        "Guide me through meditation",
+        "I want to meditate",
+        "Help me relax",
+        "I need to calm down",
+        "Can we do a breathing exercise",
+        "I'm feeling anxious, help me breathe",
+        "Let's do some mindfulness",
+        "I need to center myself",
+        "Guide me through relaxation"
+      ],
+      "responses": [
+        "Let's take this journey together. Find a comfortable position, close your eyes if you'd like, and let's start with three deep breaths. Breathe in slowly through your nose... hold for a moment... and breathe out gently through your mouth. Feel your body beginning to relax.",
+        "Wonderful choice. Meditation can bring such peace. Let's begin by noticing your breath. Don't try to change it, just observe it naturally flowing in and out. With each breath, allow yourself to become more present in this moment.",
+        "I'm here to guide you. Let's start with a body scan. Begin by focusing on the top of your head, and slowly move your attention down through your body. Notice any areas of tension, and with each exhale, allow those muscles to soften and release."
+      ]
+    },
+    {
+      "displayName": "Goals Intent",
+      "trainingPhrases": [
+        "Check my goals",
+        "Help me with my goals",
+        "I want to set a goal",
+        "What are my goals",
+        "How am I doing with my goals",
+        "I want to achieve something",
+        "Help me track my progress",
+        "I need motivation for my goals",
+        "Let's work on my objectives"
+      ],
+      "responses": [
+        "Goals give our lives direction and purpose. What's one goal that's been on your mind lately? Whether it's big or small, I'm here to help you break it down into manageable steps.",
+        "I'm excited to help you with your goals! Remember, every small step counts. What's something you've been wanting to work towards? Let's create a plan together.",
+        "Goal-setting is such an important part of personal growth. What area of your life would you like to focus on? Maybe we can identify one specific, achievable step you could take this week."
+      ]
+    },
+    {
+      "displayName": "Rewards Intent",
+      "trainingPhrases": [
+        "Show my rewards",
+        "What rewards do I have",
+        "I want to celebrate",
+        "What have I accomplished",
+        "Show my progress",
+        "I did something good today",
+        "I want to see my achievements",
+        "Let's celebrate my wins",
+        "What points do I have"
+      ],
+      "responses": [
+        "I love celebrating your achievements! Every step you take towards your well-being deserves recognition. What accomplishment would you like to celebrate today, no matter how small?",
+        "You've been doing wonderful work on your wellness journey! Recognizing your progress is so important. What positive changes have you noticed in yourself lately?",
+        "Celebrating your wins is crucial for motivation! Tell me about something you're proud of recently - it could be completing a meditation, writing in your journal, or even just taking time for self-care."
+      ]
+    },
+    {
+      "displayName": "Help Intent",
+      "trainingPhrases": [
+        "Help",
+        "What can you do",
+        "How can you help me",
+        "What are your features",
+        "I need help",
+        "What should I do"
+      ],
+      "responses": [
+        "I'm here to support your wellness journey in several ways: I can help you check in with your mood and emotions, provide journaling prompts for self-reflection, guide you through meditation and breathing exercises, assist with goal-setting and tracking, and celebrate your progress and achievements. What would be most helpful for you right now?",
+        "As your wellness companion, I can support you with mood check-ins, journaling exercises, guided meditations, goal tracking, and celebrating your accomplishments. I'm also here just to listen when you need someone to talk to. How would you like to start?"
+      ]
+    },
+    {
+      "displayName": "Goodbye Intent",
+      "trainingPhrases": [
+        "Goodbye",
+        "Bye",
+        "See you later",
+        "Talk to you soon",
+        "I have to go",
+        "Thanks for your help"
+      ],
+      "responses": [
+        "Take care of yourself! Remember, I'm always here when you need support on your wellness journey. You're doing great! 🌿",
+        "It was wonderful spending time with you. Keep being kind to yourself, and remember that every small step towards wellness matters. See you soon! 💚",
+        "Thank you for taking time for your well-being today. That's already a victory worth celebrating. I'll be here whenever you need me. Take care! ✨"
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "displayName": "mood-types",
+      "entries": [
+        {"value": "happy", "synonyms": ["joyful", "cheerful", "glad", "content", "pleased", "upbeat"]},
+        {"value": "sad", "synonyms": ["down", "blue", "depressed", "melancholy", "low", "unhappy"]},
+        {"value": "anxious", "synonyms": ["worried", "nervous", "stressed", "uneasy", "tense", "overwhelmed"]},
+        {"value": "angry", "synonyms": ["mad", "furious", "irritated", "frustrated", "upset", "annoyed"]},
+        {"value": "excited", "synonyms": ["thrilled", "energetic", "enthusiastic", "pumped", "elated"]},
+        {"value": "calm", "synonyms": ["peaceful", "relaxed", "serene", "tranquil", "centered"]},
+        {"value": "tired", "synonyms": ["exhausted", "drained", "weary", "fatigued", "sleepy"]}
+      ]
+    },
+    {
+      "displayName": "goal-types",
+      "entries": [
+        {"value": "health", "synonyms": ["fitness", "exercise", "wellness", "diet", "nutrition"]},
+        {"value": "mental-health", "synonyms": ["mindfulness", "meditation", "self-care", "therapy"]},
+        {"value": "personal", "synonyms": ["self-improvement", "habits", "routine", "lifestyle"]},
+        {"value": "social", "synonyms": ["relationships", "friends", "family", "connection"]},
+        {"value": "career", "synonyms": ["work", "job", "professional", "skills"]},
+        {"value": "creative", "synonyms": ["art", "writing", "music", "hobbies"]}
+      ]
+    }
+  ],
+  "systemEntities": [
+    "@sys.date-time",
+    "@sys.number",
+    "@sys.any"
+  ]
+}

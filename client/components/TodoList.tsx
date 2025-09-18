@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FlowerGrowthWrapper from './FlowerGrowthWrapper';
 
 interface TodoItem {
   id: string;
@@ -87,88 +88,11 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
-  // Flower growth based on completion
-  const getFlowerStage = () => {
-    if (completionPercentage === 0) return 'seed';
-    if (completionPercentage < 25) return 'sprout';
-    if (completionPercentage < 50) return 'small';
-    if (completionPercentage < 75) return 'growing';
-    if (completionPercentage < 100) return 'blooming';
-    return 'full-bloom';
-  };
-
-  const FlowerAnimation = () => {
-    const stage = getFlowerStage();
-    
-    return (
-      <div className="flex flex-col items-center justify-end h-32 mb-4">
-        {/* Flower pot */}
-        <div className="w-16 h-10 bg-gradient-to-b from-orange-300 to-orange-400 rounded-b-xl border-2 border-orange-500 relative">
-          <div className="absolute inset-x-2 top-1 h-1 bg-orange-500 rounded"></div>
-        </div>
-        
-        {/* Flower stages */}
-        <div className="relative -mt-2 transition-all duration-1000 ease-out">
-          {stage === 'seed' && (
-            <div className="w-2 h-1 bg-brown-600 rounded-full"></div>
-          )}
-          
-          {stage === 'sprout' && (
-            <div className="flex flex-col items-center">
-              <div className="w-1 h-6 bg-green-500 rounded-t-full animate-pulse"></div>
-            </div>
-          )}
-          
-          {(stage === 'small' || stage === 'growing' || stage === 'blooming' || stage === 'full-bloom') && (
-            <div className="flex flex-col items-center">
-              {/* Stem */}
-              <div className="w-1 h-12 bg-green-500 rounded-t-full"></div>
-              
-              {/* Leaves */}
-              <div className="absolute bottom-4 -left-2 w-3 h-2 bg-green-400 rounded-full transform -rotate-45"></div>
-              <div className="absolute bottom-6 -right-2 w-3 h-2 bg-green-400 rounded-full transform rotate-45"></div>
-              
-              {/* Flower */}
-              {stage !== 'small' && (
-                <div className="absolute -top-2 flex items-center justify-center">
-                  {stage === 'growing' && (
-                    <div className="w-4 h-4 bg-pink-300 rounded-full animate-pulse"></div>
-                  )}
-                  
-                  {stage === 'blooming' && (
-                    <div className="relative">
-                      <div className="w-6 h-6 bg-pink-400 rounded-full"></div>
-                      <div className="absolute inset-1 w-4 h-4 bg-pink-300 rounded-full"></div>
-                      <div className="absolute inset-2 w-2 h-2 bg-yellow-300 rounded-full"></div>
-                    </div>
-                  )}
-                  
-                  {stage === 'full-bloom' && (
-                    <div className="relative animate-bounce">
-                      {/* Petals */}
-                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-6 bg-pink-400 rounded-full"></div>
-                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-3 h-6 bg-pink-400 rounded-full"></div>
-                      <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-6 h-3 bg-pink-400 rounded-full"></div>
-                      <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-6 h-3 bg-pink-400 rounded-full"></div>
-                      
-                      {/* Diagonal petals */}
-                      <div className="absolute -top-1 -left-1 w-4 h-4 bg-pink-300 rounded-full transform rotate-45"></div>
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-pink-300 rounded-full transform -rotate-45"></div>
-                      <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-pink-300 rounded-full transform -rotate-45"></div>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-pink-300 rounded-full transform rotate-45"></div>
-                      
-                      {/* Center */}
-                      <div className="w-6 h-6 bg-yellow-300 rounded-full border-2 border-yellow-400"></div>
-                      <div className="absolute inset-1 w-4 h-4 bg-yellow-200 rounded-full"></div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
+  const handleFlowerClick = () => {
+    // Add a little celebration when clicking the flower
+    if (completionPercentage >= 100) {
+      console.log('🌸 Flower celebration! All tasks complete!');
+    }
   };
 
   return (
@@ -183,8 +107,15 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
         </div>
       </div>
 
-      {/* Flower animation */}
-      <FlowerAnimation />
+      {/* Enhanced Flower Growth Animation */}
+      <div className="mb-4">
+        <FlowerGrowthWrapper 
+          percentage={completionPercentage} 
+          onFlowerClick={handleFlowerClick}
+          className="mx-auto"
+          preferredMode="auto"
+        />
+      </div>
 
       {/* Progress bar */}
       <div className="w-full bg-muted rounded-full h-2 mb-6">

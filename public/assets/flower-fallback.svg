@@ -1,0 +1,134 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flower Pot -->
+  <defs>
+    <linearGradient id="potGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#DEB887;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D2691E;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="stemGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#228B22;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#32CD32;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="petalGradient" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#FFB6C1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF1493;stop-opacity:1" />
+    </radialGradient>
+    
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.3" flood-color="#000000"/>
+    </filter>
+  </defs>
+  
+  <!-- Pot Base -->
+  <ellipse cx="100" cy="185" rx="35" ry="8" fill="#8B4513" opacity="0.6"/>
+  
+  <!-- Pot Body -->
+  <path d="M65 160 L135 160 L130 185 L70 185 Z" fill="url(#potGradient)" filter="url(#dropShadow)"/>
+  
+  <!-- Pot Rim -->
+  <ellipse cx="100" cy="160" rx="35" ry="5" fill="#A0522D"/>
+  
+  <!-- Soil -->
+  <ellipse cx="100" cy="160" rx="32" ry="3" fill="#8B4513"/>
+  
+  <!-- Growth stages (hidden by default, shown via CSS classes) -->
+  
+  <!-- Seed (0%) -->
+  <g class="flower-stage seed" opacity="0">
+    <circle cx="100" cy="155" r="3" fill="#8B4513"/>
+  </g>
+  
+  <!-- Sprout (1-25%) -->
+  <g class="flower-stage sprout" opacity="0">
+    <rect x="98" y="140" width="4" height="20" fill="url(#stemGradient)" rx="2"/>
+  </g>
+  
+  <!-- Small Plant (26-50%) -->
+  <g class="flower-stage small-plant" opacity="0">
+    <rect x="98" y="120" width="4" height="40" fill="url(#stemGradient)" rx="2"/>
+    <!-- Leaf 1 -->
+    <ellipse cx="85" cy="135" rx="12" ry="6" fill="#32CD32" transform="rotate(-30 85 135)"/>
+    <!-- Leaf 2 -->
+    <ellipse cx="115" cy="140" rx="12" ry="6" fill="#32CD32" transform="rotate(30 115 140)"/>
+  </g>
+  
+  <!-- Growing (51-75%) -->
+  <g class="flower-stage growing" opacity="0">
+    <rect x="98" y="100" width="4" height="60" fill="url(#stemGradient)" rx="2"/>
+    <!-- Leaves -->
+    <ellipse cx="82" cy="125" rx="14" ry="7" fill="#32CD32" transform="rotate(-25 82 125)"/>
+    <ellipse cx="118" cy="130" rx="14" ry="7" fill="#32CD32" transform="rotate(25 118 130)"/>
+    <ellipse cx="85" cy="145" rx="13" ry="6" fill="#228B22" transform="rotate(-35 85 145)"/>
+    <!-- Bud -->
+    <circle cx="100" cy="95" r="8" fill="#90EE90"/>
+  </g>
+  
+  <!-- Blooming (76-99%) -->
+  <g class="flower-stage blooming" opacity="0">
+    <rect x="98" y="90" width="4" height="70" fill="url(#stemGradient)" rx="2"/>
+    <!-- Leaves -->
+    <ellipse cx="80" cy="120" rx="15" ry="8" fill="#32CD32" transform="rotate(-25 80 120)"/>
+    <ellipse cx="120" cy="125" rx="15" ry="8" fill="#32CD32" transform="rotate(25 120 125)"/>
+    <ellipse cx="82" cy="140" rx="14" ry="7" fill="#228B22" transform="rotate(-35 82 140)"/>
+    <ellipse cx="118" cy="145" rx="14" ry="7" fill="#228B22" transform="rotate(35 118 145)"/>
+    
+    <!-- Petals -->
+    <ellipse cx="100" cy="75" rx="8" ry="20" fill="url(#petalGradient)" opacity="0.9"/>
+    <ellipse cx="100" cy="75" rx="8" ry="20" fill="url(#petalGradient)" opacity="0.9" transform="rotate(60 100 75)"/>
+    <ellipse cx="100" cy="75" rx="8" ry="20" fill="url(#petalGradient)" opacity="0.9" transform="rotate(120 100 75)"/>
+    <ellipse cx="100" cy="75" rx="8" ry="20" fill="url(#petalGradient)" opacity="0.9" transform="rotate(180 100 75)"/>
+    <ellipse cx="100" cy="75" rx="8" ry="20" fill="url(#petalGradient)" opacity="0.9" transform="rotate(240 100 75)"/>
+    <ellipse cx="100" cy="75" rx="8" ry="20" fill="url(#petalGradient)" opacity="0.9" transform="rotate(300 100 75)"/>
+    
+    <!-- Center -->
+    <circle cx="100" cy="75" r="8" fill="#FFD700"/>
+  </g>
+  
+  <!-- Full Bloom (100%) -->
+  <g class="flower-stage full-bloom" opacity="0">
+    <rect x="98" y="85" width="4" height="75" fill="url(#stemGradient)" rx="2"/>
+    <!-- Leaves -->
+    <ellipse cx="78" cy="115" rx="16" ry="9" fill="#32CD32" transform="rotate(-25 78 115)"/>
+    <ellipse cx="122" cy="120" rx="16" ry="9" fill="#32CD32" transform="rotate(25 122 120)"/>
+    <ellipse cx="80" cy="135" rx="15" ry="8" fill="#228B22" transform="rotate(-35 80 135)"/>
+    <ellipse cx="120" cy="140" rx="15" ry="8" fill="#228B22" transform="rotate(35 120 140)"/>
+    
+    <!-- Full Petals -->
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)"/>
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)" transform="rotate(45 100 70)"/>
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)" transform="rotate(90 100 70)"/>
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)" transform="rotate(135 100 70)"/>
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)" transform="rotate(180 100 70)"/>
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)" transform="rotate(225 100 70)"/>
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)" transform="rotate(270 100 70)"/>
+    <ellipse cx="100" cy="70" rx="10" ry="22" fill="url(#petalGradient)" transform="rotate(315 100 70)"/>
+    
+    <!-- Glowing Center -->
+    <circle cx="100" cy="70" r="10" fill="#FFD700">
+      <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="70" r="6" fill="#FFA500" opacity="0.8"/>
+    
+    <!-- Celebration particles -->
+    <g class="particles">
+      <circle cx="85" cy="55" r="2" fill="#FFD700" opacity="0.7">
+        <animate attributeName="cy" values="55;30;55" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="115" cy="50" r="2" fill="#FFD700" opacity="0.7">
+        <animate attributeName="cy" values="50;25;50" dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;0" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="95" cy="45" r="1.5" fill="#FFA500" opacity="0.6">
+        <animate attributeName="cy" values="45;20;45" dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;0" dur="3.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="105" cy="48" r="1.5" fill="#FFA500" opacity="0.6">
+        <animate attributeName="cy" values="48;23;48" dur="2.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;0" dur="2.8s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+</svg>

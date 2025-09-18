@@ -61,9 +61,9 @@ const Settings: React.FC = () => {
       reminderTime: "09:00",
     },
     account: {
-      email: "user@example.com",
-      name: "Prateek Tanwar",
-      phoneNumber: "+1 (555) 123-4567",
+      email: "Vinayak.com",
+      name: "Vinayak Gupta",
+      phoneNumber: "+91 98765-43210",
       emergencyContact: "+1 (555) 987-6543",
     },
   });

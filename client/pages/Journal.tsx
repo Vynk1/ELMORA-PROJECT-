@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import VoiceJournal from '../components/VoiceJournal';
 
 interface JournalEntry {
   id: string;
@@ -111,12 +112,21 @@ const Journal: React.FC = () => {
               className="w-full p-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-lg"
             />
             
-            <textarea
-              placeholder="Write about your day, thoughts, feelings..."
-              value={newEntry.content}
-              onChange={(e) => setNewEntry({...newEntry, content: e.target.value})}
-              className="w-full p-4 border border-gray-200 rounded-2xl h-40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">Journal Content</label>
+                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  💡 Try voice journaling! Click the 🎤 button
+                </div>
+              </div>
+              
+              <VoiceJournal
+                initialText={newEntry.content}
+                onTranscriptChange={(text) => setNewEntry({...newEntry, content: text})}
+                placeholder="Write about your day, thoughts, feelings... or click the microphone to speak your thoughts!"
+                className="voice-journal-entry"
+              />
+            </div>
             
             <input
               type="text"

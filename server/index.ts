@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import chatHandler from "./chat-handler";
+import speechToTextHandler from "./speech-to-text-handler";
 
 export function createServer() {
   const app = express();
@@ -18,6 +20,12 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+  
+  // Chat functionality
+  app.use("/api", chatHandler);
+  
+  // Speech-to-text functionality
+  app.use("/api", speechToTextHandler);
 
   return app;
 }

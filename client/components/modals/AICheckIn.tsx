@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+
+// Lazy load custom effect components
+const TrueFocus = lazy(() => import('../effects/TrueFocus'));
+const TextCursor = lazy(() => import('../effects/TextCursor'));
+const CountUp = lazy(() => import('../effects/CountUp'));
+const ScrollReveal = lazy(() => import('../effects/ScrollReveal'));
 
 interface AICheckInProps {
   isOpen: boolean;
@@ -22,6 +28,18 @@ const AICheckIn: React.FC<AICheckInProps> = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [aiInsight, setAiInsight] = useState("");
   const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
 
   const moodOptions = [
     { value: "excited", emoji: "🤩", label: "Excited", color: "bg-yellow-500" },
@@ -160,7 +178,9 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
 
         {/* Step 1: Mood Selection */}
         {currentStep === 1 && (
-          <div>
+          <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">How are you feeling right now?</h3></div>}>
+            <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
+              <div>
             <h3 className="text-lg font-medium text-gray-800 mb-4">
               How are you feeling right now?
             </h3>
@@ -188,10 +208,20 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
 
         {/* Step 2: Energy Level */}
         {currentStep === 2 && (
-          <div>
+          <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">What's your energy level?</h3></div>}>
+            <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
+              <div>
             <h3 className="text-lg font-medium text-gray-800 mb-4">
               What's your energy level?{" "}
-              <span className="text-primary font-bold">{energyLevel}/10</span>
+              <Suspense fallback={<span className="text-primary font-bold">{energyLevel}/10</span>}>
+                <CountUp 
+                  end={energyLevel} 
+                  duration={500} 
+                  suffix="/10"
+                  className="text-primary font-bold"
+                  disabled={prefersReducedMotion}
+                />
+              </Suspense>
             </h3>
             <div className="mb-6">
               <input
@@ -222,12 +252,16 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
                   "High energy - great time to pursue your goals!"}
               </p>
             </div>
-          </div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
         )}
 
         {/* Step 3: Gratitude */}
         {currentStep === 3 && (
-          <div>
+          <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">What are you grateful for today?</h3></div>}>
+            <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
+              <div className="relative">
             <h3 className="text-lg font-medium text-gray-800 mb-4">
               What are you grateful for today?
             </h3>
@@ -237,16 +271,31 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
               placeholder="Even small things count... a warm cup of coffee, a text from a friend, or simply having a roof over your head."
               className="w-full p-4 border border-gray-200 rounded-2xl resize-none h-32 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
+            {!gratitude && (
+              <div className="absolute top-16 left-6 pointer-events-none text-gray-400 text-sm">
+                <Suspense fallback={<span>Type how you're feeling...</span>}>
+                  <TextCursor 
+                    text="Type how you're feeling..."
+                    disabled={prefersReducedMotion}
+                    className="opacity-60"
+                  />
+                </Suspense>
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-2">
               Gratitude helps shift our perspective and improves mental
               well-being.
             </p>
-          </div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
         )}
 
         {/* Step 4: AI Insight */}
         {currentStep === 4 && (
-          <div>
+          <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">Your Personalized Insight</h3></div>}>
+            <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
+              <div>
             <h3 className="text-lg font-medium text-gray-800 mb-4">
               Your Personalized Insight
             </h3>
@@ -258,19 +307,34 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
                 </p>
               </div>
             ) : (
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
+              <Suspense fallback={
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
+                  <div className="flex items-center mb-3">
+                    <span className="text-2xl mr-2">🤖</span>
+                    <span className="font-medium text-gray-800">AI Wellness Coach</span>
+                  </div>
+                </div>
+              }>
+                <TrueFocus 
+                  scale={1.03} 
+                  glowColor="rgba(59, 130, 246, 0.5)" 
+                  disabled={prefersReducedMotion}
+                  className="focus:outline-none"
+                >
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
                 <div className="flex items-center mb-3">
                   <span className="text-2xl mr-2">🤖</span>
                   <span className="font-medium text-gray-800">
                     AI Wellness Coach
                   </span>
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                  {aiInsight}
-                </div>
+                    <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                      {aiInsight}
+                    </div>
+                     )}
               </div>
-            )}
-          </div>
+            </ScrollReveal>
+          </Suspense>
         )}
 
         {/* Navigation Buttons */}
@@ -323,10 +387,12 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
           >
             Cancel
           </button>
-        </div>
-      </div>
-    </div>
-  );
+              </div>
+            </div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
+        )}
 };
 
 export default AICheckIn;

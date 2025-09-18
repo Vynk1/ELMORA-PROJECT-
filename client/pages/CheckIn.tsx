@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AICheckIn from '../components/modals/AICheckIn';
 import DailyCheckIn from '../components/modals/DailyCheckIn';
 import { type MoodType } from '../components/MoodColorSwitcher';
+
+// Lazy load custom effect components
+const ScrollReveal = lazy(() => import('../components/effects/ScrollReveal'));
 
 interface CheckInProps {
   currentMood?: MoodType;
@@ -18,6 +21,18 @@ const CheckIn: React.FC<CheckInProps> = ({
   const navigate = useNavigate();
   const [showAICheckIn, setShowAICheckIn] = useState(false);
   const [showBasicCheckIn, setShowBasicCheckIn] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
 
   const getMoodContent = () => {
     switch (currentMood) {
@@ -105,7 +120,18 @@ const CheckIn: React.FC<CheckInProps> = ({
         {/* Check-in Options */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* AI Enhanced Check-in */}
-          <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20`}>
+          <Suspense fallback={
+            <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20`}>
+              <div className="text-center">
+                <div className="text-6xl mb-6">🤖</div>
+                <h2 className={`text-2xl font-medium ${moodContent.textColor} mb-4`}>
+                  AI-Enhanced Check-In
+                </h2>
+              </div>
+            </div>
+          }>
+            <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
+              <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20`}>
             <div className="text-center">
               <div className="text-6xl mb-6">🤖</div>
               <h2 className={`text-2xl font-medium ${moodContent.textColor} mb-4`}>
@@ -139,11 +165,24 @@ const CheckIn: React.FC<CheckInProps> = ({
               >
                 Start AI Check-In
               </button>
-            </div>
-          </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
 
           {/* Basic Check-in */}
-          <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20`}>
+          <Suspense fallback={
+            <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20`}>
+              <div className="text-center">
+                <div className="text-6xl mb-6">📝</div>
+                <h2 className={`text-2xl font-medium ${moodContent.textColor} mb-4`}>
+                  Quick Check-In
+                </h2>
+              </div>
+            </div>
+          }>
+            <ScrollReveal duration={0.25} delay={0.1} disabled={prefersReducedMotion}>
+              <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20`}>
             <div className="text-center">
               <div className="text-6xl mb-6">📝</div>
               <h2 className={`text-2xl font-medium ${moodContent.textColor} mb-4`}>
@@ -177,12 +216,23 @@ const CheckIn: React.FC<CheckInProps> = ({
               >
                 Start Quick Check-In
               </button>
-            </div>
-          </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
         </div>
 
         {/* Benefits Section */}
-        <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20 text-center`}>
+        <Suspense fallback={
+          <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20 text-center`}>
+            <div className="text-4xl mb-4">💜</div>
+            <h3 className={`text-xl font-medium ${moodContent.textColor} mb-4`}>
+              Why Daily Check-Ins Matter
+            </h3>
+          </div>
+        }>
+          <ScrollReveal duration={0.25} delay={0.2} disabled={prefersReducedMotion}>
+            <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 border border-white/20 text-center`}>
           <div className="text-4xl mb-4">💜</div>
           <h3 className={`text-xl font-medium ${moodContent.textColor} mb-4`}>
             Why Daily Check-Ins Matter
@@ -209,7 +259,19 @@ const CheckIn: React.FC<CheckInProps> = ({
                 Develop consistent self-care practices that support your mental well-being.
               </p>
             </div>
-          </div>
+            </div>
+            </div>
+          </ScrollReveal>
+        </Suspense>
+
+        {/* Spline Placeholder for Mood-Reactive Scene */}
+        <div 
+          id="spline-mood-placeholder" 
+          data-spline="mood-sphere"
+          className="fixed bottom-6 right-6 w-24 h-24 pointer-events-none opacity-70 z-10"
+          data-mood={currentMood}
+        >
+          {/* Reserved slot for Spline 3D mood sphere that changes color based on mood */}
         </div>
       </div>
 

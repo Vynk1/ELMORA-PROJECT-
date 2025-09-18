@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useTaskContext } from '../contexts/TaskContext';
 
 interface QuickAddProps {
-  onTaskAdded: (task: string, category: string) => void;
+  onTaskAdded?: (task: string, category: string) => void;
 }
 
 const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
+  const { addTodo } = useTaskContext();
   const [showForm, setShowForm] = useState(false);
   const [taskText, setTaskText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("wellness");
@@ -33,7 +35,12 @@ const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
   ];
 
   const handleQuickAdd = (task: string, category: string) => {
-    onTaskAdded(task, category);
+    // Add to the main todo list via context
+    addTodo(task, category);
+    
+    // Also call the optional callback for backwards compatibility
+    onTaskAdded?.(task, category);
+    
     // Show success feedback
     const button = document.activeElement as HTMLButtonElement;
     if (button) {
@@ -49,7 +56,12 @@ const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
 
   const handleCustomAdd = () => {
     if (taskText.trim()) {
-      onTaskAdded(taskText.trim(), selectedCategory);
+      // Add to the main todo list via context
+      addTodo(taskText.trim(), selectedCategory);
+      
+      // Also call the optional callback for backwards compatibility
+      onTaskAdded?.(taskText.trim(), selectedCategory);
+      
       setTaskText("");
       setShowForm(false);
       // Show success notification

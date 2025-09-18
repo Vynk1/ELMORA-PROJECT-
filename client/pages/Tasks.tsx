@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import TodoList from '../components/TodoList';
+import { useTaskContext } from '../contexts/TaskContext';
 import { type MoodType } from '../components/MoodColorSwitcher';
 
 interface TasksProps {
@@ -9,6 +10,7 @@ interface TasksProps {
 }
 
 const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }) => {
+  const { addTodo, todos } = useTaskContext();
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('daily');
 
@@ -102,7 +104,7 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
 
           <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
             <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>
-              5
+              {todos.filter(todo => !todo.completed).length}
             </div>
             <div className={`text-xs ${colors.textColor} opacity-80`}>
               Tasks Remaining
@@ -143,23 +145,38 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
                 Quick Add
               </h3>
               <div className="space-y-3">
-                <button className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}>
+                <button 
+                  onClick={() => addTodo('Take a 10-minute walk 🚶', 'wellness')}
+                  className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
+                >
                   <span>🚶</span>
                   <span>Take a 10-min walk</span>
                 </button>
-                <button className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}>
+                <button 
+                  onClick={() => addTodo('Drink a glass of water 💧', 'wellness')}
+                  className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
+                >
                   <span>💧</span>
                   <span>Drink a glass of water</span>
                 </button>
-                <button className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}>
+                <button 
+                  onClick={() => addTodo('Call a friend or family member 📞', 'social')}
+                  className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
+                >
                   <span>📞</span>
                   <span>Call a friend or family</span>
                 </button>
-                <button className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}>
+                <button 
+                  onClick={() => addTodo('Write 3 things I\'m grateful for 📝', 'wellness')}
+                  className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
+                >
                   <span>📝</span>
                   <span>Write 3 gratitudes</span>
                 </button>
-                <button className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}>
+                <button 
+                  onClick={() => addTodo('Do 5 minutes of meditation 🧘', 'wellness')}
+                  className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
+                >
                   <span>🧘</span>
                   <span>5-minute meditation</span>
                 </button>

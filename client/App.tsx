@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
+import { TaskProvider } from "./contexts/TaskContext";
 import LoadingScreen from "./components/LoadingScreen";
 import MoodSelection from "./pages/MoodSelection";
 import Header from "./components/Header";
@@ -26,7 +27,9 @@ import { type MoodColors } from "./components/MoodColorPicker";
 function App() {
   return (
     <AppProvider>
-      <AppContent />
+      <TaskProvider>
+        <AppContent />
+      </TaskProvider>
     </AppProvider>
   );
 }

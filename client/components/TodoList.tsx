@@ -1,91 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import FlowerGrowthWrapper from './FlowerGrowthWrapper';
-
-interface TodoItem {
-  id: string;
-  text: string;
-  completed: boolean;
-  createdAt: Date;
-}
+import { useTaskContext, type TodoItem } from '../contexts/TaskContext';
 
 interface TodoListProps {
   onCompletionChange?: (percentage: number) => void;
 }
 
 const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
-  // Mock daily tasks data
-  const mockDailyTasks: TodoItem[] = [
-    {
-      id: 'daily-1',
-      text: 'Drink 8 glasses of water 💧',
-      completed: false,
-      createdAt: new Date(),
-    },
-    {
-      id: 'daily-2',
-      text: 'Take a 15-minute walk outside 🚶‍♀️',
-      completed: false,
-      createdAt: new Date(),
-    },
-    {
-      id: 'daily-3',
-      text: 'Write down 3 things you\'re grateful for ✨',
-      completed: false,
-      createdAt: new Date(),
-    },
-    {
-      id: 'daily-4',
-      text: 'Do 5 minutes of meditation or deep breathing 🧘‍♀️',
-      completed: false,
-      createdAt: new Date(),
-    },
-    {
-      id: 'daily-5',
-      text: 'Read 10 pages of a book or article 📚',
-      completed: false,
-      createdAt: new Date(),
-    },
-  ];
-
-  const [todos, setTodos] = useState<TodoItem[]>(mockDailyTasks);
+  const { todos, addTodo, toggleTodo, deleteTodo, completionPercentage } = useTaskContext();
   const [newTodoText, setNewTodoText] = useState('');
-  const [completionPercentage, setCompletionPercentage] = useState(0);
 
-  // Calculate completion percentage
+  // Update parent component with completion percentage
   useEffect(() => {
-    if (todos.length === 0) {
-      setCompletionPercentage(0);
-      onCompletionChange?.(0);
-      return;
-    }
+    onCompletionChange?.(completionPercentage);
+  }, [completionPercentage, onCompletionChange]);
 
-    const completed = todos.filter(todo => todo.completed).length;
-    const percentage = Math.round((completed / todos.length) * 100);
-    setCompletionPercentage(percentage);
-    onCompletionChange?.(percentage);
-  }, [todos]);
-
-  const addTodo = () => {
+  const handleAddTodo = () => {
     if (newTodoText.trim()) {
-      const newTodo: TodoItem = {
-        id: Date.now().toString(),
-        text: newTodoText.trim(),
-        completed: false,
-        createdAt: new Date(),
-      };
-      setTodos([...todos, newTodo]);
+      addTodo(newTodoText.trim(), 'general');
       setNewTodoText('');
     }
-  };
-
-  const toggleTodo = (id: string) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
-  };
-
-  const deleteTodo = (id: string) => {
-    setTodos(todos.filter(todo => todo.id !== id));
   };
 
   const handleFlowerClick = () => {
@@ -131,12 +65,12 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
           type="text"
           value={newTodoText}
           onChange={(e) => setNewTodoText(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+          onKeyPress={(e) => e.key === 'Enter' && handleAddTodo()}
           placeholder="Add a new task..."
           className="flex-1 px-4 py-2 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
         />
         <button
-          onClick={addTodo}
+          onClick={handleAddTodo}
           className="px-6 py-2 bg-primary text-primary-foreground rounded-xl gentle-hover"
         >
           Add

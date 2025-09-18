@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { type MoodType } from "../components/MoodColorSwitcher";
+import { useTaskContext } from "../contexts/TaskContext";
 import QuickAdd from "../components/QuickAdd";
 
 interface DashboardProps {
@@ -14,11 +15,17 @@ const Dashboard: React.FC<DashboardProps> = ({
   userPoints,
   onPointsUpdate,
 }) => {
+  const { todos, completionPercentage } = useTaskContext();
   const [streakDays, setStreakDays] = useState(3);
-  const [quickTasks, setQuickTasks] = useState<string[]>([]);
+  const [recentlyAddedTasks, setRecentlyAddedTasks] = useState<{task: string, timestamp: Date}[]>([]);
 
   const handleTaskAdded = (task: string, category: string) => {
-    setQuickTasks((prev) => [...prev, task]);
+    // Keep track of recently added tasks for display
+    setRecentlyAddedTasks((prev) => [{
+      task,
+      timestamp: new Date()
+    }, ...prev.slice(0, 2)]);  // Keep only the 3 most recent
+    
     // Award points for adding tasks
     onPointsUpdate(userPoints + 2);
     console.log(`Added task: ${task} (${category})`);
@@ -249,9 +256,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                   text: "Sent encouragement to a friend",
                   time: "1 day ago",
                 },
-                ...quickTasks.slice(-2).map((task, index) => ({
+                ...recentlyAddedTasks.map((item, index) => ({
                   icon: "📝",
-                  text: `Added task: ${task}`,
+                  text: `Added task: ${item.task}`,
                   time: "Just now",
                 })),
               ].map((activity, index) => (

@@ -181,29 +181,31 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
           <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">How are you feeling right now?</h3></div>}>
             <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
               <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-4">
-              How are you feeling right now?
-            </h3>
-            <div className="grid grid-cols-4 gap-3">
-              {moodOptions.map((mood) => (
-                <button
-                  key={mood.value}
-                  onClick={() => setSelectedMood(mood.value)}
-                  className={`
-                    p-3 rounded-2xl text-center transition-all transform hover:scale-105
-                    ${
-                      selectedMood === mood.value
-                        ? `${mood.color} text-white scale-105 shadow-lg`
-                        : "bg-gray-100 hover:bg-gray-200"
-                    }
-                  `}
-                >
-                  <div className="text-2xl mb-1">{mood.emoji}</div>
-                  <div className="text-xs font-medium">{mood.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">
+                  How are you feeling right now?
+                </h3>
+                <div className="grid grid-cols-4 gap-3">
+                  {moodOptions.map((mood) => (
+                    <button
+                      key={mood.value}
+                      onClick={() => setSelectedMood(mood.value)}
+                      className={`
+                        p-3 rounded-2xl text-center transition-all transform hover:scale-105
+                        ${
+                          selectedMood === mood.value
+                            ? `${mood.color} text-white scale-105 shadow-lg`
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }
+                      `}
+                    >
+                      <div className="text-2xl mb-1">{mood.emoji}</div>
+                      <div className="text-xs font-medium">{mood.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
         )}
 
         {/* Step 2: Energy Level */}
@@ -211,47 +213,47 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
           <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">What's your energy level?</h3></div>}>
             <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
               <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-4">
-              What's your energy level?{" "}
-              <Suspense fallback={<span className="text-primary font-bold">{energyLevel}/10</span>}>
-                <CountUp 
-                  end={energyLevel} 
-                  duration={500} 
-                  suffix="/10"
-                  className="text-primary font-bold"
-                  disabled={prefersReducedMotion}
-                />
-              </Suspense>
-            </h3>
-            <div className="mb-6">
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={energyLevel}
-                onChange={(e) => setEnergyLevel(Number(e.target.value))}
-                className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, #ef4444 0%, #f59e0b 50%, #10b981 100%)`,
-                }}
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-2">
-                <span>Exhausted</span>
-                <span>Moderate</span>
-                <span>Energized</span>
-              </div>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-2xl">
-              <p className="text-sm text-gray-600">
-                {energyLevel <= 3 &&
-                  "Low energy - that's okay! Today is about gentle self-care."}
-                {energyLevel > 3 &&
-                  energyLevel <= 7 &&
-                  "Moderate energy - perfect for balanced activities."}
-                {energyLevel > 7 &&
-                  "High energy - great time to pursue your goals!"}
-              </p>
-            </div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">
+                  What's your energy level?{" "}
+                  <Suspense fallback={<span className="text-primary font-bold">{energyLevel}/10</span>}>
+                    <CountUp 
+                      end={energyLevel} 
+                      duration={500} 
+                      suffix="/10"
+                      className="text-primary font-bold"
+                      disabled={prefersReducedMotion}
+                    />
+                  </Suspense>
+                </h3>
+                <div className="mb-6">
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={energyLevel}
+                    onChange={(e) => setEnergyLevel(Number(e.target.value))}
+                    className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, #ef4444 0%, #f59e0b 50%, #10b981 100%)`,
+                    }}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>Exhausted</span>
+                    <span>Moderate</span>
+                    <span>Energized</span>
+                  </div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-2xl">
+                  <p className="text-sm text-gray-600">
+                    {energyLevel <= 3 &&
+                      "Low energy - that's okay! Today is about gentle self-care."}
+                    {energyLevel > 3 &&
+                      energyLevel <= 7 &&
+                      "Moderate energy - perfect for balanced activities."}
+                    {energyLevel > 7 &&
+                      "High energy - great time to pursue your goals!"}
+                  </p>
+                </div>
               </div>
             </ScrollReveal>
           </Suspense>
@@ -262,30 +264,30 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
           <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">What are you grateful for today?</h3></div>}>
             <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
               <div className="relative">
-            <h3 className="text-lg font-medium text-gray-800 mb-4">
-              What are you grateful for today?
-            </h3>
-            <textarea
-              value={gratitude}
-              onChange={(e) => setGratitude(e.target.value)}
-              placeholder="Even small things count... a warm cup of coffee, a text from a friend, or simply having a roof over your head."
-              className="w-full p-4 border border-gray-200 rounded-2xl resize-none h-32 focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            {!gratitude && (
-              <div className="absolute top-16 left-6 pointer-events-none text-gray-400 text-sm">
-                <Suspense fallback={<span>Type how you're feeling...</span>}>
-                  <TextCursor 
-                    text="Type how you're feeling..."
-                    disabled={prefersReducedMotion}
-                    className="opacity-60"
-                  />
-                </Suspense>
-              </div>
-            )}
-            <p className="text-xs text-gray-500 mt-2">
-              Gratitude helps shift our perspective and improves mental
-              well-being.
-            </p>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">
+                  What are you grateful for today?
+                </h3>
+                <textarea
+                  value={gratitude}
+                  onChange={(e) => setGratitude(e.target.value)}
+                  placeholder="Even small things count... a warm cup of coffee, a text from a friend, or simply having a roof over your head."
+                  className="w-full p-4 border border-gray-200 rounded-2xl resize-none h-32 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                {!gratitude && (
+                  <div className="absolute top-16 left-6 pointer-events-none text-gray-400 text-sm">
+                    <Suspense fallback={<span>Type how you're feeling...</span>}>
+                      <TextCursor 
+                        text="Type how you're feeling..."
+                        disabled={prefersReducedMotion}
+                        className="opacity-60"
+                      />
+                    </Suspense>
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-2">
+                  Gratitude helps shift our perspective and improves mental
+                  well-being.
+                </p>
               </div>
             </ScrollReveal>
           </Suspense>
@@ -296,42 +298,45 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
           <Suspense fallback={<div><h3 className="text-lg font-medium text-gray-800 mb-4">Your Personalized Insight</h3></div>}>
             <ScrollReveal duration={0.25} delay={0} disabled={prefersReducedMotion}>
               <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-4">
-              Your Personalized Insight
-            </h3>
-            {isGeneratingInsight ? (
-              <div className="text-center py-8">
-                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-gray-600">
-                  AI is analyzing your check-in...
-                </p>
-              </div>
-            ) : (
-              <Suspense fallback={
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
-                  <div className="flex items-center mb-3">
-                    <span className="text-2xl mr-2">🤖</span>
-                    <span className="font-medium text-gray-800">AI Wellness Coach</span>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">
+                  Your Personalized Insight
+                </h3>
+                {isGeneratingInsight ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p className="text-gray-600">
+                      AI is analyzing your check-in...
+                    </p>
                   </div>
-                </div>
-              }>
-                <TrueFocus 
-                  scale={1.03} 
-                  glowColor="rgba(59, 130, 246, 0.5)" 
-                  disabled={prefersReducedMotion}
-                  className="focus:outline-none"
-                >
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
-                <div className="flex items-center mb-3">
-                  <span className="text-2xl mr-2">🤖</span>
-                  <span className="font-medium text-gray-800">
-                    AI Wellness Coach
-                  </span>
-                </div>
-                    <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                      {aiInsight}
+                ) : (
+                  <Suspense fallback={
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
+                      <div className="flex items-center mb-3">
+                        <span className="text-2xl mr-2">🤖</span>
+                        <span className="font-medium text-gray-800">AI Wellness Coach</span>
+                      </div>
                     </div>
-                     )}
+                  }>
+                    <TrueFocus 
+                      scale={1.03} 
+                      glowColor="rgba(59, 130, 246, 0.5)" 
+                      disabled={prefersReducedMotion}
+                      className="focus:outline-none"
+                    >
+                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
+                        <div className="flex items-center mb-3">
+                          <span className="text-2xl mr-2">🤖</span>
+                          <span className="font-medium text-gray-800">
+                            AI Wellness Coach
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                          {aiInsight}
+                        </div>
+                      </div>
+                    </TrueFocus>
+                  </Suspense>
+                )}
               </div>
             </ScrollReveal>
           </Suspense>
@@ -387,12 +392,10 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
           >
             Cancel
           </button>
-              </div>
-            </div>
-              </div>
-            </ScrollReveal>
-          </Suspense>
-        )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default AICheckIn;

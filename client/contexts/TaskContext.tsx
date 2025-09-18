@@ -10,7 +10,7 @@ export interface TodoItem {
 
 interface TaskContextType {
   todos: TodoItem[];
-  addTodo: (text: string, category?: string) => void;
+  addTodo: (text: string, category?: string, completed?: boolean) => void;
   toggleTodo: (id: string) => void;
   deleteTodo: (id: string) => void;
   completionPercentage: number;
@@ -72,11 +72,11 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
 
   const [todos, setTodos] = useState<TodoItem[]>(initialTasks);
   
-  const addTodo = useCallback((text: string, category: string = 'general') => {
+  const addTodo = useCallback((text: string, category: string = 'general', completed: boolean = false) => {
     const newTodo: TodoItem = {
       id: Date.now().toString(),
       text,
-      completed: false,
+      completed,
       createdAt: new Date(),
       category,
     };

@@ -4,9 +4,11 @@ import { AppProvider } from "./contexts/AppContext";
 import { TaskProvider } from "./contexts/TaskContext";
 import LoadingScreen from "./components/LoadingScreen";
 import MoodSelection from "./pages/MoodSelection";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
+import Pomodoro from "./pages/Pomodoro";
 import Rewards from "./pages/Rewards";
 import Friends from "./pages/Friends";
 import Notifications from "./pages/Notifications";
@@ -26,11 +28,13 @@ import { type MoodColors } from "./components/MoodColorPicker";
 
 function App() {
   return (
-    <AppProvider>
-      <TaskProvider>
-        <AppContent />
-      </TaskProvider>
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <TaskProvider>
+          <AppContent />
+        </TaskProvider>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -41,14 +45,22 @@ function AppContent() {
   const [userPoints, setUserPoints] = useState(0);
   const [moodColors, setMoodColors] = useState<MoodColors | null>(null);
 
-  // Simulate loading time
+  // Simulate loading time and auto-bypass in development
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 1000); // Reduced loading time for development
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Auto-select mood in development
+  useEffect(() => {
+    if (!isLoading && import.meta.env.DEV) {
+      setHasSelectedMood(true);
+      setCurrentMood('content');
+    }
+  }, [isLoading]);
 
   // Apply mood-based body class for global theming
   useEffect(() => {
@@ -76,7 +88,17 @@ function AppContent() {
     return <LoadingScreen />;
   }
 
-  if (!hasSelectedMood) {
+  // Debug info in development
+  if (import.meta.env.DEV) {
+    console.log('App State:', {
+      isLoading,
+      hasSelectedMood,
+      currentMood,
+      userPoints
+    });
+  }
+
+  if (!hasSelectedMood && !import.meta.env.DEV) {
     return <MoodSelection onMoodSelection={handleMoodSelection} />;
   }
 
@@ -105,6 +127,16 @@ function AppContent() {
               path="/tasks"
               element={
                 <Tasks
+                  currentMood={currentMood}
+                  userPoints={userPoints}
+                  onPointsUpdate={handlePointsUpdate}
+                />
+              }
+            />
+            <Route
+              path="/pomodoro"
+              element={
+                <Pomodoro
                   currentMood={currentMood}
                   userPoints={userPoints}
                   onPointsUpdate={handlePointsUpdate}

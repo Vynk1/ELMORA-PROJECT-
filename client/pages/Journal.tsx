@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense, useEffect } from 'react';
 import VoiceJournal from '../components/VoiceJournal';
+
+// Lazy load effect components
+const TextCursor = lazy(() => import('../components/effects/TextCursor'));
+const DecryptedText = lazy(() => import('../components/effects/DecryptedText'));
+const FallingText = lazy(() => import('../components/effects/FallingText'));
+const TextTrail = lazy(() => import('../components/effects/TextTrail'));
+const CountUp = lazy(() => import('../components/effects/CountUp'));
+const ScrollReveal = lazy(() => import('../components/effects/ScrollReveal'));
 
 interface JournalEntry {
   id: string;
@@ -9,9 +17,13 @@ interface JournalEntry {
   content: string;
   tags: string[];
   gratitude?: string[];
+  aiSummary?: string;
 }
 
 const Journal: React.FC = () => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [showSavedMessage, setShowSavedMessage] = useState(false);
+  const [showAISummary, setShowAISummary] = useState<{[key: string]: boolean}>({});
   const [entries, setEntries] = useState<JournalEntry[]>([
     {
       id: '1',
@@ -20,7 +32,8 @@ const Journal: React.FC = () => {
       title: 'Great progress today!',
       content: 'I completed all my tasks and felt really productive. The meditation session this morning helped me stay focused throughout the day.',
       tags: ['productivity', 'meditation', 'focus'],
-      gratitude: ['Peaceful morning', 'Supportive friends', 'Good health']
+      gratitude: ['Peaceful morning', 'Supportive friends', 'Good health'],
+      aiSummary: 'Today was marked by high productivity and mindfulness. Your morning meditation practice appears to be creating positive ripple effects throughout your day, enhancing focus and task completion. This shows excellent self-awareness and routine building.'
     },
     {
       id: '2',
@@ -29,12 +42,24 @@ const Journal: React.FC = () => {
       title: 'Thinking about growth',
       content: 'Some days are harder than others, but I\'m learning to appreciate the small wins. Even taking a shower felt like an achievement today.',
       tags: ['self-care', 'growth', 'mindfulness'],
-      gratitude: ['Warm water', 'Comfortable bed', 'This app helping me']
+      gratitude: ['Warm water', 'Comfortable bed', 'This app helping me'],
+      aiSummary: 'Your reflective mindset and ability to find meaning in small accomplishments demonstrates resilience and self-compassion. Recognizing basic self-care as an achievement shows healthy reframing during challenging times. This perspective will serve you well in building sustainable wellness habits.'
     }
   ]);
 
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
 
   const moodEmojis = {
     'amazing': '🤩',
@@ -70,6 +95,10 @@ const Journal: React.FC = () => {
         setEntries([entry, ...entries]);
         setShowNewEntry(false);
         setNewEntry({ mood: 'neutral', title: '', content: '', tags: '', gratitude: '' });
+        
+        // Show saved confirmation
+        setShowSavedMessage(true);
+        setTimeout(() => setShowSavedMessage(false), 2000);
       }
     };
 
@@ -206,7 +235,7 @@ const Journal: React.FC = () => {
           )}
 
           {selectedEntry.gratitude && selectedEntry.gratitude.length > 0 && (
-            <div>
+            <div className="mb-6">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Gratitude</h4>
               <ul className="space-y-1">
                 {selectedEntry.gratitude.map((item, index) => (
@@ -216,6 +245,46 @@ const Journal: React.FC = () => {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* AI Summary Section */}
+          {selectedEntry.aiSummary && (
+            <div className="border-t pt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-sm font-medium text-gray-700">AI Insights</h4>
+                <button
+                  onClick={() => setShowAISummary(prev => ({
+                    ...prev,
+                    [selectedEntry.id]: !prev[selectedEntry.id]
+                  }))}
+                  className="text-xs text-primary hover:text-primary/80 transition-colors"
+                >
+                  {showAISummary[selectedEntry.id] ? 'Hide' : 'Show'} Insights
+                </button>
+              </div>
+              
+              {showAISummary[selectedEntry.id] && (
+                <div className="bg-blue-50 rounded-2xl p-4">
+                  <div className="flex items-start space-x-3 mb-3">
+                    <span className="text-2xl">🤖</span>
+                    <div className="text-sm font-medium text-blue-800">AI Reflection</div>
+                  </div>
+                  
+                  <Suspense fallback={
+                    <p className="text-sm text-blue-700 leading-relaxed">
+                      {selectedEntry.aiSummary}
+                    </p>
+                  }>
+                    <DecryptedText 
+                      text={selectedEntry.aiSummary}
+                      speed={30}
+                      className="text-sm text-blue-700 leading-relaxed"
+                      disabled={prefersReducedMotion}
+                    />
+                  </Suspense>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -241,26 +310,75 @@ const Journal: React.FC = () => {
           </button>
         </div>
 
-        {/* Stats */}
+        {/* Enhanced Stats with CountUp */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-primary mb-1">{entries.length}</div>
-            <div className="text-sm text-gray-600">Total Entries</div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-green-600 mb-1">
-              {entries.filter(e => new Date(e.date).getMonth() === new Date().getMonth()).length}
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl font-bold text-primary mb-1">{entries.length}</div>
+              <div className="text-sm text-gray-600">Total Entries</div>
             </div>
-            <div className="text-sm text-gray-600">This Month</div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-blue-600 mb-1">7</div>
-            <div className="text-sm text-gray-600">Day Streak</div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl mb-1">😊</div>
-            <div className="text-sm text-gray-600">Most Common Mood</div>
-          </div>
+          }>
+            <ScrollReveal duration={0.5} delay={0.1} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1" aria-live="polite">
+                  <CountUp end={entries.length} duration={1000} disabled={prefersReducedMotion} />
+                </div>
+                <div className="text-sm text-gray-600">Total Entries</div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
+          
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl font-bold text-green-600 mb-1">
+                {entries.filter(e => new Date(e.date).getMonth() === new Date().getMonth()).length}
+              </div>
+              <div className="text-sm text-gray-600">This Month</div>
+            </div>
+          }>
+            <ScrollReveal duration={0.5} delay={0.2} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-green-600 mb-1" aria-live="polite">
+                  <CountUp 
+                    end={entries.filter(e => new Date(e.date).getMonth() === new Date().getMonth()).length} 
+                    duration={1200} 
+                    disabled={prefersReducedMotion} 
+                  />
+                </div>
+                <div className="text-sm text-gray-600">This Month</div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
+          
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl font-bold text-blue-600 mb-1">7</div>
+              <div className="text-sm text-gray-600">Day Streak</div>
+            </div>
+          }>
+            <ScrollReveal duration={0.5} delay={0.3} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-blue-600 mb-1" aria-live="polite">
+                  <CountUp end={7} duration={800} disabled={prefersReducedMotion} />
+                </div>
+                <div className="text-sm text-gray-600">Day Streak</div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
+          
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl mb-1">😊</div>
+              <div className="text-sm text-gray-600">Most Common Mood</div>
+            </div>
+          }>
+            <ScrollReveal duration={0.5} delay={0.4} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl mb-1">😊</div>
+                <div className="text-sm text-gray-600">Most Common Mood</div>
+              </div>
+            </ScrollReveal>
+          </Suspense>
         </div>
 
         {/* Entries Timeline */}
@@ -310,10 +428,28 @@ const Journal: React.FC = () => {
         </div>
 
         {entries.length === 0 && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 relative">
+            {/* Spline Notebook Scene Placeholder */}
+            <div 
+              id="spline-journal-placeholder" 
+              data-spline="notebook-petals"
+              className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-32 pointer-events-none opacity-60"
+            >
+              {/* Reserved slot for Spline 3D notebook with petals */}
+            </div>
+            
             <div className="text-6xl mb-4">📖</div>
             <h3 className="text-xl font-medium text-gray-800 mb-2">Start your journal</h3>
-            <p className="text-gray-600 mb-6">Begin documenting your thoughts and feelings</p>
+            <div className="text-gray-600 mb-6">
+              <Suspense fallback="No entries yet — write one thing you're grateful for.">
+                <TextCursor 
+                  text="No entries yet — write one thing you're grateful for." 
+                  speed={50} 
+                  disabled={prefersReducedMotion}
+                  className="text-gray-600"
+                />
+              </Suspense>
+            </div>
             <button
               onClick={() => setShowNewEntry(true)}
               className="bg-primary text-white px-6 py-3 rounded-2xl font-medium hover:bg-primary/90"
@@ -326,6 +462,30 @@ const Journal: React.FC = () => {
 
       <NewEntryModal />
       <EntryDetailModal />
+      
+      {/* Saved Entry Confirmation */}
+      {showSavedMessage && !prefersReducedMotion && (
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
+          <Suspense fallback={null}>
+            <FallingText 
+              trigger={showSavedMessage} 
+              duration={1.8} 
+              className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg font-medium"
+            >
+              Saved — well done! ✨
+            </FallingText>
+          </Suspense>
+        </div>
+      )}
+      
+      {/* Static saved message for reduced motion */}
+      {showSavedMessage && prefersReducedMotion && (
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg font-medium">
+            Saved — well done! ✨
+          </div>
+        </div>
+      )}
     </div>
   );
 };

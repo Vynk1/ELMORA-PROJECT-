@@ -1,7 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import TodoList from '../components/TodoList';
 import { useTaskContext } from '../contexts/TaskContext';
 import { type MoodType } from '../components/MoodColorSwitcher';
+
+// Lazy load effect components
+const CountUp = lazy(() => import('../components/effects/CountUp'));
+const ScrollFloat = lazy(() => import('../components/effects/ScrollFloat'));
 
 interface TasksProps {
   currentMood: MoodType;
@@ -13,6 +17,20 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
   const { addTodo, todos } = useTaskContext();
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('daily');
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [pointsEarned, setPointsEarned] = useState(15);
+  const [streakDays, setStreakDays] = useState(3);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
 
   const getMoodColors = () => {
     switch (currentMood) {
@@ -34,10 +52,33 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
           cardBg: "bg-emerald-100/70",
           textColor: "text-emerald-900"
         };
+      case 'content':
+        return {
+          bg: "from-blue-400 via-indigo-400 to-purple-400",
+          cardBg: "bg-blue-100/70",
+          textColor: "text-blue-900"
+        };
+      case 'calm':
+        return {
+          bg: "from-green-300 via-blue-300 to-indigo-300",
+          cardBg: "bg-green-100/70",
+          textColor: "text-green-900"
+        };
+      default:
+        // Default fallback for any unhandled mood states
+        return {
+          bg: "from-purple-400 via-pink-400 to-red-400",
+          cardBg: "bg-purple-100/70",
+          textColor: "text-purple-900"
+        };
     }
   };
 
-  const colors = getMoodColors();
+  const colors = getMoodColors() || {
+    bg: "from-purple-400 via-pink-400 to-red-400",
+    cardBg: "bg-purple-100/70",
+    textColor: "text-purple-900"
+  };
 
   const categories = [
     { id: 'daily', name: 'Daily Tasks', icon: '📅' },
@@ -55,6 +96,7 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
       onPointsUpdate(userPoints + bonusPoints);
     }
   }, [userPoints, onPointsUpdate]);
+
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${colors.bg}`}>
@@ -91,44 +133,98 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
           </div>
         </div>
 
-        {/* Stats Bar */}
+        {/* Enhanced Stats Bar with CountUp Animations */}
         <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
-            <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>
-              {completionPercentage}%
+          <Suspense fallback={
+            <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+              <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>{completionPercentage}%</div>
+              <div className={`text-xs ${colors.textColor} opacity-80`}>Completed Today</div>
             </div>
-            <div className={`text-xs ${colors.textColor} opacity-80`}>
-              Completed Today
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.5} delay={0.1} disabled={prefersReducedMotion}>
+              <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+                <div className={`text-2xl font-bold ${colors.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={completionPercentage} 
+                    duration={1200} 
+                    suffix="%" 
+                    disabled={prefersReducedMotion} 
+                  />
+                </div>
+                <div className={`text-xs ${colors.textColor} opacity-80`}>
+                  Completed Today
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
 
-          <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
-            <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>
-              {todos.filter(todo => !todo.completed).length}
+          <Suspense fallback={
+            <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+              <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>{todos.filter(todo => !todo.completed).length}</div>
+              <div className={`text-xs ${colors.textColor} opacity-80`}>Tasks Remaining</div>
             </div>
-            <div className={`text-xs ${colors.textColor} opacity-80`}>
-              Tasks Remaining
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.5} delay={0.2} disabled={prefersReducedMotion}>
+              <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+                <div className={`text-2xl font-bold ${colors.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={todos.filter(todo => !todo.completed).length} 
+                    duration={1000} 
+                    disabled={prefersReducedMotion} 
+                  />
+                </div>
+                <div className={`text-xs ${colors.textColor} opacity-80`}>
+                  Tasks Remaining
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
 
-          <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
-            <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>
-              15
+          <Suspense fallback={
+            <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+              <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>{pointsEarned}</div>
+              <div className={`text-xs ${colors.textColor} opacity-80`}>Points Earned</div>
             </div>
-            <div className={`text-xs ${colors.textColor} opacity-80`}>
-              Points Earned
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.5} delay={0.3} disabled={prefersReducedMotion}>
+              <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+                <div className={`text-2xl font-bold ${colors.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={pointsEarned} 
+                    duration={1400} 
+                    disabled={prefersReducedMotion} 
+                  />
+                </div>
+                <div className={`text-xs ${colors.textColor} opacity-80`}>
+                  Points Earned
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
 
-          <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
-            <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>
-              3
+          <Suspense fallback={
+            <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+              <div className={`text-2xl font-bold ${colors.textColor} mb-1`}>{streakDays}</div>
+              <div className={`text-xs ${colors.textColor} opacity-80`}>Streak Days</div>
             </div>
-            <div className={`text-xs ${colors.textColor} opacity-80`}>
-              Streak Days
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.5} delay={0.4} disabled={prefersReducedMotion}>
+              <div className={`${colors.cardBg} backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20`}>
+                <div className={`text-2xl font-bold ${colors.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={streakDays} 
+                    duration={800} 
+                    disabled={prefersReducedMotion} 
+                  />
+                </div>
+                <div className={`text-xs ${colors.textColor} opacity-80`}>
+                  Streak Days
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
         </div>
+
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-4 gap-8">

@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense, useEffect } from 'react';
+
+// Lazy load custom effect components
+const ScrollFloat = lazy(() => import('../components/effects/ScrollFloat'));
+const FallingText = lazy(() => import('../components/effects/FallingText'));
+const CountUp = lazy(() => import('../components/effects/CountUp'));
+const TextTrail = lazy(() => import('../components/effects/TextTrail'));
 
 interface Goal {
   id: string;
@@ -16,6 +22,8 @@ interface Goal {
 const Goals: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showAddGoal, setShowAddGoal] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [celebratingGoal, setCelebratingGoal] = useState<string | null>(null);
   const [goals, setGoals] = useState<Goal[]>([
     {
       id: '1',
@@ -67,6 +75,17 @@ const Goals: React.FC = () => {
     }
   ]);
 
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
+
   const categories = [
     { id: 'all', name: 'All Goals', icon: '🎯', color: 'bg-gray-100' },
     { id: 'wellness', name: 'Wellness', icon: '🧘', color: 'bg-green-100' },
@@ -84,10 +103,19 @@ const Goals: React.FC = () => {
     setGoals(goals.map(goal => {
       if (goal.id === goalId) {
         const newValue = Math.max(0, Math.min(goal.targetValue, goal.currentValue + increment));
+        const wasCompleted = goal.isCompleted;
+        const isNowCompleted = newValue >= goal.targetValue;
+        
+        // Trigger celebration for newly completed goals
+        if (!wasCompleted && isNowCompleted) {
+          setCelebratingGoal(goalId);
+          setTimeout(() => setCelebratingGoal(null), 3000);
+        }
+        
         return {
           ...goal,
           currentValue: newValue,
-          isCompleted: newValue >= goal.targetValue
+          isCompleted: isNowCompleted
         };
       }
       return goal;
@@ -243,30 +271,82 @@ const Goals: React.FC = () => {
           </button>
         </div>
 
-        {/* Stats */}
+        {/* Enhanced Stats with CountUp Animations */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-primary mb-1">{goals.length}</div>
-            <div className="text-sm text-gray-600">Total Goals</div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-green-600 mb-1">
-              {goals.filter(g => g.isCompleted).length}
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl font-bold text-primary mb-1">{goals.length}</div>
+              <div className="text-sm text-gray-600">Total Goals</div>
             </div>
-            <div className="text-sm text-gray-600">Completed</div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-blue-600 mb-1">
-              {goals.filter(g => !g.isCompleted).length}
+          }>
+            <ScrollFloat duration={0.5} delay={0.1} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1" aria-live="polite">
+                  <CountUp end={goals.length} duration={1000} disabled={prefersReducedMotion} />
+                </div>
+                <div className="text-sm text-gray-600">Total Goals</div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
+          
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl font-bold text-green-600 mb-1">
+                {goals.filter(g => g.isCompleted).length}
+              </div>
+              <div className="text-sm text-gray-600">Completed</div>
             </div>
-            <div className="text-sm text-gray-600">In Progress</div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-purple-600 mb-1">
-              {Math.round((goals.filter(g => g.isCompleted).length / goals.length) * 100) || 0}%
+          }>
+            <ScrollFloat duration={0.5} delay={0.2} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-green-600 mb-1" aria-live="polite">
+                  <CountUp end={goals.filter(g => g.isCompleted).length} duration={1200} disabled={prefersReducedMotion} />
+                </div>
+                <div className="text-sm text-gray-600">Completed</div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
+          
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl font-bold text-blue-600 mb-1">
+                {goals.filter(g => !g.isCompleted).length}
+              </div>
+              <div className="text-sm text-gray-600">In Progress</div>
             </div>
-            <div className="text-sm text-gray-600">Success Rate</div>
-          </div>
+          }>
+            <ScrollFloat duration={0.5} delay={0.3} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-blue-600 mb-1" aria-live="polite">
+                  <CountUp end={goals.filter(g => !g.isCompleted).length} duration={1400} disabled={prefersReducedMotion} />
+                </div>
+                <div className="text-sm text-gray-600">In Progress</div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
+          
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-2xl font-bold text-purple-600 mb-1">
+                {Math.round((goals.filter(g => g.isCompleted).length / goals.length) * 100) || 0}%
+              </div>
+              <div className="text-sm text-gray-600">Success Rate</div>
+            </div>
+          }>
+            <ScrollFloat duration={0.5} delay={0.4} disabled={prefersReducedMotion}>
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-purple-600 mb-1" aria-live="polite">
+                  <CountUp 
+                    end={Math.round((goals.filter(g => g.isCompleted).length / goals.length) * 100) || 0} 
+                    duration={1600} 
+                    suffix="%" 
+                    disabled={prefersReducedMotion} 
+                  />
+                </div>
+                <div className="text-sm text-gray-600">Success Rate</div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
         </div>
 
         {/* Category Filters */}
@@ -289,51 +369,99 @@ const Goals: React.FC = () => {
           ))}
         </div>
 
-        {/* Goals Grid */}
+        {/* Enhanced Goals Grid with ScrollFloat */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredGoals.map((goal) => (
-            <div
-              key={goal.id}
-              className={`
+          {filteredGoals.map((goal, index) => (
+            <Suspense key={goal.id} fallback={
+              <div className={`
                 bg-white rounded-3xl p-6 shadow-sm border-l-4 transition-all hover:shadow-md
-                ${goal.isCompleted 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-primary'
-                }
-              `}
-            >
-              {/* Header */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className={`font-medium text-lg mb-1 ${goal.isCompleted ? 'text-green-800' : 'text-gray-800'}`}>
-                    {goal.title}
-                    {goal.isCompleted && <span className="ml-2">✅</span>}
-                  </h3>
-                  <p className={`text-sm ${goal.isCompleted ? 'text-green-600' : 'text-gray-600'}`}>
-                    {goal.description}
-                  </p>
+                ${goal.isCompleted ? 'border-green-500 bg-green-50' : 'border-primary'}
+              `}>
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(goal.priority)}`}>
-                  {goal.priority}
-                </span>
               </div>
+            }>
+              <ScrollFloat 
+                duration={0.6} 
+                delay={index * 0.1} 
+                disabled={prefersReducedMotion}
+                className="relative"
+              >
+                <div
+                  className={`
+                    bg-white rounded-3xl p-6 shadow-sm border-l-4 transition-all hover:shadow-md
+                    ${goal.isCompleted 
+                      ? 'border-green-500 bg-green-50' 
+                      : 'border-primary'
+                    }
+                  `}
+                >
+                  {/* Celebratory Text Effect */}
+                  {celebratingGoal === goal.id && !prefersReducedMotion && (
+                    <Suspense fallback={null}>
+                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
+                        <FallingText 
+                          trigger={true} 
+                          duration={2} 
+                          className="text-yellow-500 font-bold text-sm whitespace-nowrap"
+                        >
+                          🎉 Nice work!
+                        </FallingText>
+                      </div>
+                    </Suspense>
+                  )}
 
-              {/* Progress */}
-              <div className="mb-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Progress</span>
-                  <span>{goal.currentValue} / {goal.targetValue} {goal.unit}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full transition-all duration-500 ${goal.isCompleted ? 'bg-green-500' : 'bg-primary'}`}
-                    style={{ width: `${Math.min((goal.currentValue / goal.targetValue) * 100, 100)}%` }}
-                  />
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {Math.round((goal.currentValue / goal.targetValue) * 100)}% complete
-                </div>
-              </div>
+                  {/* Header */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className={`font-medium text-lg mb-1 ${goal.isCompleted ? 'text-green-800' : 'text-gray-800'}`}>
+                        {!prefersReducedMotion && goal.isCompleted ? (
+                          <Suspense fallback={goal.title}>
+                            <TextTrail text={goal.title} speed={0.8} stagger={0.05} />
+                          </Suspense>
+                        ) : (
+                          goal.title
+                        )}
+                        {goal.isCompleted && <span className="ml-2">✅</span>}
+                      </h3>
+                      <p className={`text-sm ${goal.isCompleted ? 'text-green-600' : 'text-gray-600'}`}>
+                        {goal.description}
+                      </p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(goal.priority)}`}>
+                      {goal.priority}
+                    </span>
+                  </div>
+
+                  {/* Progress */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Progress</span>
+                      <span aria-live="polite">
+                        <Suspense fallback={`${goal.currentValue} / ${goal.targetValue} ${goal.unit}`}>
+                          <CountUp end={goal.currentValue} duration={800} disabled={prefersReducedMotion} /> / {goal.targetValue} {goal.unit}
+                        </Suspense>
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-500 ${goal.isCompleted ? 'bg-green-500' : 'bg-primary'}`}
+                        style={{ width: `${Math.min((goal.currentValue / goal.targetValue) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1" aria-live="polite">
+                      <Suspense fallback={`${Math.round((goal.currentValue / goal.targetValue) * 100)}% complete`}>
+                        <CountUp 
+                          end={Math.round((goal.currentValue / goal.targetValue) * 100)} 
+                          duration={600} 
+                          suffix="% complete" 
+                          disabled={prefersReducedMotion} 
+                        />
+                      </Suspense>
+                    </div>
+                  </div>
 
               {/* Deadline */}
               <div className="mb-4 text-xs text-gray-500">
@@ -355,9 +483,11 @@ const Goals: React.FC = () => {
                   >
                     -1
                   </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </ScrollFloat>
+            </Suspense>
           ))}
         </div>
 

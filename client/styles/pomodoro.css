@@ -1,0 +1,344 @@
+/**
+ * Enhanced Pomodoro Card Styles
+ * Complementary to Elmora's soft, calming design with focus session specific animations
+ */
+
+/* Progress Circle Animation */
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+}
+
+/* Completion Toast Animation */
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%) translateX(50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Orb Breathing Animation */
+@keyframes orbBreath {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Timer Focus State */
+.pomodoro-timer-active {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* Spline Orb Enhancements */
+#spline-pomodoro-orb {
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+#spline-pomodoro-orb::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#spline-pomodoro-orb[data-phase="focus"] {
+  animation: orbBreath 4s ease-in-out infinite;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+}
+
+#spline-pomodoro-orb[data-phase="break"] {
+  animation: orbBreath 3s ease-in-out infinite;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+
+#spline-pomodoro-orb:hover::before {
+  opacity: 1;
+}
+
+/* Volume Slider Custom Styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.volume-slider {
+  height: 8px !important;
+  border-radius: 4px;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: rgba(255, 255, 255, 0.3);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: currentColor;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-track {
+  background: rgba(255, 255, 255, 0.3);
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: currentColor;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Completion Toast Styles */
+.completion-toast {
+  animation: slideInFromTop 0.5s ease-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.completion-toast.fade-out {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+/* Music Player Enhancements */
+.music-player-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.music-player-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.music-player-button:hover::before {
+  opacity: 1;
+}
+
+.music-player-button:active {
+  transform: scale(0.95);
+}
+
+/* Timer Display Enhancements */
+.timer-display {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.timer-display.running {
+  text-shadow: 0 0 8px currentColor;
+}
+
+/* Progress Circle Enhancements */
+.progress-circle {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.progress-circle.active {
+  filter: drop-shadow(0 2px 8px currentColor);
+}
+
+/* Button Hover Effects */
+.pomodoro-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.pomodoro-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.pomodoro-button:hover::before {
+  transform: translateX(100%);
+}
+
+.pomodoro-button:active {
+  transform: scale(0.98);
+}
+
+/* Phase Indicator Styles */
+.phase-indicator {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.phase-indicator.focus {
+  color: #10b981;
+}
+
+.phase-indicator.break {
+  color: #f59e0b;
+}
+
+/* Motivational Text Animation */
+.motivational-text {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.motivational-text:hover {
+  opacity: 1;
+}
+
+/* Session Counter Styles */
+.session-counter {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  #spline-pomodoro-orb {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .timer-display {
+    font-size: 2.5rem;
+  }
+  
+  .progress-circle svg {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .progress-circle circle {
+    r: 60px;
+    cx: 75px;
+    cy: 75px;
+  }
+}
+
+/* Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  #spline-pomodoro-orb,
+  .pomodoro-timer-active,
+  .timer-display.running {
+    animation: none !important;
+  }
+  
+  .completion-toast {
+    animation: none !important;
+  }
+  
+  .pomodoro-button::before {
+    display: none;
+  }
+  
+  .music-player-button::before {
+    display: none;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .progress-circle,
+  #spline-pomodoro-orb,
+  .completion-toast {
+    border: 2px solid currentColor;
+  }
+  
+  .pomodoro-button {
+    border: 2px solid currentColor;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb,
+  input[type="range"]::-moz-range-thumb {
+    border: 3px solid currentColor;
+  }
+}
+
+/* Focus States for Accessibility */
+.pomodoro-button:focus,
+.music-player-button:focus,
+input[type="range"]:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.3) 50%, 
+    rgba(255,255,255,0.1) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

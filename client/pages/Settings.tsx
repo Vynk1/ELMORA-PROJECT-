@@ -1,6 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useApp } from "../contexts/AppContext";
 import { t, type Language } from "../utils/translations";
+import { useReducedMotion } from "../utils/withReducedMotion";
+
+// Lazy load effect components with minimal usage
+const DecryptText = lazy(() => import('../components/effects/DecryptedText'));
+const TrueFocus = lazy(() => import('../components/effects/TrueFocus'));
+const CountUp = lazy(() => import('../components/effects/CountUp'));
 
 interface UserSettings {
   notifications: {
@@ -36,6 +42,9 @@ interface UserSettings {
 
 const Settings: React.FC = () => {
   const { state, setTheme, setLanguage, updatePreferences } = useApp();
+  const prefersReducedMotion = useReducedMotion();
+  const [exportProgress, setExportProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
   const [settings, setSettings] = useState<UserSettings>({
     notifications: {
       dailyReminders: true,
@@ -73,6 +82,8 @@ const Settings: React.FC = () => {
   >("notifications");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  // The prefersReducedMotion state is now handled by the useReducedMotion hook
+
   const updateSetting = (
     section: keyof UserSettings,
     key: string,
@@ -96,28 +107,53 @@ const Settings: React.FC = () => {
   ];
 
   const exportData = () => {
-    // Simulate data export
-    const dataToExport = {
-      settings,
-      exportDate: new Date().toISOString(),
-      dataTypes: [
-        "tasks",
-        "journal_entries",
-        "meditation_sessions",
-        "goals",
-        "progress",
-      ],
-    };
+    if (isExporting) return;
+    
+    setIsExporting(true);
+    setExportProgress(0);
 
-    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
-      type: "application/json",
+    // Simulate progressive export with subtle progress
+    const progressSteps = [15, 35, 60, 85, 100];
+    const stepDuration = 300; // 300ms per step for smooth progress
+
+    progressSteps.forEach((step, index) => {
+      setTimeout(() => {
+        setExportProgress(step);
+        
+        if (step === 100) {
+          // Complete export
+          setTimeout(() => {
+            const dataToExport = {
+              settings,
+              exportDate: new Date().toISOString(),
+              dataTypes: [
+                "tasks",
+                "journal_entries", 
+                "meditation_sessions",
+                "goals",
+                "progress",
+              ],
+            };
+
+            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
+              type: "application/json",
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "elmora-data-export.json";
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            // Reset after completion
+            setTimeout(() => {
+              setIsExporting(false);
+              setExportProgress(0);
+            }, 1000);
+          }, 200);
+        }
+      }, index * stepDuration);
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "elmora-data-export.json";
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const DeleteAccountModal = () => {
@@ -296,6 +332,27 @@ const Settings: React.FC = () => {
                         <option value="friends">Friends Only</option>
                         <option value="private">Private - Only me</option>
                       </select>
+                      
+                      {/* Critical warning with TrueFocus */}
+                      {settings.privacy.profileVisibility === 'public' && (
+                        <div className="mt-2">
+                          <Suspense fallback={
+                            <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-2">
+                              ⚠️ Public profile enabled — your activity may be visible to anyone
+                            </div>
+                          }>
+                            <TrueFocus 
+                              scale={1.02} 
+                              glowColor="rgba(245, 158, 11, 0.3)" 
+                              disabled={prefersReducedMotion}
+                            >
+                              <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-2 focus:outline focus:outline-2 focus:outline-amber-400">
+                                ⚠️ <strong>Public profile enabled</strong> — your activity may be visible to anyone
+                              </div>
+                            </TrueFocus>
+                          </Suspense>
+                        </div>
+                      )}
                     </div>
 
                     {Object.entries(settings.privacy)
@@ -309,16 +366,53 @@ const Settings: React.FC = () => {
                             <h3 className="font-medium text-gray-800 capitalize">
                               {key.replace(/([A-Z])/g, " $1").trim()}
                             </h3>
-                            <p className="text-sm text-gray-600">
-                              {key === "shareProgress" &&
-                                "Allow friends to see your task completion progress"}
-                              {key === "shareJournal" &&
-                                "Share journal entries with selected friends"}
-                              {key === "dataCollection" &&
-                                "Help improve the app with usage analytics"}
-                              {key === "analyticsTracking" &&
-                                "Allow tracking for personalized recommendations"}
-                            </p>
+                            {/* DecryptText for hover explanations */}
+                            <div className="text-sm text-gray-600">
+                              {key === "shareProgress" && (
+                                <Suspense fallback="Allow friends to see your task completion progress">
+                                  <DecryptText 
+                                    text="Share Progress — allows selected friends to view your daily task completion rates and streak counters"
+                                    speed={25}
+                                    disabled={prefersReducedMotion}
+                                    className="hover:text-gray-800 focus:text-gray-800 transition-colors cursor-help"
+                                    tabIndex={0}
+                                  />
+                                </Suspense>
+                              )}
+                              {key === "shareJournal" && (
+                                <Suspense fallback="Share journal entries with selected friends">
+                                  <DecryptText 
+                                    text="Share Journal — allows selected friends to view entries you choose to share (private by default)"
+                                    speed={25}
+                                    disabled={prefersReducedMotion}
+                                    className="hover:text-gray-800 focus:text-gray-800 transition-colors cursor-help"
+                                    tabIndex={0}
+                                  />
+                                </Suspense>
+                              )}
+                              {key === "dataCollection" && (
+                                <Suspense fallback="Help improve the app with usage analytics">
+                                  <DecryptText 
+                                    text="Data Collection — anonymized usage patterns help us improve features (no personal content stored)"
+                                    speed={25}
+                                    disabled={prefersReducedMotion}
+                                    className="hover:text-gray-800 focus:text-gray-800 transition-colors cursor-help"
+                                    tabIndex={0}
+                                  />
+                                </Suspense>
+                              )}
+                              {key === "analyticsTracking" && (
+                                <Suspense fallback="Allow tracking for personalized recommendations">
+                                  <DecryptText 
+                                    text="Analytics Tracking — enables personalized recommendations based on your app usage patterns"
+                                    speed={25}
+                                    disabled={prefersReducedMotion}
+                                    className="hover:text-gray-800 focus:text-gray-800 transition-colors cursor-help"
+                                    tabIndex={0}
+                                  />
+                                </Suspense>
+                              )}
+                            </div>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
                             <input
@@ -587,12 +681,50 @@ const Settings: React.FC = () => {
                         Download all your data including tasks, journal entries,
                         meditation history, and progress.
                       </p>
-                      <button
-                        onClick={exportData}
-                        className="bg-green-600 text-white px-6 py-3 rounded-2xl font-medium hover:bg-green-700 transition-colors"
-                      >
-                        Download Data Export
-                      </button>
+                      <div className="space-y-3">
+                        <button
+                          onClick={exportData}
+                          disabled={isExporting}
+                          className={`
+                            px-6 py-3 rounded-2xl font-medium transition-colors
+                            ${isExporting 
+                              ? 'bg-gray-400 text-white cursor-not-allowed'
+                              : 'bg-green-600 text-white hover:bg-green-700'
+                            }
+                          `}
+                        >
+                          {isExporting ? 'Exporting...' : 'Download Data Export'}
+                        </button>
+                        
+                        {/* Subtle progress indicator */}
+                        {isExporting && (
+                          <div className="space-y-2">
+                            <div className="w-full bg-green-100 rounded-full h-2">
+                              <div 
+                                className="bg-green-600 h-2 rounded-full transition-all duration-300 ease-out"
+                                style={{ width: `${exportProgress}%` }}
+                              />
+                            </div>
+                            <div className="text-sm text-green-700 flex justify-between items-center">
+                              <span>Preparing your data...</span>
+                              <span className="font-medium" aria-live="polite">
+                                {!prefersReducedMotion ? (
+                                  <Suspense fallback={`${exportProgress}%`}>
+                                    <CountUp 
+                                      end={exportProgress} 
+                                      duration={0} 
+                                      suffix="%" 
+                                      disabled={prefersReducedMotion}
+                                    />
+                                  </Suspense>
+                                ) : (
+                                  `${exportProgress}%`
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="bg-blue-50 rounded-2xl p-6">

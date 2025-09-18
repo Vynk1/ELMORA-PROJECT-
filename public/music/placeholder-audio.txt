@@ -1,0 +1,22 @@
+# Placeholder Audio Files
+
+For development, you can create small placeholder audio files:
+
+## Quick Setup:
+1. Find 3 short audio clips (10-30 seconds each)
+2. Rename them to:
+   - `lofi1.mp3`
+   - `rain.mp3` 
+   - `ocean.mp3`
+3. Place them in this `/public/music/` directory
+
+## Alternative for Testing:
+Use any existing audio files you have locally and rename them appropriately.
+The PomodoroCard component will handle missing files gracefully.
+
+## Online Resources:
+- Freesound.org (free)
+- YouTube Audio Library (free)
+- Any royalty-free music sites
+
+The audio files should be in MP3 format for maximum browser compatibility.

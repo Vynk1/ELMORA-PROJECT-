@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+
+// Lazy load effect components
+const CountUp = lazy(() => import('../effects/CountUp'));
+const ScrollReveal = lazy(() => import('../effects/ScrollReveal'));
 
 interface ProgressData {
   dailyCompletion: number[];
@@ -23,6 +27,18 @@ interface ViewProgressProps {
 }
 
 const ViewProgress: React.FC<ViewProgressProps> = ({ isOpen, onClose, progressData }) => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
   // Default data if none provided
   const defaultData: ProgressData = {
     dailyCompletion: [85, 92, 78, 95, 88, 100, 76], // Last 7 days
@@ -71,34 +87,92 @@ const ViewProgress: React.FC<ViewProgressProps> = ({ isOpen, onClose, progressDa
           </div>
         </div>
 
-        {/* Weekly Stats */}
+        {/* Enhanced Weekly Stats with CountUp */}
         <div className="mb-8">
           <h3 className="text-lg font-medium text-gray-800 mb-4">This Week's Highlights</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-blue-50 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600 mb-1">
-                {data.weeklyStats.tasksCompleted}
+            <Suspense fallback={
+              <div className="bg-blue-50 rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600 mb-1">{data.weeklyStats.tasksCompleted}</div>
+                <div className="text-xs text-blue-800">Tasks Completed</div>
               </div>
-              <div className="text-xs text-blue-800">Tasks Completed</div>
-            </div>
-            <div className="bg-green-50 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-bold text-green-600 mb-1">
-                {data.weeklyStats.pointsEarned}
+            }>
+              <ScrollReveal duration={0.5} delay={0.1} disabled={prefersReducedMotion}>
+                <div className="bg-blue-50 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-1" aria-live="polite">
+                    <CountUp 
+                      end={data.weeklyStats.tasksCompleted} 
+                      duration={1200} 
+                      disabled={prefersReducedMotion} 
+                    />
+                  </div>
+                  <div className="text-xs text-blue-800">Tasks Completed</div>
+                </div>
+              </ScrollReveal>
+            </Suspense>
+            
+            <Suspense fallback={
+              <div className="bg-green-50 rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-green-600 mb-1">{data.weeklyStats.pointsEarned}</div>
+                <div className="text-xs text-green-800">Points Earned</div>
               </div>
-              <div className="text-xs text-green-800">Points Earned</div>
-            </div>
-            <div className="bg-orange-50 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600 mb-1">
-                {data.weeklyStats.streakDays}
+            }>
+              <ScrollReveal duration={0.5} delay={0.2} disabled={prefersReducedMotion}>
+                <div className="bg-green-50 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1" aria-live="polite">
+                    <CountUp 
+                      end={data.weeklyStats.pointsEarned} 
+                      duration={1400} 
+                      disabled={prefersReducedMotion} 
+                    />
+                  </div>
+                  <div className="text-xs text-green-800">Points Earned</div>
+                </div>
+              </ScrollReveal>
+            </Suspense>
+            
+            <Suspense fallback={
+              <div className="bg-orange-50 rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-orange-600 mb-1">{data.weeklyStats.streakDays}</div>
+                <div className="text-xs text-orange-800">Streak Days</div>
               </div>
-              <div className="text-xs text-orange-800">Streak Days</div>
-            </div>
-            <div className="bg-purple-50 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600 mb-1">
-                {Math.round((data.weeklyStats.tasksCompleted / 49) * 100)}%
+            }>
+              <ScrollReveal duration={0.5} delay={0.3} disabled={prefersReducedMotion}>
+                <div className="bg-orange-50 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-orange-600 mb-1" aria-live="polite">
+                    <CountUp 
+                      end={data.weeklyStats.streakDays} 
+                      duration={1000} 
+                      disabled={prefersReducedMotion} 
+                    />
+                  </div>
+                  <div className="text-xs text-orange-800">Streak Days</div>
+                </div>
+              </ScrollReveal>
+            </Suspense>
+            
+            <Suspense fallback={
+              <div className="bg-purple-50 rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600 mb-1">
+                  {Math.round((data.weeklyStats.tasksCompleted / 49) * 100)}%
+                </div>
+                <div className="text-xs text-purple-800">Weekly Rate</div>
               </div>
-              <div className="text-xs text-purple-800">Weekly Rate</div>
-            </div>
+            }>
+              <ScrollReveal duration={0.5} delay={0.4} disabled={prefersReducedMotion}>
+                <div className="bg-purple-50 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-600 mb-1" aria-live="polite">
+                    <CountUp 
+                      end={Math.round((data.weeklyStats.tasksCompleted / 49) * 100)} 
+                      duration={1600} 
+                      suffix="%" 
+                      disabled={prefersReducedMotion} 
+                    />
+                  </div>
+                  <div className="text-xs text-purple-800">Weekly Rate</div>
+                </div>
+              </ScrollReveal>
+            </Suspense>
           </div>
         </div>
 
@@ -131,7 +205,11 @@ const ViewProgress: React.FC<ViewProgressProps> = ({ isOpen, onClose, progressDa
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span>Tasks Completed</span>
-                <span>{data.monthlyGoals.tasksCompleted} / {data.monthlyGoals.tasksTarget}</span>
+                <span aria-live="polite">
+                  <Suspense fallback={`${data.monthlyGoals.tasksCompleted} / ${data.monthlyGoals.tasksTarget}`}>
+                    <CountUp end={data.monthlyGoals.tasksCompleted} duration={1000} disabled={prefersReducedMotion} /> / {data.monthlyGoals.tasksTarget}
+                  </Suspense>
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div 
@@ -143,7 +221,11 @@ const ViewProgress: React.FC<ViewProgressProps> = ({ isOpen, onClose, progressDa
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span>Points Earned</span>
-                <span>{data.monthlyGoals.pointsEarned} / {data.monthlyGoals.pointsTarget}</span>
+                <span aria-live="polite">
+                  <Suspense fallback={`${data.monthlyGoals.pointsEarned} / ${data.monthlyGoals.pointsTarget}`}>
+                    <CountUp end={data.monthlyGoals.pointsEarned} duration={1200} disabled={prefersReducedMotion} /> / {data.monthlyGoals.pointsTarget}
+                  </Suspense>
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div 

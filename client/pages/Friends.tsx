@@ -1,4 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense, useEffect } from "react";
+
+// Lazy load effect components
+const RotatingText = lazy(() => import('../components/effects/RotatingText'));
+const Magnet = lazy(() => import('../components/effects/Magnet'));
+const ClickSpark = lazy(() => import('../components/effects/ClickSpark'));
+const FallingText = lazy(() => import('../components/effects/FallingText'));
+const ScrollReveal = lazy(() => import('../components/effects/ScrollReveal'));
 
 interface QuizQuestion {
   id: number;
@@ -19,12 +26,15 @@ interface UserMatch {
 }
 
 const Friends: React.FC = () => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [currentStep, setCurrentStep] = useState<
     "welcome" | "quiz" | "results" | "matches"
   >("welcome");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [matches, setMatches] = useState<UserMatch[]>([]);
+  const [requestSent, setRequestSent] = useState<{[key: string]: boolean}>({});
+  const [sparkTrigger, setSparkTrigger] = useState(0);
 
   const quizQuestions: QuizQuestion[] = [
     {
@@ -139,6 +149,17 @@ const Friends: React.FC = () => {
     },
   ];
 
+  // Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleMotionChange);
+  }, []);
+
   const generateMatches = () => {
     // Simulate matching algorithm based on answers
     const potentialMatches: UserMatch[] = [
@@ -211,7 +232,8 @@ const Friends: React.FC = () => {
   };
 
   const sendFriendRequest = (userId: string) => {
-    alert(`Friend request sent! 🎉`);
+    setRequestSent(prev => ({ ...prev, [userId]: true }));
+    setSparkTrigger(prev => prev + 1);
     // Here you would typically call an API to send the friend request
   };
 
@@ -228,11 +250,21 @@ const Friends: React.FC = () => {
           <h1 className="text-4xl font-light text-gray-800 mb-6">
             Find Your Tribe
           </h1>
-          <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+          <div className="text-lg text-gray-600 mb-6 leading-relaxed">
             Connect with like-minded people who share your interests and values.
             Our thoughtful matching process helps you find meaningful
             friendships based on compatibility and shared goals.
-          </p>
+          </div>
+          <div className="text-primary font-medium mb-8">
+            <Suspense fallback="Share • Support • Grow">
+              <RotatingText 
+                texts={['Share', 'Support', 'Grow']} 
+                interval={2500} 
+                disabled={prefersReducedMotion}
+                className="text-primary"
+              />
+            </Suspense>
+          </div>
 
           <div className="bg-white rounded-3xl p-8 shadow-lg mb-8">
             <h2 className="text-xl font-medium text-gray-800 mb-4">
@@ -374,29 +406,57 @@ const Friends: React.FC = () => {
 
         <div className="grid md:grid-cols-2 gap-6">
           {matches.map((match) => (
-            <div key={match.id} className="bg-white rounded-3xl p-6 shadow-lg">
-              <div className="flex items-start space-x-4 mb-4">
-                <img
-                  src={match.avatar}
-                  alt={match.name}
-                  className="w-16 h-16 rounded-full bg-gray-200"
-                />
-                <div className="flex-1">
-                  <h3 className="text-xl font-medium text-gray-800">
-                    {match.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">{match.location}</p>
-                  <p className="text-xs text-gray-500">
-                    Active {match.lastActive}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {match.matchPercentage}%
+            <Suspense key={match.id} fallback={
+              <div className="bg-white rounded-3xl p-6 shadow-lg">
+                <div className="flex items-start space-x-4 mb-4">
+                  <img
+                    src={match.avatar}
+                    alt={match.name}
+                    className="w-16 h-16 rounded-full bg-gray-200"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-xl font-medium text-gray-800">
+                      {match.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">{match.location}</p>
+                    <p className="text-xs text-gray-500">
+                      Active {match.lastActive}
+                    </p>
                   </div>
-                  <div className="text-xs text-gray-600">Match</div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {match.matchPercentage}%
+                    </div>
+                    <div className="text-xs text-gray-600">Match</div>
+                  </div>
                 </div>
               </div>
+            }>
+              <ScrollReveal duration={0.6} delay={0.1} disabled={prefersReducedMotion}>
+                <Magnet strength={0.15} disabled={prefersReducedMotion}>
+                  <div className="bg-white rounded-3xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="flex items-start space-x-4 mb-4">
+                      <img
+                        src={match.avatar}
+                        alt={match.name}
+                        className="w-16 h-16 rounded-full bg-gray-200"
+                      />
+                      <div className="flex-1">
+                        <h3 className="text-xl font-medium text-gray-800">
+                          {match.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">{match.location}</p>
+                        <p className="text-xs text-gray-500">
+                          Active {match.lastActive}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">
+                          {match.matchPercentage}%
+                        </div>
+                        <div className="text-xs text-gray-600">Match</div>
+                      </div>
+                    </div>
 
               <p className="text-gray-700 mb-4 text-sm">{match.bio}</p>
 
@@ -416,21 +476,44 @@ const Friends: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => sendFriendRequest(match.id)}
-                  className="flex-1 bg-primary text-white py-3 rounded-2xl font-medium hover:bg-primary/90 transition-colors"
-                >
-                  Send Friend Request
-                </button>
-                <button
-                  onClick={() => skipUser(match.id)}
-                  className="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 transition-colors"
-                >
-                  Skip
-                </button>
-              </div>
-            </div>
+                    <div className="flex space-x-3">
+                      <Suspense fallback={
+                        <button
+                          onClick={() => sendFriendRequest(match.id)}
+                          className="flex-1 bg-primary text-white py-3 rounded-2xl font-medium hover:bg-primary/90 transition-colors"
+                        >
+                          {requestSent[match.id] ? 'Request Sent!' : 'Send Request'}
+                        </button>
+                      }>
+                        <ClickSpark 
+                          trigger={sparkTrigger} 
+                          disabled={prefersReducedMotion}
+                          color="#10b981"
+                        >
+                          <button
+                            onClick={() => sendFriendRequest(match.id)}
+                            disabled={requestSent[match.id]}
+                            className={`flex-1 py-3 rounded-2xl font-medium transition-colors ${
+                              requestSent[match.id] 
+                                ? 'bg-green-500 text-white cursor-not-allowed'
+                                : 'bg-primary text-white hover:bg-primary/90'
+                            }`}
+                          >
+                            {requestSent[match.id] ? 'Request Sent! ✓' : 'Send Request'}
+                          </button>
+                        </ClickSpark>
+                      </Suspense>
+                      <button
+                        onClick={() => skipUser(match.id)}
+                        className="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 transition-colors"
+                      >
+                        Skip
+                      </button>
+                    </div>
+                  </div>
+                </Magnet>
+              </ScrollReveal>
+            </Suspense>
           ))}
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { type MoodType } from "./MoodColorSwitcher";
 import AICheckIn from "./modals/AICheckIn";
@@ -6,6 +6,17 @@ import SendEncouragement from "./modals/SendEncouragement";
 import ViewProgress from "./modals/ViewProgress";
 import { useApp } from "../contexts/AppContext";
 import { t, type Language } from "../utils/translations";
+import { 
+  VariableProximity, 
+  GlareHover, 
+  Magnet, 
+  ClickSpark, 
+  LogoLoop, 
+  useReducedMotion, 
+  useIsDesktop, 
+  EffectWrapper 
+} from "../utils/reactBitsLoader";
+import "../styles/topbar.css";
 
 interface HeaderProps {
   currentMood: MoodType;
@@ -23,6 +34,13 @@ const Header: React.FC<HeaderProps> = ({
   const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
   const [showSendEncouragement, setShowSendEncouragement] = useState(false);
   const [showViewProgress, setShowViewProgress] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [profileHovered, setProfileHovered] = useState(false);
+  
+  // Performance and accessibility hooks
+  const reducedMotion = useReducedMotion();
+  const isDesktop = useIsDesktop();
+  const shouldShowEffects = !reducedMotion && isDesktop;
 
   const handleDailyCheckIn = (data: {
     mood: string;
@@ -55,6 +73,11 @@ const Header: React.FC<HeaderProps> = ({
       name: t("tasks", state.language as Language),
       href: "/tasks",
       icon: "📝",
+    },
+    {
+      name: "Pomodoro",
+      href: "/pomodoro",
+      icon: "🍅",
     },
     {
       name: t("journal", state.language as Language),
@@ -106,131 +129,237 @@ const Header: React.FC<HeaderProps> = ({
 
   const currentMoodData = moods.find((mood) => mood.type === currentMood);
 
+  /**
+   * SPLINE INTEGRATION NOTES:
+   * - Spline placeholder is ready at #spline-topbar-placeholder
+   * - Use data-spline="plant-mini" attribute for 3D plant model
+   * - Add data-progress attribute if progress visualization needed
+   * - Mount Spline component in this placeholder when ready:
+   *   const splinePlaceholder = document.getElementById('spline-topbar-placeholder');
+   *   if (splinePlaceholder) {
+   *     // Mount Spline component here
+   *   }
+   * 
+   * ACCESSIBILITY NOTES:
+   * - All navigation links have proper aria-labels
+   * - Mood toggles use aria-pressed for state
+   * - Mobile hamburger has aria-expanded
+   * - Profile button indicates popup with aria-haspopup
+   * - Keyboard navigation works throughout
+   * 
+   * TESTING CHECKLIST:
+   * - [ ] Tab through all interactive elements
+   * - [ ] Test with screen reader (aria-labels read correctly)
+   * - [ ] Verify prefers-reduced-motion disables effects
+   * - [ ] Check mobile responsiveness
+   * - [ ] Validate color contrast in different moods
+   */
+
   return (
     <>
-      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link to="/dashboard" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-white text-xl font-bold">E</span>
-              </div>
-              <span className="text-2xl font-light text-primary">ELMORA</span>
-            </Link>
+      <header id="elmora-topbar" className="elmora-topbar" role="banner">
+        <div className="elmora-left">
+          {/* Logo area with Spline placeholder */}
+          <Link to="/dashboard" className="elmora-logo">
+            <div 
+              id="spline-topbar-placeholder" 
+              data-spline="plant-mini" 
+              aria-hidden="true"
+            />
+            <Suspense fallback={<span className="elmora-logo-text">ELMORA</span>}>
+              <EffectWrapper
+                condition={shouldShowEffects}
+                fallback={<span className="elmora-logo-text">ELMORA</span>}
+              >
+                <VariableProximity>
+                  <span className="elmora-logo-text">ELMORA</span>
+                </VariableProximity>
+              </EffectWrapper>
+            </Suspense>
+          </Link>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
-              {navigation.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`
-                    flex items-center space-x-1 px-3 py-2 rounded-xl text-sm font-medium
-                    transition-colors hover:bg-gray-100
-                    ${
-                      location.pathname === item.href
-                        ? "text-primary bg-primary/10"
-                        : "text-gray-600 hover:text-gray-900"
+          {/* Primary Navigation */}
+          <nav className={`elmora-nav ${mobileNavOpen ? 'mobile-active' : ''}`} role="navigation" aria-label="Main navigation">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              
+              return (
+                <Suspense key={item.href} fallback={
+                  <Link
+                    to={item.href}
+                    className={`top-nav-link ${isActive ? 'active' : ''}`}
+                    onClick={() => setMobileNavOpen(false)}
+                  >
+                    <Magnet disabled={true}>
+                      <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                    </Magnet>
+                    <span className="nav-label">{item.name}</span>
+                  </Link>
+                }>
+                  <EffectWrapper
+                    condition={shouldShowEffects}
+                    fallback={
+                      <Link
+                        to={item.href}
+                        className={`top-nav-link ${isActive ? 'active' : ''}`}
+                        onClick={() => setMobileNavOpen(false)}
+                      >
+                        <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                        <span className="nav-label">{item.name}</span>
+                      </Link>
                     }
-                  `}
-                >
-                  <span>{item.icon}</span>
-                  <span>{item.name}</span>
-                </Link>
-              ))}
-            </nav>
-
-            {/* Right side */}
-            <div className="flex items-center space-x-4">
-              {/* Quick Actions */}
-              <div className="hidden md:flex items-center space-x-2">
-                <button
-                  onClick={() => setShowDailyCheckIn(true)}
-                  className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-xl transition-colors"
-                  title={t("dailyCheckIn", state.language as Language)}
-                >
-                  ✨
-                </button>
-                <button
-                  onClick={() => setShowSendEncouragement(true)}
-                  className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-xl transition-colors"
-                  title="Send Encouragement"
-                >
-                  💌
-                </button>
-                <button
-                  onClick={() => setShowViewProgress(true)}
-                  className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-xl transition-colors"
-                  title="View Progress"
-                >
-                  📊
-                </button>
-              </div>
-
-              {/* Mood Switcher */}
-              <div className="flex items-center space-x-2 bg-gray-100 rounded-2xl px-3 py-2">
-                <span className="text-sm text-gray-600">Mood:</span>
-                <div className="flex space-x-1">
-                  {moods.map((mood) => (
-                    <button
-                      key={mood.type}
-                      onClick={() => onMoodChange(mood.type)}
-                      className={`
-                        w-6 h-6 rounded-full border-2 transition-all
-                        ${
-                          currentMood === mood.type
-                            ? "border-gray-800 scale-110"
-                            : "border-gray-300 hover:border-gray-500"
-                        }
-                        ${mood.color}
-                      `}
-                      title={`Switch to ${mood.label} mood`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Settings */}
-              <Link
-                to="/settings"
-                className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                ⚙️
-              </Link>
-
-              {/* Profile */}
-              <Link
-                to="/profile"
-                className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                V
-              </Link>
-            </div>
-          </div>
+                  >
+                    <GlareHover>
+                      <Link
+                        to={item.href}
+                        className={`top-nav-link ${isActive ? 'active' : ''}`}
+                        onClick={() => setMobileNavOpen(false)}
+                      >
+                        <Magnet>
+                          <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                        </Magnet>
+                        <span className="nav-label">{item.name}</span>
+                      </Link>
+                    </GlareHover>
+                  </EffectWrapper>
+                </Suspense>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-gray-200">
-          <div className="flex overflow-x-auto py-2 px-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`
-                  flex flex-col items-center px-3 py-2 rounded-xl text-xs min-w-max
-                  ${
-                    location.pathname === item.href
-                      ? "text-primary bg-primary/10"
-                      : "text-gray-600"
-                  }
-                `}
-              >
-                <span className="text-lg mb-1">{item.icon}</span>
-                <span>{item.name}</span>
-              </Link>
-            ))}
+        <div className="elmora-right">
+          {/* Mobile hamburger */}
+          <button 
+            className="mobile-hamburger"
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            aria-expanded={mobileNavOpen}
+            aria-label="Toggle navigation menu"
+          >
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+          </button>
+
+          {/* Quick Actions */}
+          <div className="hidden md:flex items-center space-x-2">
+            <button
+              onClick={() => setShowDailyCheckIn(true)}
+              className="quick-action"
+              title={t("dailyCheckIn", state.language as Language)}
+              aria-label={t("dailyCheckIn", state.language as Language)}
+            >
+              ✨
+            </button>
+            <button
+              onClick={() => setShowSendEncouragement(true)}
+              className="quick-action"
+              title="Send Encouragement"
+              aria-label="Send encouragement to friends"
+            >
+              💌
+            </button>
+            <button
+              onClick={() => setShowViewProgress(true)}
+              className="quick-action"
+              title="View Progress"
+              aria-label="View your progress"
+            >
+              📊
+            </button>
           </div>
+
+          {/* Mood Toggle with ClickSpark effects */}
+          <div className="mood-toggle" role="tablist" aria-label="Mood selector">
+            <span className="mood-label">Mood:</span>
+            {moods.map((mood) => {
+              const isActive = currentMood === mood.type;
+              
+              return (
+                <Suspense key={mood.type} fallback={
+                  <button
+                    onClick={() => onMoodChange(mood.type)}
+                    className={`mood-pill ${mood.type}`}
+                    aria-pressed={isActive}
+                    aria-label={`Switch to ${mood.label} mood`}
+                    title={`${mood.emoji} ${mood.label}`}
+                  />
+                }>
+                  <EffectWrapper
+                    condition={shouldShowEffects}
+                    fallback={
+                      <button
+                        onClick={() => onMoodChange(mood.type)}
+                        className={`mood-pill ${mood.type}`}
+                        aria-pressed={isActive}
+                        aria-label={`Switch to ${mood.label} mood`}
+                        title={`${mood.emoji} ${mood.label}`}
+                      />
+                    }
+                  >
+                    <ClickSpark color={mood.color.replace('bg-', '#')} size={8}>
+                      <button
+                        onClick={() => onMoodChange(mood.type)}
+                        className={`mood-pill ${mood.type}`}
+                        aria-pressed={isActive}
+                        aria-label={`Switch to ${mood.label} mood`}
+                        title={`${mood.emoji} ${mood.label}`}
+                      />
+                    </ClickSpark>
+                  </EffectWrapper>
+                </Suspense>
+              );
+            })}
+          </div>
+
+          {/* Settings */}
+          <Link
+            to="/settings"
+            className="quick-action"
+            aria-label="Open settings"
+          >
+            ⚙️
+          </Link>
+
+          {/* Profile Avatar with LogoLoop effect */}
+          <Suspense fallback={
+            <Link to="/profile">
+              <button id="profile-btn" aria-haspopup="true" aria-expanded="false" aria-label="Open profile menu">
+                <span className="avatar">V</span>
+              </button>
+            </Link>
+          }>
+            <Link to="/profile">
+              <EffectWrapper
+                condition={shouldShowEffects && profileHovered}
+                fallback={
+                  <button 
+                    id="profile-btn" 
+                    aria-haspopup="true" 
+                    aria-expanded="false" 
+                    aria-label="Open profile menu"
+                    onMouseEnter={() => setProfileHovered(true)}
+                    onMouseLeave={() => setProfileHovered(false)}
+                  >
+                    <span className="avatar">V</span>
+                  </button>
+                }
+              >
+                <LogoLoop>
+                  <button 
+                    id="profile-btn" 
+                    aria-haspopup="true" 
+                    aria-expanded="false" 
+                    aria-label="Open profile menu"
+                    onMouseEnter={() => setProfileHovered(true)}
+                    onMouseLeave={() => setProfileHovered(false)}
+                  >
+                    <span className="avatar">V</span>
+                  </button>
+                </LogoLoop>
+              </EffectWrapper>
+            </Link>
+          </Suspense>
         </div>
       </header>
 

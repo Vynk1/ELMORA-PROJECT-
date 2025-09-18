@@ -1,0 +1,384 @@
+/**
+ * Enhanced Elmora Topbar Styles
+ * Frosted glass effect with pastel gradients and micro-interactions
+ */
+
+:root {
+  /* Elmora theme colors */
+  --elmora-primary: #6366f1;
+  --elmora-primary-light: rgba(99, 102, 241, 0.1);
+  --elmora-glass-bg: linear-gradient(135deg, rgba(255,230,240,0.55), rgba(230,245,255,0.42));
+  --elmora-glass-border: rgba(255,255,255,0.06);
+  --elmora-text-primary: #1f2937;
+  --elmora-text-secondary: #6b7280;
+  --elmora-mood-sad: #6b7280;
+  --elmora-mood-mid: #f59e0b;
+  --elmora-mood-amazing: #10b981;
+  
+  /* Spacing and sizing */
+  --topbar-height: 68px;
+  --topbar-padding: 10px 18px;
+  --nav-gap: 18px;
+  --border-radius-pill: 50px;
+  --border-radius-lg: 16px;
+  
+  /* Animation timing */
+  --transition-fast: 0.15s ease-out;
+  --transition-smooth: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --hover-scale: 1.02;
+}
+
+/* Main topbar container */
+.elmora-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: var(--elmora-glass-bg);
+  border-bottom: 1px solid var(--elmora-glass-border);
+  padding: var(--topbar-padding);
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+  justify-content: space-between;
+  height: var(--topbar-height);
+  transition: all var(--transition-smooth);
+}
+
+/* Left section */
+.elmora-left {
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+  flex: 1;
+}
+
+/* Logo area */
+.elmora-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-lg);
+  transition: all var(--transition-smooth);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.elmora-logo:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Spline placeholder */
+#spline-topbar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#spline-topbar-placeholder::before {
+  content: '🌱';
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Logo text */
+.elmora-logo-text {
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--elmora-primary);
+  letter-spacing: 0.5px;
+  user-select: none;
+  transition: all var(--transition-smooth);
+}
+
+/* Primary navigation */
+.elmora-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Navigation links */
+.top-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-pill);
+  text-decoration: none;
+  color: var(--elmora-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.top-nav-link:hover {
+  color: var(--elmora-text-primary);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.top-nav-link.active {
+  color: var(--elmora-primary);
+  background: var(--elmora-primary-light);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+/* Navigation icons */
+.nav-icon {
+  font-size: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.top-nav-link:hover .nav-icon {
+  transform: scale(1.1);
+}
+
+/* Right controls */
+.elmora-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Mood toggle container */
+.mood-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-pill);
+  padding: 6px 12px;
+  backdrop-filter: blur(5px);
+}
+
+.mood-label {
+  font-size: 12px;
+  color: var(--elmora-text-secondary);
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+/* Mood toggle buttons */
+.mood-pill {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.mood-pill:hover {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.mood-pill:focus {
+  outline: 2px solid var(--elmora-primary);
+  outline-offset: 2px;
+}
+
+.mood-pill[aria-pressed="true"] {
+  border-color: var(--elmora-text-primary);
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Mood colors */
+.mood-pill.sad {
+  background-color: var(--elmora-mood-sad);
+}
+
+.mood-pill.mid {
+  background-color: var(--elmora-mood-mid);
+}
+
+.mood-pill.amazing {
+  background-color: var(--elmora-mood-amazing);
+}
+
+/* Quick action buttons */
+.quick-action {
+  padding: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-lg);
+  color: var(--elmora-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-action:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--elmora-primary);
+  transform: translateY(-1px);
+}
+
+/* Profile avatar button */
+#profile-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--elmora-primary);
+  border: none;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#profile-btn:hover {
+  background: #5855eb;
+  transform: scale(1.05);
+}
+
+#profile-btn:focus {
+  outline: 2px solid var(--elmora-primary);
+  outline-offset: 2px;
+}
+
+/* Mobile hamburger (hidden by default) */
+.mobile-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburger-line {
+  width: 20px;
+  height: 2px;
+  background: var(--elmora-text-secondary);
+  border-radius: 1px;
+  transition: all var(--transition-fast);
+}
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  .elmora-topbar {
+    padding: 8px 16px;
+    height: auto;
+    flex-wrap: wrap;
+  }
+  
+  .elmora-nav {
+    display: none;
+  }
+  
+  .mood-toggle {
+    order: 2;
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  
+  .mobile-hamburger {
+    display: flex;
+  }
+  
+  .quick-action {
+    display: none;
+  }
+  
+  /* Show mobile nav when active */
+  .elmora-nav.mobile-active {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 4px;
+    order: 3;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .elmora-nav.mobile-active .top-nav-link {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .top-nav-link:hover {
+    transform: none;
+  }
+  
+  .mood-pill:hover {
+    transform: none;
+  }
+  
+  .quick-action:hover {
+    transform: none;
+  }
+  
+  #profile-btn:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .elmora-topbar {
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 2px solid #000;
+  }
+  
+  .top-nav-link {
+    border: 1px solid transparent;
+  }
+  
+  .top-nav-link:hover,
+  .top-nav-link:focus {
+    border-color: #000;
+  }
+}
+
+/* Focus styles for accessibility */
+.top-nav-link:focus,
+.quick-action:focus,
+.mood-pill:focus {
+  outline: 2px solid var(--elmora-primary);
+  outline-offset: 2px;
+}

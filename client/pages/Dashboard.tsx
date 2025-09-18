@@ -8,6 +8,8 @@ import QuickAdd from "../components/QuickAdd";
 const VariableProximity = lazy(() => import('../components/effects/VariableProximity'));
 const TextTrail = lazy(() => import('../components/effects/TextTrail'));
 const DecryptedText = lazy(() => import('../components/effects/DecryptedText'));
+const CountUp = lazy(() => import('../components/effects/CountUp'));
+const ScrollFloat = lazy(() => import('../components/effects/ScrollFloat'));
 
 interface DashboardProps {
   currentMood: MoodType;
@@ -26,6 +28,11 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showCTAMicrocopy, setShowCTAMicrocopy] = useState(false);
+  // Additional stats for enhanced dashboard
+  const [minutesMeditated, setMinutesMeditated] = useState(127);
+  const [tasksCompleted, setTasksCompleted] = useState(89);
+  const [friendsConnected, setFriendsConnected] = useState(12);
+  const [goalsActive, setGoalsActive] = useState(7);
 
   // Check for reduced motion preference and screen size
   useEffect(() => {
@@ -85,10 +92,41 @@ const Dashboard: React.FC<DashboardProps> = ({
           cardBg: "bg-emerald-100/70",
           textColor: "text-emerald-900",
         };
+      case "content":
+        return {
+          greeting: "Feeling balanced and ready",
+          message: "You're in a great headspace. Let's build on this momentum.",
+          gradient: "from-blue-400 via-indigo-400 to-purple-400",
+          cardBg: "bg-blue-100/70",
+          textColor: "text-blue-900",
+        };
+      case "calm":
+        return {
+          greeting: "Peaceful and centered",
+          message: "Your calm energy is a strength. Use it mindfully.",
+          gradient: "from-green-300 via-blue-300 to-indigo-300",
+          cardBg: "bg-green-100/70",
+          textColor: "text-green-900",
+        };
+      default:
+        // Default fallback for any unhandled mood states
+        return {
+          greeting: "Welcome back",
+          message: "Ready to make today meaningful? Let's take it step by step.",
+          gradient: "from-purple-400 via-pink-400 to-red-400",
+          cardBg: "bg-purple-100/70",
+          textColor: "text-purple-900",
+        };
     }
   };
 
-  const moodContent = getMoodContent();
+  const moodContent = getMoodContent() || {
+    greeting: "Welcome back",
+    message: "Ready to make today meaningful? Let's take it step by step.",
+    gradient: "from-purple-400 via-pink-400 to-red-400",
+    cardBg: "bg-purple-100/70",
+    textColor: "text-purple-900",
+  };
 
   const quickActions = [
     {
@@ -229,53 +267,111 @@ const Dashboard: React.FC<DashboardProps> = ({
           >
             {/* Reserved slot for Spline 3D plant mascot */}
           </div>
+
+          {/* Interactive Progress Orb */}
+          <div 
+            id="spline-progress-orb" 
+            data-spline="progress-orb"
+            className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-16 h-16 pointer-events-none opacity-60"
+            data-completion={completionPercentage}
+          >
+            {/* Reserved slot for Spline 3D progress orb */}
+          </div>
         </div>
 
-        {/* Stats Overview */}
+        {/* Enhanced Stats Overview with CountUp Animations */}
         <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <div
-            className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}
-          >
-            <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>
-              {userPoints}
+          <Suspense fallback={
+            <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+              <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>{userPoints}</div>
+              <div className={`text-sm ${moodContent.textColor} opacity-80`}>Total Points</div>
             </div>
-            <div className={`text-sm ${moodContent.textColor} opacity-80`}>
-              Total Points
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.6} delay={0.1} disabled={prefersReducedMotion}>
+              <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+                <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={userPoints} 
+                    duration={1500} 
+                    disabled={prefersReducedMotion}
+                    className={moodContent.textColor}
+                  />
+                </div>
+                <div className={`text-sm ${moodContent.textColor} opacity-80`}>
+                  Total Points
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
 
-          <div
-            className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}
-          >
-            <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>
-              {streakDays}
+          <Suspense fallback={
+            <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+              <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>{streakDays}</div>
+              <div className={`text-sm ${moodContent.textColor} opacity-80`}>Day Streak</div>
             </div>
-            <div className={`text-sm ${moodContent.textColor} opacity-80`}>
-              Day Streak
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.6} delay={0.2} disabled={prefersReducedMotion}>
+              <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+                <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={streakDays} 
+                    duration={1200} 
+                    disabled={prefersReducedMotion}
+                    className={moodContent.textColor}
+                  />
+                </div>
+                <div className={`text-sm ${moodContent.textColor} opacity-80`}>
+                  Day Streak
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
 
-          <div
-            className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}
-          >
-            <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>
-              12
+          <Suspense fallback={
+            <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+              <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>{minutesMeditated}</div>
+              <div className={`text-sm ${moodContent.textColor} opacity-80`}>Minutes Meditated</div>
             </div>
-            <div className={`text-sm ${moodContent.textColor} opacity-80`}>
-              Friends Connected
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.6} delay={0.3} disabled={prefersReducedMotion}>
+              <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+                <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={minutesMeditated} 
+                    duration={1800} 
+                    disabled={prefersReducedMotion}
+                    className={moodContent.textColor}
+                  />
+                </div>
+                <div className={`text-sm ${moodContent.textColor} opacity-80`}>
+                  Minutes Meditated
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
 
-          <div
-            className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}
-          >
-            <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>
-              7
+          <Suspense fallback={
+            <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+              <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`}>{tasksCompleted}</div>
+              <div className={`text-sm ${moodContent.textColor} opacity-80`}>Tasks Completed</div>
             </div>
-            <div className={`text-sm ${moodContent.textColor} opacity-80`}>
-              Goals Active
-            </div>
-          </div>
+          }>
+            <ScrollFloat duration={0.6} delay={0.4} disabled={prefersReducedMotion}>
+              <div className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-6 text-center border border-white/20`}>
+                <div className={`text-3xl font-bold ${moodContent.textColor} mb-1`} aria-live="polite">
+                  <CountUp 
+                    end={tasksCompleted} 
+                    duration={2000} 
+                    disabled={prefersReducedMotion}
+                    className={moodContent.textColor}
+                  />
+                </div>
+                <div className={`text-sm ${moodContent.textColor} opacity-80`}>
+                  Tasks Completed
+                </div>
+              </div>
+            </ScrollFloat>
+          </Suspense>
         </div>
 
         {/* Quick Actions */}

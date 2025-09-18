@@ -1,8 +1,13 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, lazy, Suspense, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { type MoodType } from "../components/MoodColorSwitcher";
 import { useTaskContext } from "../contexts/TaskContext";
 import QuickAdd from "../components/QuickAdd";
+
+// Lazy load custom effect components for performance
+const VariableProximity = lazy(() => import('../components/effects/VariableProximity'));
+const TextTrail = lazy(() => import('../components/effects/TextTrail'));
+const DecryptedText = lazy(() => import('../components/effects/DecryptedText'));
 
 interface DashboardProps {
   currentMood: MoodType;
@@ -18,6 +23,29 @@ const Dashboard: React.FC<DashboardProps> = ({
   const { todos, completionPercentage } = useTaskContext();
   const [streakDays, setStreakDays] = useState(3);
   const [recentlyAddedTasks, setRecentlyAddedTasks] = useState<{task: string, timestamp: Date}[]>([]);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [showCTAMicrocopy, setShowCTAMicrocopy] = useState(false);
+
+  // Check for reduced motion preference and screen size
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const desktopQuery = window.matchMedia('(min-width: 768px)');
+    
+    setPrefersReducedMotion(mediaQuery.matches);
+    setIsDesktop(desktopQuery.matches);
+    
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    const handleDesktopChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    
+    mediaQuery.addEventListener('change', handleMotionChange);
+    desktopQuery.addEventListener('change', handleDesktopChange);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleMotionChange);
+      desktopQuery.removeEventListener('change', handleDesktopChange);
+    };
+  }, []);
 
   const handleTaskAdded = (task: string, category: string) => {
     // Keep track of recently added tasks for display
@@ -112,18 +140,95 @@ const Dashboard: React.FC<DashboardProps> = ({
       className={`min-h-screen bg-gradient-to-br ${moodContent.gradient} pt-4`}
     >
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Welcome Header */}
-        <div className="text-center mb-12">
-          <h1
-            className={`text-4xl md:text-6xl font-light mb-4 ${moodContent.textColor}`}
+        {/* Enhanced Hero Section */}
+        <div className="text-center mb-12 relative">
+          {/* Main Headline with VariableProximity Effect */}
+          <div className="mb-6">
+            {!prefersReducedMotion && isDesktop ? (
+              <Suspense fallback={
+                <h1 className={`text-4xl md:text-6xl font-light ${moodContent.textColor}`}>
+                  Ready to conquer the day?
+                </h1>
+              }>
+                <VariableProximity
+                  label="Ready to conquer the day?"
+                  radius={100}
+                  className={`text-4xl md:text-6xl font-light ${moodContent.textColor} cursor-default`}
+                />
+              </Suspense>
+            ) : (
+              <h1 className={`text-4xl md:text-6xl font-light ${moodContent.textColor}`}>
+                Ready to conquer the day?
+              </h1>
+            )}
+          </div>
+
+          {/* Subheadline with TextTrail Effect */}
+          <div className="mb-8">
+            {!prefersReducedMotion ? (
+              <Suspense fallback={
+                <p className={`text-lg md:text-xl ${moodContent.textColor} opacity-90 max-w-2xl mx-auto`}>
+                  Small steps. Kind progress. Daily care.
+                </p>
+              }>
+                <TextTrail
+                  text="Small steps. Kind progress. Daily care."
+                  speed={0.9}
+                  stagger={0.06}
+                  className={`text-lg md:text-xl ${moodContent.textColor} opacity-90 max-w-2xl mx-auto`}
+                />
+              </Suspense>
+            ) : (
+              <p className={`text-lg md:text-xl ${moodContent.textColor} opacity-90 max-w-2xl mx-auto`}>
+                Small steps. Kind progress. Daily care.
+              </p>
+            )}
+          </div>
+
+          {/* Primary CTA with DecryptedText Microcopy */}
+          <div className="mb-8">
+            <Link
+              to="/checkin"
+              className={`
+                inline-block px-8 py-4 bg-white/20 ${moodContent.textColor} 
+                rounded-2xl font-medium hover:bg-white/30 transition-all duration-300
+                transform hover:scale-105 shadow-lg hover:shadow-xl
+                border border-white/30
+              `}
+              onMouseEnter={() => setShowCTAMicrocopy(true)}
+              onMouseLeave={() => setShowCTAMicrocopy(false)}
+              onFocus={() => setShowCTAMicrocopy(true)}
+              onBlur={() => setShowCTAMicrocopy(false)}
+            >
+              <div className="flex flex-col items-center space-y-1">
+                <span className="text-lg">Check in now</span>
+                <div className="h-4 min-w-[120px]">
+                  {showCTAMicrocopy && !prefersReducedMotion ? (
+                    <Suspense fallback={
+                      <span className="text-sm opacity-80">Takes 60 seconds.</span>
+                    }>
+                      <DecryptedText
+                        text="Takes 60 seconds."
+                        className="text-sm opacity-80"
+                      />
+                    </Suspense>
+                  ) : showCTAMicrocopy ? (
+                    <span className="text-sm opacity-80">Takes 60 seconds.</span>
+                  ) : null}
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Spline Placeholder for Plant Mascot */}
+          <div 
+            id="spline-hero-placeholder" 
+            data-spline="plant-mascot"
+            className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-50"
+            style={{ transform: 'translate(50%, -25%)' }}
           >
-            {moodContent.greeting}
-          </h1>
-          <p
-            className={`text-lg md:text-xl ${moodContent.textColor} opacity-90 max-w-2xl mx-auto`}
-          >
-            {moodContent.message}
-          </p>
+            {/* Reserved slot for Spline 3D plant mascot */}
+          </div>
         </div>
 
         {/* Stats Overview */}

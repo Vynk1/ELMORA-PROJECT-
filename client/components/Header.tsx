@@ -5,6 +5,7 @@ import AICheckIn from "./modals/AICheckIn";
 import SendEncouragement from "./modals/SendEncouragement";
 import ViewProgress from "./modals/ViewProgress";
 import { useApp } from "../contexts/AppContext";
+import { useAuth } from "../contexts/AuthContext";
 import { t, type Language } from "../utils/translations";
 import { 
   VariableProximity, 
@@ -31,6 +32,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const location = useLocation();
   const { state } = useApp();
+  const { user } = useAuth();
   const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
   const [showSendEncouragement, setShowSendEncouragement] = useState(false);
   const [showViewProgress, setShowViewProgress] = useState(false);
@@ -321,11 +323,21 @@ const Header: React.FC<HeaderProps> = ({
             ⚙️
           </Link>
 
+          {/* Sign Out Button */}
+          <button
+            onClick={onSignOut}
+            className="quick-action sign-out-btn"
+            title="Sign Out"
+            aria-label="Sign out of account"
+          >
+            🚪
+          </button>
+
           {/* Profile Avatar with LogoLoop effect */}
           <Suspense fallback={
             <Link to="/profile">
               <button id="profile-btn" aria-haspopup="true" aria-expanded="false" aria-label="Open profile menu">
-                <span className="avatar">V</span>
+                <span className="avatar">{user?.email?.charAt(0).toUpperCase() || 'U'}</span>
               </button>
             </Link>
           }>
@@ -341,7 +353,7 @@ const Header: React.FC<HeaderProps> = ({
                     onMouseEnter={() => setProfileHovered(true)}
                     onMouseLeave={() => setProfileHovered(false)}
                   >
-                    <span className="avatar">V</span>
+                    <span className="avatar">{user?.email?.charAt(0).toUpperCase() || 'U'}</span>
                   </button>
                 }
               >
@@ -354,7 +366,7 @@ const Header: React.FC<HeaderProps> = ({
                     onMouseEnter={() => setProfileHovered(true)}
                     onMouseLeave={() => setProfileHovered(false)}
                   >
-                    <span className="avatar">V</span>
+                    <span className="avatar">{user?.email?.charAt(0).toUpperCase() || 'U'}</span>
                   </button>
                 </LogoLoop>
               </EffectWrapper>

@@ -1,5 +1,6 @@
 import React, { useState, lazy, Suspense, useEffect } from 'react';
 import VoiceJournal from '../components/VoiceJournal';
+import { getJournals, addJournal, deleteJournal } from '../lib/supabaseApi';
 
 // Lazy load effect components
 const TextCursor = lazy(() => import('../components/effects/TextCursor'));
@@ -11,11 +12,12 @@ const ScrollReveal = lazy(() => import('../components/effects/ScrollReveal'));
 
 interface JournalEntry {
   id: string;
-  date: string;
-  mood: string;
-  title: string;
+  created_at: string;
+  user_id: string;
   content: string;
-  tags: string[];
+  mood?: string;
+  title?: string;
+  tags?: string[];
   gratitude?: string[];
   aiSummary?: string;
 }
@@ -24,28 +26,9 @@ const Journal: React.FC = () => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [showSavedMessage, setShowSavedMessage] = useState(false);
   const [showAISummary, setShowAISummary] = useState<{[key: string]: boolean}>({});
-  const [entries, setEntries] = useState<JournalEntry[]>([
-    {
-      id: '1',
-      date: '2024-01-15',
-      mood: 'happy',
-      title: 'Great progress today!',
-      content: 'I completed all my tasks and felt really productive. The meditation session this morning helped me stay focused throughout the day.',
-      tags: ['productivity', 'meditation', 'focus'],
-      gratitude: ['Peaceful morning', 'Supportive friends', 'Good health'],
-      aiSummary: 'Today was marked by high productivity and mindfulness. Your morning meditation practice appears to be creating positive ripple effects throughout your day, enhancing focus and task completion. This shows excellent self-awareness and routine building.'
-    },
-    {
-      id: '2',
-      date: '2024-01-14',
-      mood: 'reflective',
-      title: 'Thinking about growth',
-      content: 'Some days are harder than others, but I\'m learning to appreciate the small wins. Even taking a shower felt like an achievement today.',
-      tags: ['self-care', 'growth', 'mindfulness'],
-      gratitude: ['Warm water', 'Comfortable bed', 'This app helping me'],
-      aiSummary: 'Your reflective mindset and ability to find meaning in small accomplishments demonstrates resilience and self-compassion. Recognizing basic self-care as an achievement shows healthy reframing during challenging times. This perspective will serve you well in building sustainable wellness habits.'
-    }
-  ]);
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
@@ -60,6 +43,25 @@ const Journal: React.FC = () => {
     
     return () => mediaQuery.removeEventListener('change', handleMotionChange);
   }, []);
+
+  // Load journal entries from Supabase
+  useEffect(() => {
+    loadEntries();
+  }, []);
+
+  const loadEntries = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getJournals();
+      setEntries(data);
+    } catch (err) {
+      console.error('Failed to load journal entries:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load entries');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const moodEmojis = {
     'amazing': '🤩',
@@ -81,26 +83,53 @@ const Journal: React.FC = () => {
       gratitude: ''
     });
 
-    const handleSubmit = () => {
-      if (newEntry.title.trim() && newEntry.content.trim()) {
-        const entry: JournalEntry = {
-          id: Date.now().toString(),
-          date: new Date().toISOString().split('T')[0],
-          mood: newEntry.mood,
-          title: newEntry.title.trim(),
-          content: newEntry.content.trim(),
-          tags: newEntry.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-          gratitude: newEntry.gratitude.split(',').map(item => item.trim()).filter(item => item)
-        };
-        setEntries([entry, ...entries]);
+    const handleSubmit = async () => {
+      if (!newEntry.content.trim()) return;
+      
+      setSaving(true);
+      try {
+        // Create journal content with optional title and metadata
+        let journalContent = newEntry.content.trim();
+        
+        if (newEntry.title.trim()) {
+          journalContent = `**${newEntry.title.trim()}**\n\n${journalContent}`;
+        }
+        
+        if (newEntry.mood !== 'neutral') {
+          journalContent = `Mood: ${newEntry.mood}\n${journalContent}`;
+        }
+        
+        if (newEntry.gratitude.trim()) {
+          const gratitudeItems = newEntry.gratitude.split(',').map(item => item.trim()).filter(item => item);
+          if (gratitudeItems.length > 0) {
+            journalContent += `\n\n**Grateful for:**\n${gratitudeItems.map(item => `• ${item}`).join('\n')}`;
+          }
+        }
+        
+        if (newEntry.tags.trim()) {
+          const tags = newEntry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+          if (tags.length > 0) {
+            journalContent += `\n\n#${tags.join(' #')}`;
+          }
+        }
+        
+        const savedEntry = await addJournal(journalContent);
+        setEntries([savedEntry, ...entries]);
         setShowNewEntry(false);
         setNewEntry({ mood: 'neutral', title: '', content: '', tags: '', gratitude: '' });
         
         // Show saved confirmation
         setShowSavedMessage(true);
         setTimeout(() => setShowSavedMessage(false), 2000);
+      } catch (err) {
+        console.error('Failed to save journal entry:', err);
+        alert(err instanceof Error ? err.message : 'Failed to save journal entry');
+      } finally {
+        setSaving(false);
       }
     };
+    
+    const [saving, setSaving] = useState(false);
 
     if (!showNewEntry) return null;
 
@@ -182,9 +211,10 @@ const Journal: React.FC = () => {
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 py-3 bg-primary text-white rounded-2xl font-medium hover:bg-primary/90"
+              disabled={saving || !newEntry.content.trim()}
+              className="flex-1 py-3 bg-primary text-white rounded-2xl font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Entry
+              {saving ? 'Saving...' : 'Save Entry'}
             </button>
           </div>
         </div>
@@ -198,15 +228,19 @@ const Journal: React.FC = () => {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-6">
             <div>
-              <h3 className="text-2xl font-light text-gray-800 mb-2">{selectedEntry.title}</h3>
+              <h3 className="text-2xl font-light text-gray-800 mb-2">
+                {selectedEntry.title || 'Journal Entry'}
+              </h3>
               <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <span>{new Date(selectedEntry.date).toLocaleDateString()}</span>
-                <span className="flex items-center space-x-1">
-                  <span>{moodEmojis[selectedEntry.mood as keyof typeof moodEmojis]}</span>
-                  <span className="capitalize">{selectedEntry.mood}</span>
-                </span>
+                <span>{new Date(selectedEntry.created_at).toLocaleDateString()}</span>
+                {selectedEntry.mood && (
+                  <span className="flex items-center space-x-1">
+                    <span>{moodEmojis[selectedEntry.mood as keyof typeof moodEmojis]}</span>
+                    <span className="capitalize">{selectedEntry.mood}</span>
+                  </span>
+                )}
               </div>
             </div>
             <button
@@ -221,7 +255,7 @@ const Journal: React.FC = () => {
             <p className="whitespace-pre-wrap">{selectedEntry.content}</p>
           </div>
 
-          {selectedEntry.tags.length > 0 && (
+          {selectedEntry.tags && selectedEntry.tags.length > 0 && (
             <div className="mb-6">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Tags</h4>
               <div className="flex flex-wrap gap-2">
@@ -331,7 +365,7 @@ const Journal: React.FC = () => {
           <Suspense fallback={
             <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
               <div className="text-2xl font-bold text-green-600 mb-1">
-                {entries.filter(e => new Date(e.date).getMonth() === new Date().getMonth()).length}
+                {entries.filter(e => new Date(e.created_at).getMonth() === new Date().getMonth()).length}
               </div>
               <div className="text-sm text-gray-600">This Month</div>
             </div>
@@ -340,7 +374,7 @@ const Journal: React.FC = () => {
               <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
                 <div className="text-2xl font-bold text-green-600 mb-1" aria-live="polite">
                   <CountUp 
-                    end={entries.filter(e => new Date(e.date).getMonth() === new Date().getMonth()).length} 
+                    end={entries.filter(e => new Date(e.created_at).getMonth() === new Date().getMonth()).length} 
                     duration={1200} 
                     disabled={prefersReducedMotion} 
                   />
@@ -381,53 +415,91 @@ const Journal: React.FC = () => {
           </Suspense>
         </div>
 
-        {/* Entries Timeline */}
-        <div className="space-y-6">
-          {entries.map((entry) => (
-            <div
-              key={entry.id}
-              onClick={() => setSelectedEntry(entry)}
-              className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-3 text-gray-600">Loading journal entries...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
+            <div className="flex items-center space-x-2 text-red-700">
+              <span>⚠️</span>
+              <span className="font-medium">Failed to load journal entries</span>
+            </div>
+            <p className="text-red-600 text-sm mt-2">{error}</p>
+            <button
+              onClick={loadEntries}
+              className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded-xl text-sm hover:bg-red-200 transition-colors"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-800 mb-1">{entry.title}</h3>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
-                    <span>{new Date(entry.date).toLocaleDateString()}</span>
-                    <span className="flex items-center space-x-1">
-                      <span>{moodEmojis[entry.mood as keyof typeof moodEmojis]}</span>
-                      <span className="capitalize">{entry.mood}</span>
-                    </span>
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Entries Timeline */}
+        {!loading && !error && (
+          <div className="space-y-6">
+            {entries.map((entry) => {
+              // Parse content to extract title, mood, etc. if formatted
+              const lines = entry.content.split('\n');
+              const firstLine = lines[0];
+              const isTitle = firstLine.startsWith('**') && firstLine.endsWith('**');
+              const title = isTitle ? firstLine.replace(/\*\*/g, '') : 'Journal Entry';
+              const content = isTitle ? lines.slice(2).join('\n') : entry.content;
+              
+              return (
+                <div
+                  key={entry.id}
+                  onClick={() => setSelectedEntry({ ...entry, title })}
+                  className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-medium text-gray-800 mb-1">{title}</h3>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        <span>{new Date(entry.created_at).toLocaleDateString()}</span>
+                        {entry.mood && (
+                          <span className="flex items-center space-x-1">
+                            <span>{moodEmojis[entry.mood as keyof typeof moodEmojis]}</span>
+                            <span className="capitalize">{entry.mood}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button className="text-gray-400 hover:text-primary">
+                      →
+                    </button>
                   </div>
-                </div>
-                <button className="text-gray-400 hover:text-primary">
-                  →
-                </button>
-              </div>
 
-              <p className="text-gray-600 mb-4 line-clamp-3">
-                {entry.content}
-              </p>
+                  <p className="text-gray-600 mb-4 line-clamp-3">
+                    {content.length > 150 ? `${content.substring(0, 150)}...` : content}
+                  </p>
 
-              {entry.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {entry.tags.slice(0, 3).map((tag, index) => (
-                    <span key={index} className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                      {tag}
-                    </span>
-                  ))}
-                  {entry.tags.length > 3 && (
-                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                      +{entry.tags.length - 3} more
-                    </span>
+                  {entry.tags && entry.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {entry.tags.slice(0, 3).map((tag, index) => (
+                        <span key={index} className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+                          {tag}
+                        </span>
+                      ))}
+                      {entry.tags.length > 3 && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+                          +{entry.tags.length - 3} more
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
-        {entries.length === 0 && (
+        {!loading && !error && entries.length === 0 && (
           <div className="text-center py-12 relative">
             {/* Spline Notebook Scene Placeholder */}
             <div 

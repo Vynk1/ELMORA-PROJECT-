@@ -1,28 +1,30 @@
-# ELMORA - Your Personal Wellness Companion 🌸
+# 🌸 ELMORA - Your Personal Wellness Companion
 
 ELMORA is a modern, AI-powered wellness application designed to help you build positive habits, track your daily progress, and maintain mental well-being. With a beautiful, mood-responsive interface and gamified task management, ELMORA makes wellness engaging and sustainable.
+
+![ELMORA Screenshot](https://via.placeholder.com/800x400/6366f1/white?text=ELMORA+Wellness+App)
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
 - **AI-Powered Daily Check-ins** - Personalized wellness insights based on your mood and energy levels
-- **Smart Task Management** - Pre-loaded daily wellness tasks with beautiful flower growth visualization
-- **Mood-Based Theming** - Dynamic UI that adapts to your emotional state
+- **Smart Task Management** - Pre-loaded daily wellness tasks with beautiful progress visualization
+- **Mood-Based Theming** - Dynamic UI that adapts to your emotional state (Sad, Mid, Amazing)
 - **Gamified Progress** - Earn points, maintain streaks, and unlock rewards
 - **Multi-language Support** - Available in English, Spanish, French, German, and Italian
 
 ### 🌈 Wellness Features
-- **Mood Tracking** - Visual mood selection with three states (Sad, Mid, Amazing)
-- **Daily Habits** - 5 pre-loaded wellness tasks including hydration, exercise, gratitude, meditation, and learning
-- **Progress Visualization** - Watch your virtual flower grow as you complete tasks
-- **Reward System** - Earn points and unlock coupons for real-world rewards
+- **Journal Entries** - Voice-to-text journaling with mood tracking and AI insights
+- **Meditation Sessions** - Guided meditation with session tracking and analytics
+- **Goal Setting** - Set and track long-term wellness objectives
 - **Social Features** - Send encouragement to friends and family
+- **Progress Analytics** - Comprehensive dashboard with charts and statistics
 
 ### 🎨 User Experience
 - **Beautiful Animations** - Smooth transitions and engaging visual feedback
 - **Responsive Design** - Works seamlessly on desktop and mobile devices
-- **Dark/Light Theme** - Automatic theme switching based on system preferences
-- **Accessibility** - Built with modern accessibility standards in mind
+- **Accessibility** - Built with modern accessibility standards
+- **Dark/Light Theme** - Automatic theme switching based on mood selection
 
 ## 🚀 Tech Stack
 
@@ -31,29 +33,27 @@ ELMORA is a modern, AI-powered wellness application designed to help you build p
 - **TypeScript** - Full type safety throughout the application
 - **Vite** - Fast development server and optimized builds
 - **TailwindCSS** - Utility-first styling with custom theming
-- **React Router 6** - Client-side routing in SPA mode
+- **React Router 6** - Client-side routing
 
 ### Backend
-- **Express.js** - Node.js web framework
-- **Vite Integration** - Development server integration for full-stack development
+- **Supabase** - Backend-as-a-Service with PostgreSQL database
+- **Row Level Security** - Database-level security for user data
+- **Real-time subscriptions** - Live updates for collaborative features
 
 ### UI Components
 - **Radix UI** - Accessible, unstyled UI primitives
 - **Lucide React** - Beautiful SVG icons
-- **Custom Animations** - Framer Motion for advanced animations
+- **Custom Animations** - Smooth micro-interactions throughout
 
-### Development Tools
-- **Vitest** - Fast unit testing
-- **ESLint & Prettier** - Code quality and formatting
-- **TypeScript** - Static type checking
-
-## 📦 Installation
+## 📦 Quick Start
 
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm or yarn package manager
+- Supabase account (free tier available)
 
-### Setup
+### Installation
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/yourusername/elmora.git
@@ -65,13 +65,54 @@ ELMORA is a modern, AI-powered wellness application designed to help you build p
    npm install
    ```
 
-3. **Start the development server**
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Edit `.env.local` and add your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Set up the database**
+   
+   Go to your [Supabase Dashboard](https://supabase.com/dashboard) → SQL Editor and run:
+   ```sql
+   -- Copy and paste the contents of quick-journal-fix.sql
+   -- This creates all necessary tables and security policies
+   ```
+
+5. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+6. **Open your browser**
    Navigate to `http://localhost:8080` (or the port shown in your terminal)
+
+## 🗄️ Database Setup
+
+ELMORA requires specific database tables to function. Follow these steps:
+
+### Method 1: Supabase Dashboard (Recommended)
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project
+3. Navigate to **SQL Editor**
+4. Copy the contents of `quick-journal-fix.sql`
+5. Paste and click **"Run"**
+
+### Method 2: Command Line
+```bash
+node setup-database.js
+```
+
+### Required Tables
+- `profiles` - User profile information
+- `journals` - Journal entries with mood tracking
+- `meditations` - Meditation session records
+- `admin_users` - Admin access control
 
 ## 🛠️ Available Scripts
 
@@ -86,51 +127,78 @@ npm run typecheck    # Run TypeScript type checking
 npm test            # Run unit tests
 npm run format.fix   # Format code with Prettier
 
-# Build Variants
-npm run build:client # Build only the client-side application
-npm run build:server # Build only the server-side application
+# Database
+node setup-database.js     # Set up database with sample data
+node verify-tables.js      # Verify database tables exist
+node debug-supabase.js     # Debug Supabase connection
 ```
 
 ## 📱 Usage
 
 ### Getting Started
-1. **Select Your Mood** - Choose from three mood states when you first visit
-2. **Daily Check-in** - Complete the AI-powered wellness assessment
+1. **Select Your Mood** - Choose from Sad, Mid, or Amazing mood states
+2. **Daily Check-in** - Complete the AI-powered wellness assessment  
 3. **Complete Tasks** - Work through your daily wellness tasks
-4. **Watch Your Progress** - See your flower grow as you complete tasks
-5. **Earn Rewards** - Collect points and unlock real-world rewards
+4. **Track Progress** - View analytics and maintain streaks
+5. **Journal** - Write entries with voice-to-text support
+6. **Meditate** - Access guided meditation sessions
 
-### Daily Tasks (Pre-loaded)
-- 💧 **Hydration** - Drink 8 glasses of water
-- 🚶‍♀️ **Movement** - Take a 15-minute walk outside
-- ✨ **Gratitude** - Write down 3 things you're grateful for
-- 🧘‍♀️ **Mindfulness** - Do 5 minutes of meditation or deep breathing
-- 📚 **Learning** - Read 10 pages of a book or article
+### Test Accounts
+For development and testing:
+- **Email**: alice.johnson@example.com
+- **Password**: password123
 
-### Navigation
-- **Dashboard** - Overview of your progress and quick actions
-- **Tasks** - Manage your daily wellness tasks
-- **Journal** - Reflection and journaling features
-- **Meditation** - Guided meditation and mindfulness exercises
-- **Goals** - Set and track long-term wellness objectives
-- **Friends** - Social features and encouragement
-- **Rewards** - View and redeem earned rewards
+Additional test users available with the same password:
+- bob.smith@example.com
+- carol.williams@example.com
+- david.brown@example.com
 
-## 🎨 Customization
+### Admin Dashboard
+- **Email**: admin@elmora.com
+- **Password**: admin123
+- **Access**: `/admin` route for analytics dashboard
 
-### Themes
-ELMORA automatically adapts its appearance based on your selected mood:
-- **Sad Mode** - Calming blues and grays for difficult days
-- **Mid Mode** - Warm ambers and yellows for balanced days
-- **Amazing Mode** - Vibrant greens and teals for great days
+## 🤝 Contributing
 
-### Languages
-Currently supported languages:
-- 🇺🇸 English
-- 🇪🇸 Spanish
-- 🇫🇷 French
-- 🇩🇪 German
-- 🇮🇹 Italian
+We welcome contributions to ELMORA! Please follow these guidelines:
+
+### How to Contribute
+
+1. **Fork the repository**
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Make your changes**
+4. **Test thoroughly**
+   ```bash
+   npm run typecheck
+   npm test
+   npm run build
+   ```
+5. **Commit with descriptive messages**
+   ```bash
+   git commit -m 'Add amazing feature that improves user experience'
+   ```
+6. **Push to your branch**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+7. **Create a Pull Request**
+
+### Development Guidelines
+- **Follow TypeScript best practices**
+- **Write tests for new features**
+- **Follow the existing code style (Prettier/ESLint)**
+- **Update documentation for significant changes**
+- **Ensure accessibility compliance**
+- **Test on both desktop and mobile**
+
+### Code Review Process
+- All changes require review and approval from project maintainers
+- PRs must pass all CI/CD checks
+- Changes affecting UI/UX require screenshots
+- Breaking changes require detailed migration notes
 
 ## 🏗️ Project Structure
 
@@ -139,16 +207,17 @@ elmora/
 ├── client/                 # React frontend application
 │   ├── components/        # Reusable React components
 │   │   ├── ui/           # Base UI component library
+│   │   ├── auth/         # Authentication components
 │   │   └── modals/       # Modal components
 │   ├── pages/            # Route-based page components
 │   ├── contexts/         # React context providers
-│   ├── utils/            # Utility functions and translations
-│   └── global.css        # Global styles and theme variables
-├── server/               # Express backend
-│   ├── routes/          # API route handlers
-│   └── index.ts         # Main server configuration
-├── shared/              # Shared TypeScript types
-└── public/              # Static assets
+│   ├── lib/              # API utilities and configurations
+│   ├── styles/           # CSS and styling files
+│   └── utils/            # Utility functions and translations
+├── public/               # Static assets
+├── database/             # Database setup and migration files
+├── docs/                 # Documentation
+└── tests/               # Test files
 ```
 
 ## 🚀 Deployment
@@ -159,48 +228,94 @@ npm run build
 npm run start
 ```
 
-### Deployment Platforms
-The application is configured for easy deployment on:
-- **Netlify** - Serverless deployment with built-in CDN
+### Recommended Platforms
 - **Vercel** - Optimized for React applications
-- **Traditional Hosting** - Can be deployed on any Node.js hosting platform
+- **Netlify** - Serverless deployment with built-in CDN
+- **Railway** - Full-stack deployment
+- **Traditional Hosting** - Any Node.js hosting platform
 
-## 🤝 Contributing
+### Environment Variables
+Ensure these are set in production:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
-We welcome contributions to ELMORA! Please follow these steps:
+## 🧪 Testing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### Running Tests
+```bash
+npm test              # Run all tests
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Generate coverage report
+```
 
-### Development Guidelines
-- Follow TypeScript best practices
-- Write tests for new features
-- Follow the existing code style (Prettier/ESLint)
-- Update documentation for significant changes
+### Testing Strategy
+- **Unit Tests** - Component and utility function tests
+- **Integration Tests** - API and database interaction tests
+- **E2E Tests** - Full user workflow testing
+- **Accessibility Tests** - WCAG compliance testing
 
-## 📝 License
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Journal not loading:**
+- Ensure database tables are created via SQL script
+- Check Supabase connection in browser console
+- Verify environment variables are set correctly
+
+**Authentication issues:**
+- Clear browser cache and localStorage
+- Check Supabase project status
+- Verify API keys are not expired
+
+**Development server not starting:**
+- Clear node_modules and reinstall: `rm -rf node_modules && npm install`
+- Check port availability: `lsof -ti:8080`
+- Update Node.js to latest LTS version
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌟 Acknowledgments
+## 🙏 Acknowledgments
 
-- **Builder.io** - Initial development platform
+- **Supabase** - Backend-as-a-Service platform
 - **Radix UI** - Accessible component primitives
 - **TailwindCSS** - Utility-first CSS framework
 - **React Community** - Amazing ecosystem and tools
+- **Open Source Contributors** - All the amazing libraries we use
 
-## 📞 Support
+## 👥 Contributors
 
-If you have any questions or need help:
-- 📧 Email: support@elmora.app
-- 💬 Feedback: feedback@elmora.app
-- 🐛 Issues: Please open an issue on GitHub
+### Current Team
+- **Kanishka Narang** - Lead Developer & Project Maintainer
+- **Deepanshu** - Frontend Developer & UI/UX Designer
+- **Vinayak Gupta** - Backend Developer & Database Architect
+
+### Contributing
+We welcome new contributors! Please see our [Contributing Guidelines](#-contributing) above.
 
 ---
 
 **Made with 💜 for your wellness journey**
 
 Transform your daily routine into a beautiful, engaging experience with ELMORA. Start your wellness journey today! 🌸
+
+---
+
+## 📞 Support & Contact
+
+- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/elmora/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/elmora/discussions)
+- 📧 **Email**: support@elmora.app
+- 🌐 **Website**: https://elmora.app
+
+---
+
+### Branch Protection Rules
+
+This repository uses branch protection rules to ensure code quality:
+- All changes must be made via Pull Requests
+- Pull Requests require review and approval from maintainers
+- Status checks must pass before merging
+- Only authorized contributors can push to main branch

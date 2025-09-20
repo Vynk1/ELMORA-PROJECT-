@@ -240,6 +240,13 @@
   transform: translateY(-1px);
 }
 
+/* Sign Out Button Specific Styling */
+.sign-out-btn:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
+  transform: scale(1.05) !important;
+}
+
 /* Profile avatar button */
 #profile-btn {
   width: 36px;
@@ -312,6 +319,11 @@
   
   .quick-action {
     display: none;
+  }
+  
+  /* Always show sign-out button even on mobile */
+  .sign-out-btn {
+    display: flex !important;
   }
   
   /* Show mobile nav when active */

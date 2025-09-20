@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import MeditationTimer from '../components/MeditationTimer';
+import { getMeditations, addMeditation } from '../lib/supabaseApi';
 
 // Lazy load effect components
 const TrueFocus = lazy(() => import('../components/effects/TrueFocus'));
@@ -16,6 +17,14 @@ interface MeditationSession {
   audioUrl?: string;
 }
 
+interface MeditationRecord {
+  id: string;
+  user_id: string;
+  type: string;
+  duration: number; // in seconds
+  created_at: string;
+}
+
 const Meditation: React.FC = () => {
   const [selectedSession, setSelectedSession] = useState<MeditationSession | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,6 +32,14 @@ const Meditation: React.FC = () => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [elapsedMinutes, setElapsedMinutes] = useState(0);
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
+  const [meditationHistory, setMeditationHistory] = useState<MeditationRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalSessions: 0,
+    totalMinutes: 0,
+    streak: 0,
+    thisWeek: 0
+  });
 
   // Check for reduced motion preference
   useEffect(() => {
@@ -34,6 +51,65 @@ const Meditation: React.FC = () => {
     
     return () => mediaQuery.removeEventListener('change', handleMotionChange);
   }, []);
+
+  // Load meditation history and calculate stats
+  useEffect(() => {
+    loadMeditationData();
+  }, []);
+
+  const loadMeditationData = async () => {
+    try {
+      setLoading(true);
+      const data = await getMeditations();
+      setMeditationHistory(data);
+      calculateStats(data);
+    } catch (error) {
+      console.error('Failed to load meditation data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateStats = (sessions: MeditationRecord[]) => {
+    const totalSessions = sessions.length;
+    const totalMinutes = Math.round(sessions.reduce((sum, session) => sum + (session.duration || 0), 0) / 60);
+    
+    // Calculate this week's sessions
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const thisWeek = sessions.filter(session => 
+      new Date(session.created_at) >= oneWeekAgo
+    ).length;
+    
+    // Simple streak calculation (consecutive days with at least one session)
+    const today = new Date();
+    let streak = 0;
+    let currentDate = new Date(today);
+    
+    while (true) {
+      const dayStart = new Date(currentDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(currentDate);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      const hasSessionThisDay = sessions.some(session => {
+        const sessionDate = new Date(session.created_at);
+        return sessionDate >= dayStart && sessionDate <= dayEnd;
+      });
+      
+      if (hasSessionThisDay) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else {
+        break;
+      }
+      
+      // Prevent infinite loop
+      if (streak > 365) break;
+    }
+    
+    setStats({ totalSessions, totalMinutes, streak, thisWeek });
+  };
 
   // Breathing animation cycle
   useEffect(() => {
@@ -113,6 +189,23 @@ const Meditation: React.FC = () => {
     if (remainingTime === '0:00' && isPlaying) {
       setIsPlaying(false);
       setCurrentPhase('complete');
+      // Save completed session to database
+      saveCompletedSession(selectedSession!, elapsedMinutes);
+    }
+  };
+  
+  const saveCompletedSession = async (session: MeditationSession, actualMinutes: number) => {
+    try {
+      const durationSeconds = Math.round(actualMinutes * 60);
+      const savedSession = await addMeditation(session.type, durationSeconds);
+      
+      // Update local state
+      const newHistory = [savedSession, ...meditationHistory];
+      setMeditationHistory(newHistory);
+      calculateStats(newHistory);
+    } catch (error) {
+      console.error('Failed to save meditation session:', error);
+      // Still allow the user to see completion - just log the error
     }
   };
 
@@ -336,72 +429,80 @@ const Meditation: React.FC = () => {
           </p>
         </div>
 
-        {/* Enhanced Stats with CountUp Animations */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <Suspense fallback={
-            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-              <div className="text-2xl font-bold text-purple-600 mb-1">23</div>
-              <div className="text-sm text-gray-600">Sessions Completed</div>
-            </div>
-          }>
-            <ScrollReveal duration={0.5} delay={0.1} disabled={prefersReducedMotion}>
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center py-12 mb-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+            <span className="ml-3 text-gray-600">Loading meditation data...</span>
+          </div>
+        ) : (
+          /* Enhanced Stats with CountUp Animations */
+          <div className="grid md:grid-cols-4 gap-6 mb-12">
+            <Suspense fallback={
               <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                <div className="text-2xl font-bold text-purple-600 mb-1" aria-live="polite">
-                  <CountUp end={23} duration={1200} disabled={prefersReducedMotion} />
-                </div>
+                <div className="text-2xl font-bold text-purple-600 mb-1">{stats.totalSessions}</div>
                 <div className="text-sm text-gray-600">Sessions Completed</div>
               </div>
-            </ScrollReveal>
-          </Suspense>
-          
-          <Suspense fallback={
-            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-              <div className="text-2xl font-bold text-blue-600 mb-1">156</div>
-              <div className="text-sm text-gray-600">Minutes Meditated</div>
-            </div>
-          }>
-            <ScrollReveal duration={0.5} delay={0.2} disabled={prefersReducedMotion}>
-              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                <div className="text-2xl font-bold text-blue-600 mb-1" aria-live="polite">
-                  <CountUp end={156} duration={1800} disabled={prefersReducedMotion} />
+            }>
+              <ScrollReveal duration={0.5} delay={0.1} disabled={prefersReducedMotion}>
+                <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-purple-600 mb-1" aria-live="polite">
+                    <CountUp end={stats.totalSessions} duration={1200} disabled={prefersReducedMotion} />
+                  </div>
+                  <div className="text-sm text-gray-600">Sessions Completed</div>
                 </div>
+              </ScrollReveal>
+            </Suspense>
+            
+            <Suspense fallback={
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-blue-600 mb-1">{stats.totalMinutes}</div>
                 <div className="text-sm text-gray-600">Minutes Meditated</div>
               </div>
-            </ScrollReveal>
-          </Suspense>
-          
-          <Suspense fallback={
-            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-              <div className="text-2xl font-bold text-green-600 mb-1">7</div>
-              <div className="text-sm text-gray-600">Day Streak</div>
-            </div>
-          }>
-            <ScrollReveal duration={0.5} delay={0.3} disabled={prefersReducedMotion}>
-              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                <div className="text-2xl font-bold text-green-600 mb-1" aria-live="polite">
-                  <CountUp end={7} duration={1000} disabled={prefersReducedMotion} />
+            }>
+              <ScrollReveal duration={0.5} delay={0.2} disabled={prefersReducedMotion}>
+                <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-blue-600 mb-1" aria-live="polite">
+                    <CountUp end={stats.totalMinutes} duration={1800} disabled={prefersReducedMotion} />
+                  </div>
+                  <div className="text-sm text-gray-600">Minutes Meditated</div>
                 </div>
+              </ScrollReveal>
+            </Suspense>
+            
+            <Suspense fallback={
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-green-600 mb-1">{stats.streak}</div>
                 <div className="text-sm text-gray-600">Day Streak</div>
               </div>
-            </ScrollReveal>
-          </Suspense>
-          
-          <Suspense fallback={
-            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-              <div className="text-2xl font-bold text-orange-600 mb-1">12</div>
-              <div className="text-sm text-gray-600">This Week</div>
-            </div>
-          }>
-            <ScrollReveal duration={0.5} delay={0.4} disabled={prefersReducedMotion}>
-              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                <div className="text-2xl font-bold text-orange-600 mb-1" aria-live="polite">
-                  <CountUp end={12} duration={1400} disabled={prefersReducedMotion} />
+            }>
+              <ScrollReveal duration={0.5} delay={0.3} disabled={prefersReducedMotion}>
+                <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-green-600 mb-1" aria-live="polite">
+                    <CountUp end={stats.streak} duration={1000} disabled={prefersReducedMotion} />
+                  </div>
+                  <div className="text-sm text-gray-600">Day Streak</div>
                 </div>
+              </ScrollReveal>
+            </Suspense>
+            
+            <Suspense fallback={
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div className="text-2xl font-bold text-orange-600 mb-1">{stats.thisWeek}</div>
                 <div className="text-sm text-gray-600">This Week</div>
               </div>
-            </ScrollReveal>
-          </Suspense>
-        </div>
+            }>
+              <ScrollReveal duration={0.5} delay={0.4} disabled={prefersReducedMotion}>
+                <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-orange-600 mb-1" aria-live="polite">
+                    <CountUp end={stats.thisWeek} duration={1400} disabled={prefersReducedMotion} />
+                  </div>
+                  <div className="text-sm text-gray-600">This Week</div>
+                </div>
+              </ScrollReveal>
+            </Suspense>
+          </div>
+        )}
 
         {/* Enhanced Session Cards with ScrollFloat */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

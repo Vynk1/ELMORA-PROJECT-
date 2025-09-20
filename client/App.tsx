@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
 import { TaskProvider } from "./contexts/TaskContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
 import LoadingScreen from "./components/LoadingScreen";
 import MoodSelection from "./pages/MoodSelection";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -22,23 +23,30 @@ import TestModal from "./pages/TestModal";
 import CheckIn from "./pages/CheckIn";
 import FlowerDemo from "./pages/FlowerDemo";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import AdminAccess from "./components/AdminAccess.jsx";
 import ElmoraChat from "./components/ElmoraChat";
+import LoginForm from "./components/auth/LoginForm.jsx";
+import SignUpForm from "./components/auth/SignUpForm.jsx";
 import { type MoodType } from "./components/MoodColorSwitcher";
 import { type MoodColors } from "./components/MoodColorPicker";
 
 function App() {
   return (
     <ErrorBoundary>
-      <AppProvider>
-        <TaskProvider>
-          <AppContent />
-        </TaskProvider>
-      </AppProvider>
+      <AuthProvider>
+        <AppProvider>
+          <TaskProvider>
+            <AppContent />
+          </TaskProvider>
+        </AppProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
 
 function AppContent() {
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [hasSelectedMood, setHasSelectedMood] = useState(false);
   const [currentMood, setCurrentMood] = useState<MoodType>("mid");
@@ -84,7 +92,8 @@ function AppContent() {
     setUserPoints(points);
   };
 
-  if (isLoading) {
+  // Show loading screen while auth is loading or app is initializing
+  if (authLoading || isLoading) {
     return <LoadingScreen />;
   }
 
@@ -104,86 +113,161 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-background">
-        <Header
-          currentMood={currentMood}
-          onMoodChange={setCurrentMood}
-          onSignOut={handleSignOut}
+      <Routes>
+        {/* Public Auth Routes */}
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginForm />} 
         />
-        <main className="w-full">
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route
-              path="/dashboard"
-              element={
-                <Dashboard
-                  currentMood={currentMood}
-                  userPoints={userPoints}
-                  onPointsUpdate={handlePointsUpdate}
-                />
-              }
-            />
-            <Route
-              path="/tasks"
-              element={
-                <Tasks
-                  currentMood={currentMood}
-                  userPoints={userPoints}
-                  onPointsUpdate={handlePointsUpdate}
-                />
-              }
-            />
-            <Route
-              path="/pomodoro"
-              element={
-                <Pomodoro
-                  currentMood={currentMood}
-                  userPoints={userPoints}
-                  onPointsUpdate={handlePointsUpdate}
-                />
-              }
-            />
-            <Route
-              path="/rewards"
-              element={
-                <Rewards
-                  userPoints={userPoints}
-                  onPointsUpdate={handlePointsUpdate}
-                />
-              }
-            />
-            <Route path="/friends" element={<Friends />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/journal" element={<Journal />} />
-            <Route path="/meditation" element={<Meditation />} />
-            <Route path="/goals" element={<Goals />} />
-            <Route 
-              path="/checkin" 
-              element={
-                <CheckIn 
-                  currentMood={currentMood}
-                  userPoints={userPoints}
-                  onPointsUpdate={handlePointsUpdate}
-                />
-              } 
-            />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/help" element={<Help />} />
-            <Route path="/test-modal" element={<TestModal />} />
-            <Route path="/flower-demo" element={<FlowerDemo />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+        <Route 
+          path="/signup" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignUpForm />} 
+        />
         
-        {/* Elmora Chat - Available on all pages after mood selection */}
-        <ElmoraChat
-          currentMood={currentMood}
-          userPoints={userPoints}
-          onPointsUpdate={handlePointsUpdate}
+        {/* Protected Routes */}
+        <Route
+          path="/*"
+          element={
+            isAuthenticated ? (
+              <AuthenticatedApp
+                currentMood={currentMood}
+                setCurrentMood={setCurrentMood}
+                hasSelectedMood={hasSelectedMood}
+                handleMoodSelection={handleMoodSelection}
+                handleSignOut={handleSignOut}
+                userPoints={userPoints}
+                handlePointsUpdate={handlePointsUpdate}
+              />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
-      </div>
+      </Routes>
     </BrowserRouter>
+  );
+}
+
+// Authenticated App Component with all protected routes
+interface AuthenticatedAppProps {
+  currentMood: MoodType;
+  setCurrentMood: (mood: MoodType) => void;
+  hasSelectedMood: boolean;
+  handleMoodSelection: (mood: MoodType, colors?: MoodColors) => void;
+  handleSignOut: () => void;
+  userPoints: number;
+  handlePointsUpdate: (points: number) => void;
+}
+
+function AuthenticatedApp({
+  currentMood,
+  setCurrentMood,
+  hasSelectedMood,
+  handleMoodSelection,
+  handleSignOut,
+  userPoints,
+  handlePointsUpdate
+}: AuthenticatedAppProps) {
+  const { signOut } = useAuth();
+
+  const handleAuthSignOut = async () => {
+    try {
+      await signOut();
+      handleSignOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
+  // Show mood selection if user hasn't selected mood yet (and not in dev mode)
+  if (!hasSelectedMood && !import.meta.env.DEV) {
+    return <MoodSelection onMoodSelection={handleMoodSelection} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header
+        currentMood={currentMood}
+        onMoodChange={setCurrentMood}
+        onSignOut={handleAuthSignOut}
+      />
+      <main className="w-full">
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="/dashboard"
+            element={
+              <Dashboard
+                currentMood={currentMood}
+                userPoints={userPoints}
+                onPointsUpdate={handlePointsUpdate}
+              />
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <Tasks
+                currentMood={currentMood}
+                userPoints={userPoints}
+                onPointsUpdate={handlePointsUpdate}
+              />
+            }
+          />
+          <Route
+            path="/pomodoro"
+            element={
+              <Pomodoro
+                currentMood={currentMood}
+                userPoints={userPoints}
+                onPointsUpdate={handlePointsUpdate}
+              />
+            }
+          />
+          <Route
+            path="/rewards"
+            element={
+              <Rewards
+                userPoints={userPoints}
+                onPointsUpdate={handlePointsUpdate}
+              />
+            }
+          />
+          <Route path="/friends" element={<Friends />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/meditation" element={<Meditation />} />
+          <Route path="/goals" element={<Goals />} />
+          <Route 
+            path="/checkin" 
+            element={
+              <CheckIn 
+                currentMood={currentMood}
+                userPoints={userPoints}
+                onPointsUpdate={handlePointsUpdate}
+              />
+            } 
+          />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/test-modal" element={<TestModal />} />
+          <Route path="/flower-demo" element={<FlowerDemo />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      
+      {/* Elmora Chat - Available on all pages after mood selection */}
+      <ElmoraChat
+        currentMood={currentMood}
+        userPoints={userPoints}
+        onPointsUpdate={handlePointsUpdate}
+      />
+      
+      {/* Admin Access Component - Shows admin dashboard button for admin users */}
+      <AdminAccess />
+    </div>
   );
 }
 

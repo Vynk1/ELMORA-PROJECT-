@@ -68,9 +68,9 @@ After pushing to GitHub, set up branch protection to ensure code quality:
 ### Collaborator Settings
 1. **Go to Settings → Collaborators and teams**
 2. **Add collaborators** if needed:
-   - Kanishka Narang (Lead Developer)
-   - Deepanshu (Frontend Developer) 
-   - Vinayak Gupta (Backend Developer)
+   - Vinayak Gupta (Lead Developer & Project Maintainer)
+   - Kanishka Narang (Frontend Developer)
+   - Deepanshu (Backend Support Developer & UI/UX Designer)
 
 ### Permission Levels
 - **You (Repository Owner)**: Admin access

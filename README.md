@@ -288,9 +288,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Contributors
 
 ### Current Team
-- **Kanishka Narang** - Lead Developer & Project Maintainer
-- **Deepanshu** - Frontend Developer & UI/UX Designer
-- **Vinayak Gupta** - Backend Developer & Database Architect
+- **Vinayak Gupta** - Lead Developer & Project Maintainer & Database Architect
+- **Kanishka Narang** - Frontend Developer
+- **Deepanshu** - Backend Support Developer & UI/UX Designer
 
 ### Contributing
 We welcome new contributors! Please see our [Contributing Guidelines](#-contributing) above.

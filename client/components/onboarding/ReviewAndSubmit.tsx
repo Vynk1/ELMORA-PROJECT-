@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from "react-router-dom";
 import { supabase } from '../../lib/supabase';
 import { QUESTIONS } from '../../lib/questions';
 import { scoreAssessment } from '../../lib/score';
@@ -11,6 +12,7 @@ import { CheckCircleIcon, UserIcon, CameraIcon, ClipboardDocumentListIcon } from
 export default function ReviewAndSubmit() {
   const { answers, basics, photo, updateAi, nextStep, prevStep, setSubmitting, setError } = useOnboarding();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -258,7 +260,9 @@ export default function ReviewAndSubmit() {
               Back to Photo
             </button>
             <button
-              onClick={handleSubmit}
+              onClick={()=>{
+                navigate("/dashboard");
+              }}
               disabled={isSubmitting}
               className={`px-8 py-3 rounded-lg font-semibold transition-all duration-200 ${
                 isSubmitting

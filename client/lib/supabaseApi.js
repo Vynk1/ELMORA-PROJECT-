@@ -312,3 +312,85 @@ export async function getUserStats() {
     };
   }
 }
+
+// ============= HEALTH REPORT API =============
+
+/**
+ * Get all health reports for current user
+ * @returns {Promise<Array>} Array of health reports
+ */
+export async function getHealthReports() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+  
+  const { data, error } = await supabase
+    .from('health_data')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching health reports:', error);
+    throw new Error(error.message || 'Failed to load health reports');
+  }
+  
+  return data || [];
+}
+
+/**
+ * Get specific health report by ID
+ * @param {string} reportId - Report ID
+ * @returns {Promise<Object>} Health report
+ */
+export async function getHealthReport(reportId) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  const { data, error } = await supabase
+    .from('health_data')
+    .select('*')
+    .eq('id', reportId)
+    .eq('user_id', user.id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching health report:', error);
+    throw new Error(error.message || 'Failed to load health report');
+  }
+  
+  return data;
+}
+
+/**
+ * Generate AI health report
+ * @param {Array<string>} answers - Array of 7 answers to psychological questions
+ * @returns {Promise<Object>} Generated report data
+ */
+export async function generateHealthReport(answers) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/generate-report`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        answers: answers
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to generate report');
+    }
+    
+    return data.data;
+  } catch (error) {
+    console.error('Error generating health report:', error);
+    throw new Error(error.message || 'Failed to generate health report');
+  }
+}

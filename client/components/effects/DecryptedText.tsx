@@ -33,7 +33,7 @@ const DecryptedText: React.FC<DecryptedTextProps> = ({ text, className = '' }) =
       }
 
       iteration += 1 / 3;
-    }, 30);
+    }, 1);
 
     return () => clearInterval(interval);
   }, [text]);

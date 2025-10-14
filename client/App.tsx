@@ -25,6 +25,8 @@ import CheckIn from "./pages/CheckIn";
 import FlowerDemo from "./pages/FlowerDemo";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import AIReport from "./pages/AIReport";
+import HealthAssessment from "./pages/HealthAssessment";
 import AdminAccess from "./components/AdminAccess.jsx";
 import ElmoraChat from "./components/ElmoraChat";
 import LoginForm from "./components/auth/LoginForm.jsx";
@@ -75,7 +77,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         }
 
         // If assessment is NOT completed, user needs onboarding
-        setNeedsOnboarding(!profile?.assessment_completed);
+        setNeedsOnboarding(false);
       } catch (error) {
         console.error('Error in protected route onboarding check:', error);
         // Default to not needing onboarding on error
@@ -352,6 +354,8 @@ function AuthenticatedApp({
           <Route path="/test-modal" element={<TestModal />} />
           <Route path="/flower-demo" element={<FlowerDemo />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/health-assessment" element={<HealthAssessment />} />
+          <Route path="/ai-report" element={<AIReport />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

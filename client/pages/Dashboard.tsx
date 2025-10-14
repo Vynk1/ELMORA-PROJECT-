@@ -137,6 +137,13 @@ const Dashboard: React.FC<DashboardProps> = ({
       color: "from-purple-400 to-pink-400",
     },
     {
+      title: "AI Wellbeing Report",
+      description: "Get personalized mental health insights",
+      icon: "🧠",
+      link: "/health-assessment",
+      color: "from-indigo-400 to-purple-400",
+    },
+    {
       title: "My Tasks",
       description: "View and manage your daily tasks",
       icon: "📝",

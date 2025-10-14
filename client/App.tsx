@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
 import { TaskProvider } from "./contexts/TaskContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
+import { supabase } from "./lib/supabase";
 import LoadingScreen from "./components/LoadingScreen";
 import MoodSelection from "./pages/MoodSelection";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -28,6 +29,10 @@ import AdminAccess from "./components/AdminAccess.jsx";
 import ElmoraChat from "./components/ElmoraChat";
 import LoginForm from "./components/auth/LoginForm.jsx";
 import SignUpForm from "./components/auth/SignUpForm.jsx";
+import LandingPage from "./components/LandingPage.jsx";
+import AuthCallback from "./pages/auth/Callback";
+import UpdatePassword from "./pages/auth/UpdatePassword";
+import OnboardingPage from "./pages/onboarding/index";
 import { type MoodType } from "./components/MoodColorSwitcher";
 import { type MoodColors } from "./components/MoodColorPicker";
 
@@ -43,6 +48,61 @@ function App() {
       </AuthProvider>
     </ErrorBoundary>
   );
+}
+
+// Protected route component that checks onboarding status
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
+  useEffect(() => {
+    async function checkOnboardingStatus() {
+      if (!user) {
+        setCheckingOnboarding(false);
+        return;
+      }
+
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('assessment_completed')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking onboarding status:', error);
+        }
+
+        // If assessment is NOT completed, user needs onboarding
+        setNeedsOnboarding(!profile?.assessment_completed);
+      } catch (error) {
+        console.error('Error in protected route onboarding check:', error);
+        // Default to not needing onboarding on error
+        setNeedsOnboarding(false);
+      } finally {
+        setCheckingOnboarding(false);
+      }
+    }
+
+    if (!authLoading) {
+      checkOnboardingStatus();
+    }
+  }, [user, authLoading]);
+
+  if (authLoading || checkingOnboarding) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (needsOnboarding) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 function AppContent() {
@@ -114,14 +174,50 @@ function AppContent() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
+        <Route 
+          path="/" 
+          element={isAuthenticated ? (
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          ) : (
+            <LandingPage />
+          )} 
+        />
+        
         {/* Public Auth Routes */}
         <Route 
           path="/login" 
-          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginForm />} 
+          element={isAuthenticated ? (
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          ) : (
+            <LoginForm />
+          )} 
         />
         <Route 
           path="/signup" 
-          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignUpForm />} 
+          element={isAuthenticated ? (
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          ) : (
+            <SignUpForm />
+          )} 
+        />
+        
+        {/* OAuth Callback Route */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        
+        {/* Password Reset Route */}
+        <Route path="/auth/update-password" element={<UpdatePassword />} />
+        
+        {/* Onboarding Route */}
+        <Route 
+          path="/onboarding" 
+          element={isAuthenticated ? <OnboardingPage /> : <Navigate to="/login" replace />} 
         />
         
         {/* Protected Routes */}
@@ -129,15 +225,17 @@ function AppContent() {
           path="/*"
           element={
             isAuthenticated ? (
-              <AuthenticatedApp
-                currentMood={currentMood}
-                setCurrentMood={setCurrentMood}
-                hasSelectedMood={hasSelectedMood}
-                handleMoodSelection={handleMoodSelection}
-                handleSignOut={handleSignOut}
-                userPoints={userPoints}
-                handlePointsUpdate={handlePointsUpdate}
-              />
+              <ProtectedRoute>
+                <AuthenticatedApp
+                  currentMood={currentMood}
+                  setCurrentMood={setCurrentMood}
+                  hasSelectedMood={hasSelectedMood}
+                  handleMoodSelection={handleMoodSelection}
+                  handleSignOut={handleSignOut}
+                  userPoints={userPoints}
+                  handlePointsUpdate={handlePointsUpdate}
+                />
+              </ProtectedRoute>
             ) : (
               <Navigate to="/login" replace />
             )

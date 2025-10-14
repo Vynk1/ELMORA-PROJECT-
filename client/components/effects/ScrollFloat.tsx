@@ -80,3 +80,4 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
 };
 
 export default ScrollFloat;
+export { ScrollFloat };

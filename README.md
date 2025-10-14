@@ -114,6 +114,90 @@ node setup-database.js
 - `meditations` - Meditation session records
 - `admin_users` - Admin access control
 
+## 🔐 Google OAuth Setup
+
+To enable Google Sign-In functionality, follow these steps:
+
+### 1. Google Cloud Console Setup
+
+1. **Create Google Cloud Project** (if you don't have one)
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
+
+2. **Enable Google+ API**
+   - Navigate to **APIs & Services** → **Library**
+   - Search for "Google+ API" and enable it
+
+3. **Create OAuth 2.0 Credentials**
+   - Go to **APIs & Services** → **Credentials**
+   - Click **"Create Credentials"** → **"OAuth 2.0 Client IDs"**
+   - Choose **"Web application"**
+   - Add authorized redirect URIs:
+     - `http://localhost:8080/auth/callback` (development)
+     - `https://yourdomain.com/auth/callback` (production)
+   - Save and copy your **Client ID** and **Client Secret**
+
+### 2. Supabase Configuration
+
+1. **Enable Google Provider**
+   - Go to [Supabase Dashboard](https://supabase.com/dashboard)
+   - Select your project → **Authentication** → **Providers**
+   - Find **Google** and toggle it **ON**
+
+2. **Add Google Credentials**
+   - **Client ID**: Paste your Google OAuth Client ID
+   - **Client Secret**: Paste your Google OAuth Client Secret
+   - **Redirect URL**: `https://[your-supabase-url]/auth/v1/callback`
+
+3. **Configure Additional Settings**
+   - **Skip nonce check**: Enable (recommended)
+   - **Additional scopes**: `openid email profile` (default is fine)
+
+### 3. Application Configuration
+
+Your `.env.local` should already contain your Supabase credentials:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+### 4. Testing Google OAuth
+
+1. **Start your development server**
+   ```bash
+   npm run dev
+   ```
+
+2. **Navigate to the login page**
+   - Go to `http://localhost:8080/login`
+   - Click **"Continue with Google"**
+   - Complete the OAuth flow
+
+3. **Verify the integration**
+   - Check that you're redirected to `/dashboard` after login
+   - Verify user data is stored in Supabase Auth
+
+### 5. Production Deployment
+
+For production deployment:
+
+1. **Update redirect URLs** in Google Cloud Console:
+   - Add your production domain: `https://yourdomain.com/auth/callback`
+
+2. **Update Supabase settings**:
+   - Go to **Authentication** → **URL Configuration**
+   - Set **Site URL** to your production domain
+   - Add additional redirect URLs if needed
+
+### Troubleshooting Google OAuth
+
+- **"redirect_uri_mismatch"**: Ensure redirect URIs match exactly in Google Cloud Console
+- **"invalid_client"**: Verify Client ID and Secret are correct in Supabase
+- **CORS errors**: Check that your domain is added to Supabase Auth settings
+- **Session issues**: Clear browser data and try again
+
 ## 🛠️ Available Scripts
 
 ```bash

@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import { handleAnalyzeWellbeing } from "./routes/analyze-wellbeing";
 import chatHandler from "./chat-handler";
 import speechToTextHandler from "./speech-to-text-handler";
 
@@ -20,6 +21,9 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+  
+  // Onboarding wellbeing analysis
+  app.post("/api/analyze-wellbeing", handleAnalyzeWellbeing);
   
   // Chat functionality
   app.use("/api", chatHandler);

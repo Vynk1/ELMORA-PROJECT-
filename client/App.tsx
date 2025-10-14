@@ -76,8 +76,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
           console.error('Error checking onboarding status:', error);
         }
 
-        // If assessment is NOT completed, user needs onboarding
-        setNeedsOnboarding(false);
+        // If no profile exists or assessment is NOT completed, user needs onboarding
+        // PGRST116 means no rows returned (new user without profile)
+        const isNewUser = error?.code === 'PGRST116' || !profile;
+        const hasCompletedAssessment = profile?.assessment_completed === true;
+        setNeedsOnboarding(isNewUser || !hasCompletedAssessment);
       } catch (error) {
         console.error('Error in protected route onboarding check:', error);
         // Default to not needing onboarding on error

@@ -260,9 +260,7 @@ export default function ReviewAndSubmit() {
               Back to Photo
             </button>
             <button
-              onClick={()=>{
-                navigate("/dashboard");
-              }}
+              onClick={handleSubmit}
               disabled={isSubmitting}
               className={`px-8 py-3 rounded-lg font-semibold transition-all duration-200 ${
                 isSubmitting

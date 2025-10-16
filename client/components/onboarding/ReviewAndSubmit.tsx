@@ -30,115 +30,194 @@ export default function ReviewAndSubmit() {
     setSubmitError(null);
     setError(undefined);
 
+    // Skip API call and directly show hardcoded insights
+    console.log('Using hardcoded insights (as requested)');
+    
+    // Calculate a basic score from answers for fallback
+    const basicScore = answers.length * 2.5; // Assume average score
+    const fallbackCategory = basicScore >= 20 ? "Growth Champion" 
+                           : basicScore >= 15 ? "Resilient Builder" 
+                           : "Balanced Explorer";
+    
+    const fallbackInsights = [
+      `Your responses show a ${fallbackCategory.toLowerCase()} mindset.`,
+      "You demonstrate awareness of your emotional patterns.",
+      "You're open to personal growth and development.",
+      "Your self-reflection skills are developing positively."
+    ];
+    
+    const fallbackRecommendations = [
+      "Practice daily mindfulness for 5-10 minutes.",
+      "Keep a weekly reflection journal.",
+      "Set small, achievable personal goals.",
+      "Connect with supportive people regularly."
+    ];
+    
+    // Update context with fallback data
+    updateAi({
+      score: Math.round(basicScore),
+      category: fallbackCategory,
+      insights: fallbackInsights,
+      recommendations: fallbackRecommendations
+    });
+    
+    // Mark assessment as completed locally (best effort)
     try {
-      // 1. Call AI analysis API
-      const analysisPayload = {
+      await supabase
+        .from('profiles')
+        .update({ assessment_completed: true })
+        .eq('id', user.id);
+      console.log('Profile marked as completed');
+    } catch (supabaseError) {
+      console.log('Profile update failed, but continuing with insights');
+    }
+    
+    // Also mark as completed in localStorage as backup
+    localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+    console.log('Assessment marked as completed in localStorage');
+    
+    // Show success message and proceed to results
+    console.log('Proceeding to insights page');
+    setIsSubmitting(false);
+    setSubmitting(false);
+    nextStep(); // Move to AI results step
+    
+    return; // Skip the API call entirely
+
+    try {
+      // Call new onboarding submission endpoint
+      const onboardingPayload = {
+        userId: user.id,
         answers: answers.map(a => ({
           id: a.id,
-          choice: a.choice,
-          points: a.points
+          choice: a.choice
         })),
-        basics
+        basics: basics,
+        photoUrl: photo.url || null
       };
 
-      const analysisResponse = await fetch('/api/analyze-wellbeing', {
+      console.log('Submitting onboarding payload:', onboardingPayload);
+      
+      // Use the correct API URL - adjust port if needed
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiUrl}/api/onboarding/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(analysisPayload)
+        body: JSON.stringify(onboardingPayload)
       });
 
-      if (!analysisResponse.ok) {
-        throw new Error(`AI analysis failed: ${analysisResponse.status}`);
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      // Check if response is ok and has content
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server error response:', errorText);
+        throw new Error(`Server responded with ${response.status}: ${errorText}`);
+      }
+      
+      // Check if response has content
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+      
+      if (!responseText.trim()) {
+        throw new Error('Empty response from server');
+      }
+      
+      let result;
+      try {
+        result = JSON.parse(responseText);
+        console.log('Parsed result:', result);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        console.error('Response text was:', responseText);
+        throw new Error('Invalid JSON response from server');
+      }
+      
+      if (response.status === 409) {
+        // Assessment already completed
+        if (result.redirect) {
+          navigate(result.redirect);
+        }
+        return;
       }
 
-      const aiResults = await analysisResponse.json();
-
-      // 2. Upload data to Supabase
-      const promises = [];
-
-      // Update profiles table
-      const profileUpdate = {
-        display_name: basics.name,
-        bio: basics.bio,
-        avatar_url: photo.url || null,
-        assessment_completed: true,
-        assessment_score: aiResults.score,
-        assessment_category: aiResults.category
-      };
-
-      promises.push(
-        supabase
-          .from('profiles')
-          .upsert({ user_id: user.id, ...profileUpdate })
-          .select()
-      );
-
-      // Insert assessment results
-      const assessmentData = {
-        user_id: user.id,
-        answers: answers.map(a => ({
-          id: a.id,
-          choice: a.choice,
-          points: a.points
-        })),
-        score: aiResults.score,
-        category: aiResults.category,
-        ai_insights: {
-          insights: aiResults.insights,
-          recommendations: aiResults.recommendations
-        }
-      };
-
-      promises.push(
-        supabase
-          .from('assessment_results')
-          .insert(assessmentData)
-          .select()
-      );
-
-      // Wait for all operations to complete
-      const results = await Promise.all(promises);
-
-      // Check for errors
-      for (const result of results) {
-        if (result.error) {
-          console.error('Supabase operation failed:', result.error);
-          throw new Error(result.error.message || 'Database operation failed');
-        }
+      if (!response.ok) {
+        throw new Error(result.error || 'Submission failed');
       }
 
-      // 3. Update context with AI results
+      // Update context with results from backend
       updateAi({
-        score: aiResults.score,
-        category: aiResults.category,
-        insights: aiResults.insights,
-        recommendations: aiResults.recommendations
+        score: result.score,
+        category: result.category,
+        insights: result.insights || [],
+        recommendations: result.recommendations || []
       });
 
-      // 4. Move to results step
-      nextStep();
+      // Check for redirect instruction
+      if (result.redirect) {
+        // For now, proceed to next step to show results, then redirect
+        nextStep();
+        // Optionally, you could redirect immediately:
+        // navigate(result.redirect);
+      } else {
+        nextStep();
+      }
 
     } catch (error) {
       console.error('Submission error:', error);
       
-      let errorMessage = 'Failed to complete onboarding. Please try again.';
+      // If API fails, use hardcoded fallback data and complete onboarding locally
+      console.log('Using fallback hardcoded insights due to API failure');
       
-      if (error instanceof Error) {
-        if (error.message.includes('unique constraint')) {
-          errorMessage = 'Assessment already completed. Redirecting to dashboard...';
-          // Wait a moment then redirect
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 2000);
-        } else {
-          errorMessage = error.message;
-        }
+      // Calculate a basic score from answers for fallback
+      const basicScore = answers.length * 2.5; // Assume average score
+      const fallbackCategory = basicScore >= 20 ? "Growth Champion" 
+                             : basicScore >= 15 ? "Resilient Builder" 
+                             : "Balanced Explorer";
+      
+      const fallbackInsights = [
+        `Your responses show a ${fallbackCategory.toLowerCase()} mindset.`,
+        "You demonstrate awareness of your emotional patterns.",
+        "You're open to personal growth and development.",
+        "Your self-reflection skills are developing positively."
+      ];
+      
+      const fallbackRecommendations = [
+        "Practice daily mindfulness for 5-10 minutes.",
+        "Keep a weekly reflection journal.",
+        "Set small, achievable personal goals.",
+        "Connect with supportive people regularly."
+      ];
+      
+      // Update context with fallback data
+      updateAi({
+        score: Math.round(basicScore),
+        category: fallbackCategory,
+        insights: fallbackInsights,
+        recommendations: fallbackRecommendations
+      });
+      
+      // Mark assessment as completed locally (best effort)
+      try {
+        // Try to update Supabase directly (might work even if API doesn't)
+        await supabase
+          .from('profiles')
+          .update({ assessment_completed: true })
+          .eq('id', user.id);
+      } catch (supabaseError) {
+        console.log('Direct Supabase update also failed, continuing with fallback');
       }
       
-      setSubmitError(errorMessage);
-      setError(errorMessage);
+      // Show success message and proceed to results
+      console.log('Proceeding with fallback onboarding completion');
+      nextStep(); // Move to AI results step
+      
+      // Set a flag that this was a fallback completion
+      setSubmitError('Completed with basic insights (API temporarily unavailable)');
+      
     } finally {
       setIsSubmitting(false);
       setSubmitting(false);
@@ -248,6 +327,52 @@ export default function ReviewAndSubmit() {
           {submitError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
               <p className="text-red-800 text-sm">{submitError}</p>
+              {submitError.includes('400') && (
+                <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => {
+                      // Use completely hardcoded fallback and skip to dashboard
+                      updateAi({
+                        score: 20,
+                        category: "Balanced Explorer",
+                        insights: [
+                          "Thank you for completing the assessment.",
+                          "Your responses show thoughtful self-reflection.",
+                          "You're taking positive steps toward growth.",
+                          "Continue exploring your personal development journey."
+                        ],
+                        recommendations: [
+                          "Practice daily mindfulness meditation.",
+                          "Keep a personal growth journal.",
+                          "Set achievable weekly goals.",
+                          "Connect with supportive communities."
+                        ]
+                      });
+                      
+                      // Try to mark as completed in Supabase
+                      supabase
+                        .from('profiles')
+                        .update({ assessment_completed: true })
+                        .eq('id', user.id)
+                        .then(() => console.log('Profile updated successfully'))
+                        .catch(err => console.log('Profile update failed:', err));
+                      
+                      // Go to results page
+                      nextStep();
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Continue with Basic Insights
+                  </button>
+                  
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                  >
+                    Skip to Dashboard
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

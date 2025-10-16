@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { type MoodType } from "../components/MoodColorSwitcher";
 import { useTaskContext } from "../contexts/TaskContext";
 import QuickAdd from "../components/QuickAdd";
+import AIPersonalizationPanel from "../components/AIPersonalizationPanel";
 
 // Lazy load custom effect components for performance
 const VariableProximity = lazy(() => import('../components/effects/VariableProximity'));
@@ -426,6 +427,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                 ? "Every small step forward is progress. You're doing better than you think."
                 : "You have the power to create positive change in your life and inspire others around you."}
           </p>
+        </div>
+
+        {/* AI Personalization Panel */}
+        <div className="mb-8">
+          <AIPersonalizationPanel currentMood={currentMood} />
         </div>
 
         {/* Two column layout for bottom section */}

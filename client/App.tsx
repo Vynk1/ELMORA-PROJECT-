@@ -28,7 +28,7 @@ import AdminDashboard from "./pages/AdminDashboard.jsx";
 import AIReport from "./pages/AIReport";
 import HealthAssessment from "./pages/HealthAssessment";
 import AdminAccess from "./components/AdminAccess.jsx";
-import ElmoraChat from "./components/ElmoraChat";
+import PersonalizedChat from "./components/PersonalizedChat";
 import LoginForm from "./components/auth/LoginForm.jsx";
 import SignUpForm from "./components/auth/SignUpForm.jsx";
 import LandingPage from "./components/LandingPage.jsx";
@@ -80,7 +80,21 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         // PGRST116 means no rows returned (new user without profile)
         const isNewUser = error?.code === 'PGRST116' || !profile;
         const hasCompletedAssessment = profile?.assessment_completed === true;
-        setNeedsOnboarding(isNewUser || !hasCompletedAssessment);
+        
+        // Also check localStorage as backup
+        const localStorageCompleted = localStorage.getItem(`onboarding_completed_${user.id}`) === 'true';
+        
+        // If either database or localStorage says completed, don't need onboarding
+        const needsOnboard = (isNewUser || !hasCompletedAssessment) && !localStorageCompleted;
+        
+        console.log('Onboarding check:', {
+          isNewUser,
+          hasCompletedAssessment,
+          localStorageCompleted,
+          needsOnboard
+        });
+        
+        setNeedsOnboarding(needsOnboard);
       } catch (error) {
         console.error('Error in protected route onboarding check:', error);
         // Default to not needing onboarding on error
@@ -363,11 +377,9 @@ function AuthenticatedApp({
         </Routes>
       </main>
       
-      {/* Elmora Chat - Available on all pages after mood selection */}
-      <ElmoraChat
+      {/* Personalized Chat - Available on all pages after mood selection */}
+      <PersonalizedChat
         currentMood={currentMood}
-        userPoints={userPoints}
-        onPointsUpdate={handlePointsUpdate}
       />
       
       {/* Admin Access Component - Shows admin dashboard button for admin users */}

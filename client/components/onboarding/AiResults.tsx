@@ -1,10 +1,13 @@
 'use client';
 
 import { useOnboarding } from '../../contexts/OnboardingContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 import { SparklesIcon, LightBulbIcon, ArrowRightIcon, TrophyIcon } from '@heroicons/react/24/outline';
 
 export default function AiResults() {
   const { ai, basics } = useOnboarding();
+  const { user } = useAuth();
 
   if (!ai) {
     return (
@@ -144,13 +147,37 @@ export default function AiResults() {
           </p>
           
           <div className="text-center">
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-400/50 shadow-lg"
-            >
-              Go to My Dashboard
-              <ArrowRightIcon className="w-5 h-5 ml-2" />
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={async () => {
+                  try {
+                    // Mark assessment as completed in database
+                    if (user) {
+                      await supabase
+                        .from('profiles')
+                        .update({ assessment_completed: true })
+                        .eq('id', user.id);
+                      console.log('Assessment marked as completed in database');
+                    }
+                  } catch (error) {
+                    console.error('Error updating assessment status:', error);
+                  }
+                  
+                  // Also mark as completed in localStorage as backup
+                  if (user) {
+                    localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+                    console.log('Assessment marked as completed in localStorage');
+                  }
+                  
+                  // Force navigation to dashboard with replace to prevent back button issues
+                  window.location.replace('/dashboard');
+                }}
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-400/50 shadow-lg"
+              >
+                Go to My Dashboard
+                <ArrowRightIcon className="w-5 h-5 ml-2" />
+              </button>
+            </div>
           </div>
         </div>
 

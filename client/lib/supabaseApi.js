@@ -394,3 +394,222 @@ export async function generateHealthReport(answers) {
     throw new Error(error.message || 'Failed to generate health report');
   }
 }
+
+// ============= CHAT API =============
+
+/**
+ * Send message to personalized AI chatbot
+ * @param {string} message - User message
+ * @param {string} currentMood - Current user mood
+ * @returns {Promise<Object>} AI response
+ */
+export async function sendChatMessage(message, currentMood) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        message: message,
+        currentMood: currentMood
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to send message');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error sending chat message:', error);
+    throw new Error(error.message || 'Failed to send chat message');
+  }
+}
+
+/**
+ * Get chat history for current user
+ * @param {number} limit - Number of messages to retrieve
+ * @returns {Promise<Array>} Array of chat messages
+ */
+export async function getChatHistory(limit = 50) {
+  const user = await getCurrentUser();
+  if (!user) return [];
+  
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/chat/history/${user.id}?limit=${limit}`
+    );
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to load chat history');
+    }
+    
+    return data.data || [];
+  } catch (error) {
+    console.error('Error loading chat history:', error);
+    return [];
+  }
+}
+
+/**
+ * Delete chat history for current user
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteChatHistory() {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/chat/history/${user.id}`,
+      { method: 'DELETE' }
+    );
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to delete chat history');
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error deleting chat history:', error);
+    throw new Error(error.message || 'Failed to delete chat history');
+  }
+}
+
+// ============= ENHANCED AI PERSONALIZATION API =============
+
+/**
+ * Get personalized daily affirmation
+ * @returns {Promise<Object>} Affirmation data
+ */
+export async function getDailyAffirmation() {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/affirmation`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      }
+    );
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to generate affirmation');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error getting affirmation:', error);
+    throw new Error(error.message || 'Failed to generate affirmation');
+  }
+}
+
+/**
+ * Get personalized wellness insights
+ * @returns {Promise<Object>} Insights data
+ */
+export async function getWellnessInsights() {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/insights`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      }
+    );
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to generate insights');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error getting insights:', error);
+    throw new Error(error.message || 'Failed to generate insights');
+  }
+}
+
+/**
+ * Get mood-based recommendations
+ * @param {string} currentMood - User's current mood
+ * @returns {Promise<Object>} Recommendations data
+ */
+export async function getMoodRecommendations(currentMood) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/mood-recommendations`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, currentMood })
+      }
+    );
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to generate recommendations');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error getting mood recommendations:', error);
+    throw new Error(error.message || 'Failed to generate recommendations');
+  }
+}
+
+/**
+ * Get progress tracking summary
+ * @returns {Promise<Object>} Progress summary data
+ */
+export async function getProgressSummary() {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'}/api/progress-summary`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      }
+    );
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to generate progress summary');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error getting progress summary:', error);
+    throw new Error(error.message || 'Failed to generate progress summary');
+  }
+}

@@ -25,6 +25,9 @@ import FlowerDemo from "./pages/FlowerDemo";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import AdminAccess from "./components/AdminAccess.jsx";
+import AIReport from "./pages/AIReport";
+import HealthAssessment from "./pages/HealthAssessment";
+import PersonalizedChat from "./components/PersonalizedChat";
 import ElmoraChat from "./components/ElmoraChat";
 import LoginForm from "./components/auth/LoginForm.jsx";
 import SignUpForm from "./components/auth/SignUpForm.jsx";
@@ -254,16 +257,14 @@ function AuthenticatedApp({
           <Route path="/test-modal" element={<TestModal />} />
           <Route path="/flower-demo" element={<FlowerDemo />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/health-assessment" element={<HealthAssessment />} />
+          <Route path="/ai-report" element={<AIReport />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       
-      {/* Elmora Chat - Available on all pages after mood selection */}
-      <ElmoraChat
-        currentMood={currentMood}
-        userPoints={userPoints}
-        onPointsUpdate={handlePointsUpdate}
-      />
+      {/* Personalized AI Chat - Available on all pages after mood selection */}
+      <PersonalizedChat currentMood={currentMood} />
       
       {/* Admin Access Component - Shows admin dashboard button for admin users */}
       <AdminAccess />

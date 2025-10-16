@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { type MoodType } from "../components/MoodColorSwitcher";
 import { useTaskContext } from "../contexts/TaskContext";
 import QuickAdd from "../components/QuickAdd";
+import AIPersonalizationPanel from "../components/AIPersonalizationPanel";
 
 // Lazy load custom effect components for performance
 const VariableProximity = lazy(() => import('../components/effects/VariableProximity'));
@@ -92,7 +93,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           cardBg: "bg-emerald-100/70",
           textColor: "text-emerald-900",
         };
-      case "content":
+      case "mid":
         return {
           greeting: "Feeling balanced and ready",
           message: "You're in a great headspace. Let's build on this momentum.",
@@ -135,6 +136,13 @@ const Dashboard: React.FC<DashboardProps> = ({
       icon: "✨",
       link: "/checkin",
       color: "from-purple-400 to-pink-400",
+    },
+    {
+      title: "AI Wellbeing Report",
+      description: "Get personalized mental health insights",
+      icon: "🧠",
+      link: "/health-assessment",
+      color: "from-indigo-400 to-purple-400",
     },
     {
       title: "My Tasks",
@@ -419,6 +427,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                 ? "Every small step forward is progress. You're doing better than you think."
                 : "You have the power to create positive change in your life and inspire others around you."}
           </p>
+        </div>
+
+        {/* AI Personalization Panel - Full Width Section */}
+        <div className="mb-12">
+          <AIPersonalizationPanel currentMood={currentMood} />
         </div>
 
         {/* Two column layout for bottom section */}

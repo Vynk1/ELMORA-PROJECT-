@@ -354,6 +354,287 @@ app.get('/api/report/:reportId', async (req, res) => {
 // PERSONALIZED CHATBOT API
 // ============================================
 
+// ============================================
+// 🧠 AI ANALYSIS HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Generate immediate insights after check-in submission
+ */
+async function generateCheckinInsights(checkinData) {
+  try {
+    const prompt = `Based on this daily check-in data, provide 2-3 immediate, personalized insights:
+
+Check-in Data:
+- Mood: ${checkinData.mood}
+- Energy: ${checkinData.energy_level}/10
+- Sleep Quality: ${checkinData.sleep_quality}/10
+- Stress Level: ${checkinData.stress_level}/10
+- Physical Activity: ${checkinData.physical_activity}
+- Goals Progress: ${checkinData.daily_goals_progress}
+- Social Interactions: ${checkinData.social_interactions}
+- Weather Impact: ${checkinData.weather_impact}
+${checkinData.emotions ? `- Emotions: ${JSON.stringify(checkinData.emotions)}` : ''}
+${checkinData.gratitude ? `- Gratitude: ${checkinData.gratitude}` : ''}
+${checkinData.notes ? `- Notes: ${checkinData.notes}` : ''}
+
+Provide insights in JSON format:
+{
+  "insights": [
+    {
+      "type": "observation|encouragement|suggestion",
+      "title": "Brief title",
+      "message": "Personalized insight message",
+      "emoji": "relevant emoji"
+    }
+  ]
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 300,
+      response_format: { type: "json_object" }
+    });
+
+    return JSON.parse(completion.choices[0].message.content);
+  } catch (error) {
+    console.error('Error generating check-in insights:', error);
+    return {
+      insights: [{
+        type: "encouragement",
+        title: "Thank you!",
+        message: "Thanks for completing your daily check-in. Every step counts in your wellness journey!",
+        emoji: "🌟"
+      }]
+    };
+  }
+}
+
+/**
+ * Generate comprehensive AI insights from check-in patterns
+ */
+async function generateAICheckinInsights(contextData) {
+  try {
+    if (!contextData || !contextData.recent_checkins || contextData.recent_checkins.length === 0) {
+      return {
+        insights: [],
+        message: "Complete a few more daily check-ins to get personalized insights!",
+        recommendations: []
+      };
+    }
+
+    const recentCheckins = contextData.recent_checkins.slice(0, 14); // Last 2 weeks
+    const averages = contextData.averages || {};
+    const patterns = contextData.patterns || {};
+
+    const prompt = `Analyze this user's daily check-in patterns and provide actionable wellness insights:
+
+Recent Data (${recentCheckins.length} check-ins):
+${recentCheckins.map(c => 
+  `- ${c.date}: Mood: ${c.mood}, Energy: ${c.energy}, Sleep: ${c.sleep}, Stress: ${c.stress}, Activity: ${c.activity}`
+).join('\n')}
+
+Averages:
+- Energy: ${averages.avg_energy}/10
+- Sleep: ${averages.avg_sleep}/10
+- Stress: ${averages.avg_stress}/10
+- Most common mood: ${averages.most_common_mood}
+
+Patterns:
+- Total check-ins: ${patterns.total_checkins}
+- Goal completion rate: ${patterns.goal_completion_rate}%
+- High energy days: ${patterns.high_energy_days}
+- High stress days: ${patterns.high_stress_days}
+
+Generate insights in JSON format:
+{
+  "insights": [
+    {
+      "category": "sleep|energy|stress|mood|activity|goals",
+      "type": "pattern|correlation|concern|strength",
+      "title": "Brief insight title",
+      "observation": "What the data shows",
+      "impact": "Why this matters",
+      "emoji": "relevant emoji"
+    }
+  ],
+  "recommendations": [
+    {
+      "title": "Actionable recommendation",
+      "description": "How to implement this",
+      "priority": "high|medium|low",
+      "category": "wellness category",
+      "emoji": "emoji"
+    }
+  ],
+  "correlations": [
+    {
+      "factor1": "sleep",
+      "factor2": "energy",
+      "relationship": "positive|negative|neutral",
+      "strength": "strong|moderate|weak",
+      "insight": "What this correlation means"
+    }
+  ]
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 1000,
+      response_format: { type: "json_object" }
+    });
+
+    const result = JSON.parse(completion.choices[0].message.content);
+    return {
+      ...result,
+      data_summary: {
+        total_checkins: patterns.total_checkins,
+        consistency_rate: patterns.consistency_rate,
+        date_range: {
+          from: recentCheckins[recentCheckins.length - 1]?.date,
+          to: recentCheckins[0]?.date
+        }
+      }
+    };
+
+  } catch (error) {
+    console.error('Error generating AI check-in insights:', error);
+    return {
+      insights: [],
+      recommendations: [],
+      correlations: [],
+      error: 'Unable to generate insights at this time'
+    };
+  }
+}
+
+/**
+ * Analyze trends from check-in analytics data
+ */
+function analyzeTrends(analytics) {
+  if (!analytics || analytics.length === 0) {
+    return {
+      energy_trend: 'insufficient_data',
+      mood_pattern: 'insufficient_data',
+      sleep_correlation: 'insufficient_data',
+      stress_pattern: 'insufficient_data'
+    };
+  }
+
+  try {
+    // Calculate trends
+    const energyTrend = calculateTrend(analytics.map(a => a.energy_level));
+    const stressTrend = calculateTrend(analytics.map(a => a.stress_level));
+    const sleepTrend = calculateTrend(analytics.map(a => a.sleep_quality));
+
+    // Find most common mood
+    const moodCounts = {};
+    analytics.forEach(a => {
+      moodCounts[a.mood] = (moodCounts[a.mood] || 0) + 1;
+    });
+    const dominantMood = Object.keys(moodCounts).reduce((a, b) => 
+      moodCounts[a] > moodCounts[b] ? a : b
+    );
+
+    // Calculate correlations (simplified)
+    const sleepEnergyCorrelation = calculateCorrelation(
+      analytics.map(a => a.sleep_quality),
+      analytics.map(a => a.energy_level)
+    );
+
+    const stressEnergyCorrelation = calculateCorrelation(
+      analytics.map(a => a.stress_level),
+      analytics.map(a => a.energy_level)
+    );
+
+    return {
+      energy_trend: {
+        direction: energyTrend > 0.1 ? 'improving' : energyTrend < -0.1 ? 'declining' : 'stable',
+        slope: energyTrend,
+        average: analytics.reduce((sum, a) => sum + a.energy_level, 0) / analytics.length
+      },
+      sleep_trend: {
+        direction: sleepTrend > 0.1 ? 'improving' : sleepTrend < -0.1 ? 'declining' : 'stable',
+        slope: sleepTrend,
+        average: analytics.reduce((sum, a) => sum + a.sleep_quality, 0) / analytics.length
+      },
+      stress_trend: {
+        direction: stressTrend > 0.1 ? 'increasing' : stressTrend < -0.1 ? 'decreasing' : 'stable',
+        slope: stressTrend,
+        average: analytics.reduce((sum, a) => sum + a.stress_level, 0) / analytics.length
+      },
+      mood_pattern: {
+        dominant: dominantMood,
+        distribution: moodCounts,
+        variety: Object.keys(moodCounts).length
+      },
+      correlations: {
+        sleep_energy: {
+          strength: Math.abs(sleepEnergyCorrelation),
+          direction: sleepEnergyCorrelation > 0 ? 'positive' : 'negative',
+          interpretation: Math.abs(sleepEnergyCorrelation) > 0.5 ? 
+            'strong correlation' : Math.abs(sleepEnergyCorrelation) > 0.3 ? 
+            'moderate correlation' : 'weak correlation'
+        },
+        stress_energy: {
+          strength: Math.abs(stressEnergyCorrelation),
+          direction: stressEnergyCorrelation > 0 ? 'positive' : 'negative',
+          interpretation: Math.abs(stressEnergyCorrelation) > 0.5 ? 
+            'strong correlation' : Math.abs(stressEnergyCorrelation) > 0.3 ? 
+            'moderate correlation' : 'weak correlation'
+        }
+      },
+      summary: {
+        total_days: analytics.length,
+        best_energy_day: analytics.reduce((max, a) => a.energy_level > max.energy_level ? a : max, analytics[0]),
+        lowest_stress_day: analytics.reduce((min, a) => a.stress_level < min.stress_level ? a : min, analytics[0])
+      }
+    };
+  } catch (error) {
+    console.error('Error analyzing trends:', error);
+    return { error: 'Unable to analyze trends' };
+  }
+}
+
+/**
+ * Calculate linear trend (slope) for a series of values
+ */
+function calculateTrend(values) {
+  if (values.length < 2) return 0;
+  
+  const n = values.length;
+  const sumX = (n * (n - 1)) / 2; // Sum of indices 0,1,2...n-1
+  const sumY = values.reduce((sum, val) => sum + val, 0);
+  const sumXY = values.reduce((sum, val, idx) => sum + (val * idx), 0);
+  const sumX2 = values.reduce((sum, val, idx) => sum + (idx * idx), 0);
+  
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  return slope;
+}
+
+/**
+ * Calculate Pearson correlation coefficient between two arrays
+ */
+function calculateCorrelation(x, y) {
+  if (x.length !== y.length || x.length === 0) return 0;
+  
+  const n = x.length;
+  const sumX = x.reduce((sum, val) => sum + val, 0);
+  const sumY = y.reduce((sum, val) => sum + val, 0);
+  const sumXY = x.reduce((sum, val, idx) => sum + (val * y[idx]), 0);
+  const sumX2 = x.reduce((sum, val) => sum + (val * val), 0);
+  const sumY2 = y.reduce((sum, val) => sum + (val * val), 0);
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  
+  return denominator === 0 ? 0 : numerator / denominator;
+}
+
 /**
  * Get user context for personalized chat
  */
@@ -383,11 +664,49 @@ async function getUserContext(userId) {
       .order('created_at', { ascending: false })
       .limit(10);
 
+    // Get recent check-ins (last 7 days) for enhanced personalization
+    const { data: recentCheckins } = await supabase
+      .from('daily_checkins')
+      .select('mood, energy_level, sleep_quality, stress_level, physical_activity, emotions, gratitude, notes, checkin_date')
+      .eq('user_id', userId)
+      .gte('checkin_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+      .order('checkin_date', { ascending: false })
+      .limit(7);
+
+    // Calculate check-in averages for context
+    let checkinSummary = null;
+    if (recentCheckins && recentCheckins.length > 0) {
+      const avgEnergy = recentCheckins.reduce((sum, c) => sum + c.energy_level, 0) / recentCheckins.length;
+      const avgSleep = recentCheckins.reduce((sum, c) => sum + c.sleep_quality, 0) / recentCheckins.length;
+      const avgStress = recentCheckins.reduce((sum, c) => sum + c.stress_level, 0) / recentCheckins.length;
+      
+      const moodCounts = {};
+      recentCheckins.forEach(c => {
+        moodCounts[c.mood] = (moodCounts[c.mood] || 0) + 1;
+      });
+      const dominantMood = Object.keys(moodCounts).reduce((a, b) => 
+        moodCounts[a] > moodCounts[b] ? a : b
+      );
+
+      checkinSummary = {
+        count: recentCheckins.length,
+        avgEnergy: Math.round(avgEnergy * 10) / 10,
+        avgSleep: Math.round(avgSleep * 10) / 10,
+        avgStress: Math.round(avgStress * 10) / 10,
+        dominantMood,
+        latestMood: recentCheckins[0].mood,
+        consistency: recentCheckins.length >= 5 ? 'high' : recentCheckins.length >= 3 ? 'moderate' : 'low'
+      };
+    }
+
     return {
       latestReport: healthReports?.[0] || null,
       recentJournals: journals || [],
       meditationHistory: meditations || [],
-      hasReport: !!healthReports?.[0]
+      recentCheckins: recentCheckins || [],
+      checkinSummary,
+      hasReport: !!healthReports?.[0],
+      hasRecentCheckins: !!(recentCheckins && recentCheckins.length > 0)
     };
   } catch (error) {
     console.error('Error getting user context:', error);
@@ -395,7 +714,10 @@ async function getUserContext(userId) {
       latestReport: null,
       recentJournals: [],
       meditationHistory: [],
-      hasReport: false
+      recentCheckins: [],
+      checkinSummary: null,
+      hasReport: false,
+      hasRecentCheckins: false
     };
   }
 }
@@ -521,18 +843,46 @@ ${report.recommendations?.immediate?.slice(0, 2).map((rec, i) => `${i + 1}. ${re
 `;
   }
 
-  // Add recent activity context
-  if (userContext.recentJournals && userContext.recentJournals.length > 0) {
-    const lastJournal = userContext.recentJournals[0];
-    const journalDate = new Date(lastJournal.created_at);
-    const daysAgo = Math.floor((Date.now() - journalDate.getTime()) / (1000 * 60 * 60 * 24));
-    prompt += `\nRECENT JOURNALING: Last entry was ${daysAgo} day(s) ago. Total recent entries: ${userContext.recentJournals.length}`;
-  }
+    // Add recent activity context
+    if (userContext.recentJournals && userContext.recentJournals.length > 0) {
+      const lastJournal = userContext.recentJournals[0];
+      const journalDate = new Date(lastJournal.created_at);
+      const daysAgo = Math.floor((Date.now() - journalDate.getTime()) / (1000 * 60 * 60 * 24));
+      prompt += `\nRECENT JOURNALING: Last entry was ${daysAgo} day(s) ago. Total recent entries: ${userContext.recentJournals.length}`;
+    }
 
-  if (userContext.meditationHistory && userContext.meditationHistory.length > 0) {
-    const totalMinutes = Math.round(userContext.meditationHistory.reduce((sum, m) => sum + (m.duration || 0), 0) / 60);
-    prompt += `\nRECENT MEDITATION: ${userContext.meditationHistory.length} sessions, ${totalMinutes} minutes total`;
-  }
+    if (userContext.meditationHistory && userContext.meditationHistory.length > 0) {
+      const totalMinutes = Math.round(userContext.meditationHistory.reduce((sum, m) => sum + (m.duration || 0), 0) / 60);
+      prompt += `\nRECENT MEDITATION: ${userContext.meditationHistory.length} sessions, ${totalMinutes} minutes total`;
+    }
+
+    // Add comprehensive check-in data context
+    if (userContext.hasRecentCheckins && userContext.checkinSummary) {
+      const summary = userContext.checkinSummary;
+      prompt += `\n\nRECENT DAILY CHECK-INS (${summary.count} of last 7 days):
+- Current Mood: ${summary.latestMood} (Dominant: ${summary.dominantMood})
+- Average Energy: ${summary.avgEnergy}/10
+- Average Sleep Quality: ${summary.avgSleep}/10
+- Average Stress Level: ${summary.avgStress}/10
+- Check-in Consistency: ${summary.consistency}
+
+RECENT CHECK-IN PATTERNS:
+${userContext.recentCheckins.slice(0, 3).map((checkin, i) => 
+  `Day ${i + 1}: ${checkin.mood} mood, Energy ${checkin.energy_level}, Sleep ${checkin.sleep_quality}, Stress ${checkin.stress_level}${
+    checkin.emotions && checkin.emotions.length > 0 ? `, Emotions: ${JSON.parse(checkin.emotions).slice(0, 2).join(', ')}` : ''
+  }${
+    checkin.gratitude ? `, Grateful for: ${checkin.gratitude.substring(0, 50)}${checkin.gratitude.length > 50 ? '...' : ''}` : ''
+  }`
+).join('\n')}
+
+USE THIS DATA TO:
+- Reference specific mood patterns and energy levels
+- Acknowledge their consistency with check-ins
+- Provide targeted advice based on sleep-energy correlations
+- Address stress levels with specific techniques
+- Build on their gratitude practices
+- Recognize emotional patterns and provide support`;
+    }
 
   prompt += `\n\nREMEMBER: Use this context to provide highly personalized, relevant advice. Reference their strengths and gently address concerns. Be their supportive wellness companion! 🌿`;
 
@@ -716,6 +1066,467 @@ app.delete('/api/chat/history/:userId', async (req, res) => {
 
   } catch (error) {
     console.error('Error deleting chat history:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ============================================
+// 📊 DAILY CHECK-IN API ENDPOINTS
+// ============================================
+
+/**
+ * Store daily check-in data with comprehensive wellness tracking
+ */
+app.post('/api/checkin', async (req, res) => {
+  try {
+    const { 
+      userId, 
+      mood, 
+      energyLevel, 
+      sleepQuality, 
+      stressLevel,
+      physicalActivity,
+      socialInteractions,
+      emotions,
+      dailyGoalsProgress,
+      productivityRating,
+      weatherImpact,
+      gratitude,
+      notes,
+      challengesFaced,
+      winsCelebrated,
+      motivationLevel,
+      focusLevel,
+      overallSatisfaction
+    } = req.body;
+
+    // Validation
+    if (!userId || !mood || !energyLevel || !sleepQuality || !stressLevel || !physicalActivity || !socialInteractions || !dailyGoalsProgress || !weatherImpact) {
+      return res.status(400).json({
+        success: false,
+        error: 'Required fields: userId, mood, energyLevel, sleepQuality, stressLevel, physicalActivity, socialInteractions, dailyGoalsProgress, weatherImpact'
+      });
+    }
+
+    console.log(`Saving daily check-in for user ${userId}`);
+
+    // Insert check-in data
+    const { data: checkinData, error } = await supabase
+      .from('daily_checkins')
+      .insert([
+        {
+          user_id: userId,
+          mood,
+          energy_level: energyLevel,
+          sleep_quality: sleepQuality,
+          stress_level: stressLevel,
+          physical_activity: physicalActivity,
+          social_interactions: socialInteractions,
+          emotions: emotions || [],
+          daily_goals_progress: dailyGoalsProgress,
+          productivity_rating: productivityRating,
+          weather_impact: weatherImpact,
+          gratitude: gratitude || null,
+          notes: notes || null,
+          challenges_faced: challengesFaced || null,
+          wins_celebrated: winsCelebrated || null,
+          motivation_level: motivationLevel,
+          focus_level: focusLevel,
+          overall_satisfaction: overallSatisfaction,
+          created_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(400).json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    // Generate immediate insights based on check-in
+    const insights = await generateCheckinInsights(checkinData);
+
+    res.status(200).json({
+      success: true,
+      message: 'Daily check-in completed successfully',
+      data: checkinData,
+      insights,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error saving daily check-in:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get user's check-in history
+ */
+app.get('/api/checkin/history/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { limit = 30, days = 30 } = req.query;
+
+    const { data: checkins, error } = await supabase
+      .from('daily_checkins')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('checkin_date', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+      .order('checkin_date', { ascending: false })
+      .limit(parseInt(limit));
+
+    if (error) throw error;
+
+    res.status(200).json({
+      success: true,
+      data: checkins || [],
+      stats: {
+        total_checkins: checkins?.length || 0,
+        date_range: {
+          from: checkins?.[checkins.length - 1]?.checkin_date,
+          to: checkins?.[0]?.checkin_date
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching check-in history:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get AI-powered insights based on check-in patterns
+ */
+app.get('/api/checkin/insights/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { days = 30 } = req.query;
+
+    console.log(`💡 Generating insights for user ${userId}, last ${days} days`);
+
+    let contextData = null;
+
+    // Try to get check-in context using database function first
+    try {
+      const { data: dbContextData, error: contextError } = await supabase
+        .rpc('get_user_checkin_context', {
+          user_uuid: userId,
+          days_back: parseInt(days)
+        });
+
+      if (contextError) {
+        console.warn('⚠️ Database function not available:', contextError.message);
+        throw contextError;
+      }
+      
+      contextData = dbContextData;
+      console.log('✅ Used database function for context');
+    } catch (dbError) {
+      console.log('🔄 Falling back to manual context generation...');
+      
+      // Fallback: manually fetch and structure the data
+      const fromDate = new Date(Date.now() - parseInt(days) * 24 * 60 * 60 * 1000);
+      const { data: checkins, error: checkinError } = await supabase
+        .from('daily_checkins')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('checkin_date', fromDate.toISOString().split('T')[0])
+        .order('checkin_date', { ascending: false })
+        .limit(30);
+
+      if (checkinError) {
+        console.error('❌ Error fetching check-ins:', checkinError);
+        throw checkinError;
+      }
+
+      console.log(`📈 Found ${checkins?.length || 0} check-ins for analysis`);
+
+      // Manually create context data structure
+      contextData = await buildContextDataManually(checkins);
+    }
+
+    // Generate AI insights
+    const insights = await generateAICheckinInsights(contextData);
+
+    console.log(`✅ Insights generated successfully`);
+
+    res.status(200).json({
+      success: true,
+      insights,
+      context: contextData,
+      generated_at: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('💥 Error generating check-in insights:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: 'Check server logs for more information'
+    });
+  }
+});
+
+// Helper function to build context data manually
+async function buildContextDataManually(checkins) {
+  if (!checkins || checkins.length === 0) {
+    return {
+      recent_checkins: [],
+      averages: {
+        avg_energy: 0,
+        avg_sleep: 0,
+        avg_stress: 0,
+        avg_motivation: 0,
+        most_common_mood: 'neutral'
+      },
+      patterns: {
+        total_checkins: 0,
+        consistency_rate: 0,
+        goal_completion_rate: 0,
+        high_energy_days: 0,
+        high_stress_days: 0,
+        recent_emotions: []
+      }
+    };
+  }
+
+  // Calculate averages
+  const avgEnergy = checkins.reduce((sum, c) => sum + (c.energy_level || 0), 0) / checkins.length;
+  const avgSleep = checkins.reduce((sum, c) => sum + (c.sleep_quality || 0), 0) / checkins.length;
+  const avgStress = checkins.reduce((sum, c) => sum + (c.stress_level || 0), 0) / checkins.length;
+  const avgMotivation = checkins.reduce((sum, c) => sum + (c.motivation_level || 0), 0) / checkins.length;
+
+  // Find most common mood
+  const moodCounts = {};
+  checkins.forEach(c => {
+    if (c.mood) {
+      moodCounts[c.mood] = (moodCounts[c.mood] || 0) + 1;
+    }
+  });
+  const mostCommonMood = Object.keys(moodCounts).reduce((a, b) => 
+    moodCounts[a] > moodCounts[b] ? a : b, 'neutral'
+  );
+
+  // Calculate patterns
+  const completedGoals = checkins.filter(c => c.daily_goals_progress === 'completed').length;
+  const highEnergyDays = checkins.filter(c => (c.energy_level || 0) >= 7).length;
+  const highStressDays = checkins.filter(c => (c.stress_level || 0) >= 7).length;
+
+  // Collect recent emotions
+  const recentEmotions = new Set();
+  checkins.forEach(c => {
+    if (c.emotions) {
+      try {
+        const emotions = Array.isArray(c.emotions) ? c.emotions : JSON.parse(c.emotions || '[]');
+        emotions.forEach(emotion => recentEmotions.add(emotion));
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+  });
+
+  return {
+    recent_checkins: checkins.map(c => ({
+      date: c.checkin_date,
+      mood: c.mood,
+      energy: c.energy_level,
+      sleep: c.sleep_quality,
+      stress: c.stress_level,
+      activity: c.physical_activity,
+      emotions: c.emotions,
+      goals: c.daily_goals_progress,
+      notes: c.notes || '',
+      gratitude: c.gratitude || ''
+    })),
+    averages: {
+      avg_energy: Math.round(avgEnergy * 10) / 10,
+      avg_sleep: Math.round(avgSleep * 10) / 10,
+      avg_stress: Math.round(avgStress * 10) / 10,
+      avg_motivation: Math.round(avgMotivation * 10) / 10,
+      most_common_mood: mostCommonMood
+    },
+    patterns: {
+      total_checkins: checkins.length,
+      consistency_rate: Math.round((checkins.length / 30) * 100 * 10) / 10,
+      goal_completion_rate: Math.round((completedGoals / checkins.length) * 100 * 10) / 10,
+      high_energy_days: highEnergyDays,
+      high_stress_days: highStressDays,
+      recent_emotions: Array.from(recentEmotions).slice(0, 10)
+    }
+  };
+}
+
+/**
+ * Get trend analysis and correlations
+ */
+app.get('/api/checkin/trends/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { period = 'week' } = req.query; // week, month, quarter
+
+    console.log(`📊 Analyzing trends for user ${userId}, period: ${period}`);
+
+    // Calculate date range based on period
+    let daysBack;
+    switch (period) {
+      case 'week': daysBack = 7; break;
+      case 'month': daysBack = 30; break;
+      case 'quarter': daysBack = 90; break;
+      default: daysBack = 30;
+    }
+
+    const fromDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
+    const fromDateStr = fromDate.toISOString().split('T')[0];
+    
+    console.log(`🗓️ Fetching data from ${fromDateStr} to today`);
+
+    // First, try to get basic check-in data (fallback if analytics view doesn't exist)
+    const { data: basicCheckins, error: basicError } = await supabase
+      .from('daily_checkins')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('checkin_date', fromDateStr)
+      .order('checkin_date', { ascending: true });
+
+    if (basicError) {
+      console.error('❌ Error fetching basic check-ins:', basicError);
+      throw basicError;
+    }
+
+    console.log(`📈 Found ${basicCheckins?.length || 0} check-ins`);
+
+    // Try to get analytics data (enhanced view)
+    let analytics = null;
+    const { data: analyticsData, error: analyticsError } = await supabase
+      .from('checkin_analytics')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('checkin_date', fromDateStr)
+      .order('checkin_date', { ascending: true });
+
+    if (analyticsError) {
+      console.warn('⚠️ Analytics view not available, using basic data:', analyticsError.message);
+      analytics = basicCheckins; // Fallback to basic data
+    } else {
+      analytics = analyticsData;
+    }
+
+    // Calculate streak (with fallback)
+    let streakData = 0;
+    try {
+      const { data: streak, error: streakError } = await supabase
+        .rpc('calculate_checkin_streak', { user_uuid: userId });
+      
+      if (streakError) {
+        console.warn('⚠️ Streak function not available:', streakError.message);
+        // Calculate streak manually
+        streakData = calculateStreakManually(basicCheckins);
+      } else {
+        streakData = streak || 0;
+      }
+    } catch (streakErr) {
+      console.warn('⚠️ Streak calculation failed:', streakErr.message);
+      streakData = calculateStreakManually(basicCheckins);
+    }
+
+    console.log(`🔥 Current streak: ${streakData}`);
+
+    // Generate trend analysis
+    const trends = analyzeTrends(analytics);
+    
+    console.log(`✅ Trends analysis complete:`, { 
+      dataPoints: analytics?.length, 
+      hasValidTrends: trends && trends !== 'insufficient_data' 
+    });
+
+    res.status(200).json({
+      success: true,
+      trends,
+      current_streak: streakData,
+      period,
+      data_points: analytics?.length || 0,
+      date_range: {
+        from: fromDateStr,
+        to: new Date().toISOString().split('T')[0]
+      },
+      raw_data: analytics // Include for debugging
+    });
+
+  } catch (error) {
+    console.error('💥 Error analyzing trends:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: 'Check server logs for more information'
+    });
+  }
+});
+
+// Helper function to calculate streak manually
+function calculateStreakManually(checkins) {
+  if (!checkins || checkins.length === 0) return 0;
+  
+  let streak = 0;
+  const today = new Date();
+  let currentDate = new Date(today);
+  
+  // Check if there's a check-in for today or yesterday (to account for time zones)
+  const sortedCheckins = [...checkins].sort((a, b) => new Date(b.checkin_date) - new Date(a.checkin_date));
+  
+  for (const checkin of sortedCheckins) {
+    const checkinDate = new Date(checkin.checkin_date);
+    const daysDiff = Math.floor((currentDate - checkinDate) / (1000 * 60 * 60 * 24));
+    
+    if (daysDiff <= 1) { // Today or yesterday
+      streak++;
+      currentDate = new Date(checkinDate);
+      currentDate.setDate(currentDate.getDate() - 1); // Move to previous day
+    } else {
+      break;
+    }
+  }
+  
+  return streak;
+}
+
+/**
+ * Get today's check-in status
+ */
+app.get('/api/checkin/today/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data: todayCheckin, error } = await supabase
+      .from('daily_checkins')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('checkin_date', today)
+      .single();
+
+    res.status(200).json({
+      success: true,
+      hasCheckedInToday: !error && !!todayCheckin,
+      data: todayCheckin || null
+    });
+
+  } catch (error) {
+    console.error('Error checking today\'s status:', error);
     res.status(500).json({
       success: false,
       error: error.message

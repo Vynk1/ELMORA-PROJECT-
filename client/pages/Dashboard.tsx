@@ -4,6 +4,8 @@ import { type MoodType } from "../components/MoodColorSwitcher";
 import { useTaskContext } from "../contexts/TaskContext";
 import QuickAdd from "../components/QuickAdd";
 import AIPersonalizationPanel from "../components/AIPersonalizationPanel";
+import WellnessTrends from "../components/WellnessTrends";
+import DailyCheckIn from "../components/modals/DailyCheckIn";
 
 // Lazy load custom effect components for performance
 const VariableProximity = lazy(() => import('../components/effects/VariableProximity'));
@@ -16,12 +18,14 @@ interface DashboardProps {
   currentMood: MoodType;
   userPoints: number;
   onPointsUpdate: (points: number) => void;
+  userId?: string; // Add userId for wellness tracking
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
   currentMood,
   userPoints,
   onPointsUpdate,
+  userId = '550e8400-e29b-41d4-a716-446655440000', // Default UUID for demo purposes
 }) => {
   const { todos, completionPercentage } = useTaskContext();
   const [streakDays, setStreakDays] = useState(3);
@@ -29,6 +33,11 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showCTAMicrocopy, setShowCTAMicrocopy] = useState(false);
+  
+  // Modal states for new components
+  const [showWellnessTrends, setShowWellnessTrends] = useState(false);
+  const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
+  const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
   // Additional stats for enhanced dashboard
   const [minutesMeditated, setMinutesMeditated] = useState(127);
   const [tasksCompleted, setTasksCompleted] = useState(89);
@@ -55,6 +64,25 @@ const Dashboard: React.FC<DashboardProps> = ({
     };
   }, []);
 
+  // Check if user has completed today's check-in
+  useEffect(() => {
+    const checkTodayStatus = async () => {
+      try {
+        const response = await fetch(`/api/checkin/today/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setHasCheckedInToday(data.hasCheckedInToday);
+        }
+      } catch (error) {
+        console.error('Error checking today\'s check-in status:', error);
+      }
+    };
+
+    if (userId) {
+      checkTodayStatus();
+    }
+  }, [userId]);
+
   const handleTaskAdded = (task: string, category: string) => {
     // Keep track of recently added tasks for display
     setRecentlyAddedTasks((prev) => [{
@@ -65,6 +93,35 @@ const Dashboard: React.FC<DashboardProps> = ({
     // Award points for adding tasks
     onPointsUpdate(userPoints + 2);
     console.log(`Added task: ${task} (${category})`);
+  };
+
+  const handleCheckinComplete = async (data: any) => {
+    try {
+      const response = await fetch('/api/checkin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          ...data
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setHasCheckedInToday(true);
+        onPointsUpdate(userPoints + 10); // Award points for check-in
+        
+        // Show insights if available
+        if (result.insights && result.insights.insights.length > 0) {
+          // Could show a success modal with insights here
+          console.log('Check-in insights:', result.insights);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving check-in:', error);
+    }
   };
 
   const getMoodContent = () => {
@@ -131,11 +188,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const quickActions = [
     {
-      title: "Daily Check-in",
-      description: "Track your mood and energy",
-      icon: "✨",
-      link: "/checkin",
-      color: "from-purple-400 to-pink-400",
+      title: hasCheckedInToday ? "Check-in Complete ✓" : "Daily Check-in",
+      description: hasCheckedInToday ? "Already completed today" : "Track your comprehensive wellness",
+      icon: hasCheckedInToday ? "✅" : "✨",
+      action: () => setShowDailyCheckIn(true),
+      color: hasCheckedInToday ? "from-green-400 to-emerald-400" : "from-purple-400 to-pink-400",
+      disabled: hasCheckedInToday,
+    },
+    {
+      title: "Wellness Analytics",
+      description: "View your wellness trends and insights",
+      icon: "📊",
+      action: () => setShowWellnessTrends(true),
+      color: "from-blue-400 to-indigo-400",
     },
     {
       title: "AI Wellbeing Report",
@@ -233,13 +298,15 @@ const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Primary CTA with DecryptedText Microcopy */}
           <div className="mb-8">
-            <Link
-              to="/checkin"
+            <button
+              onClick={() => setShowDailyCheckIn(true)}
+              disabled={hasCheckedInToday}
               className={`
                 inline-block px-8 py-4 bg-white/20 ${moodContent.textColor} 
                 rounded-2xl font-medium hover:bg-white/30 transition-all duration-300
                 transform hover:scale-105 shadow-lg hover:shadow-xl
                 border border-white/30
+                ${hasCheckedInToday ? 'opacity-75 cursor-not-allowed transform-none hover:scale-100' : ''}
               `}
               onMouseEnter={() => setShowCTAMicrocopy(true)}
               onMouseLeave={() => setShowCTAMicrocopy(false)}
@@ -247,23 +314,27 @@ const Dashboard: React.FC<DashboardProps> = ({
               onBlur={() => setShowCTAMicrocopy(false)}
             >
               <div className="flex flex-col items-center space-y-1">
-                <span className="text-lg">Check in now</span>
+                <span className="text-lg">
+                  {hasCheckedInToday ? 'Already checked in today ✓' : 'Check in now'}
+                </span>
                 <div className="h-4 min-w-[120px]">
-                  {showCTAMicrocopy && !prefersReducedMotion ? (
+                  {showCTAMicrocopy && !hasCheckedInToday && !prefersReducedMotion ? (
                     <Suspense fallback={
-                      <span className="text-sm opacity-80">Takes 60 seconds.</span>
+                      <span className="text-sm opacity-80">Takes 2 minutes.</span>
                     }>
                       <DecryptedText
-                        text="Takes 60 seconds."
+                        text="Takes 2 minutes."
                         className="text-sm opacity-80"
                       />
                     </Suspense>
-                  ) : showCTAMicrocopy ? (
-                    <span className="text-sm opacity-80">Takes 60 seconds.</span>
+                  ) : showCTAMicrocopy && !hasCheckedInToday ? (
+                    <span className="text-sm opacity-80">Takes 2 minutes.</span>
+                  ) : hasCheckedInToday ? (
+                    <span className="text-sm opacity-80">Come back tomorrow!</span>
                   ) : null}
                 </div>
               </div>
-            </Link>
+            </button>
           </div>
 
           {/* Spline Placeholder for Plant Mascot */}
@@ -382,6 +453,22 @@ const Dashboard: React.FC<DashboardProps> = ({
           </Suspense>
         </div>
 
+        {/* Wellness Trends Quick Access */}
+        <div className="text-center mb-8">
+          <button
+            onClick={() => setShowWellnessTrends(true)}
+            className={`
+              inline-flex items-center space-x-2 px-6 py-3 
+              bg-white/10 ${moodContent.textColor} rounded-2xl 
+              font-medium hover:bg-white/20 transition-all duration-300
+              transform hover:scale-105 border border-white/20
+            `}
+          >
+            <span>📊</span>
+            <span>View Wellness Analytics</span>
+          </button>
+        </div>
+
         {/* Quick Actions */}
         <div className="mb-12">
           <h2
@@ -390,23 +477,32 @@ const Dashboard: React.FC<DashboardProps> = ({
             What would you like to do today?
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quickActions.map((action, index) => (
-              <Link
-                key={index}
-                to={action.link}
-                className={`
-                  bg-gradient-to-br ${action.color}
-                  rounded-3xl p-8 text-white text-center
-                  transform hover:scale-105 transition-all duration-300
-                  shadow-lg hover:shadow-xl
-                  border border-white/20
-                `}
-              >
-                <div className="text-4xl mb-4">{action.icon}</div>
-                <h3 className="text-xl font-medium mb-2">{action.title}</h3>
-                <p className="text-sm opacity-90">{action.description}</p>
-              </Link>
-            ))}
+            {quickActions.map((action, index) => {
+              const ActionComponent = action.link ? Link : 'button';
+              const actionProps = action.link 
+                ? { to: action.link } 
+                : { onClick: action.action, disabled: action.disabled };
+              
+              return (
+                <ActionComponent
+                  key={index}
+                  {...actionProps}
+                  className={`
+                    bg-gradient-to-br ${action.color}
+                    rounded-3xl p-8 text-white text-center
+                    transform hover:scale-105 transition-all duration-300
+                    shadow-lg hover:shadow-xl
+                    border border-white/20
+                    ${action.disabled ? 'opacity-75 cursor-not-allowed transform-none hover:scale-100' : ''}
+                    ${!action.link ? 'w-full' : ''}
+                  `}
+                >
+                  <div className="text-4xl mb-4">{action.icon}</div>
+                  <h3 className="text-xl font-medium mb-2">{action.title}</h3>
+                  <p className="text-sm opacity-90">{action.description}</p>
+                </ActionComponent>
+              );
+            })}
           </div>
         </div>
 
@@ -502,6 +598,19 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal Components */}
+      <WellnessTrends
+        userId={userId}
+        isOpen={showWellnessTrends}
+        onClose={() => setShowWellnessTrends(false)}
+      />
+
+      <DailyCheckIn
+        isOpen={showDailyCheckIn}
+        onClose={() => setShowDailyCheckIn(false)}
+        onComplete={handleCheckinComplete}
+      />
     </div>
   );
 };

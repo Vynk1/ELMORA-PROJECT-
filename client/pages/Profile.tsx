@@ -301,66 +301,6 @@ const Profile: React.FC = () => {
     amazing: '☀️'
   };
 
-  const ProfileEditor = () => (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-          <input
-            type="text"
-            value={editForm.name}
-            onChange={(e) => updateEditForm('name', e.target.value)}
-            className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-          <input
-            type="text"
-            value={editForm.location}
-            onChange={(e) => updateEditForm('location', e.target.value)}
-            className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
-        <textarea
-          value={editForm.bio}
-          onChange={(e) => updateEditForm('bio', e.target.value)}
-          className="w-full p-3 border border-gray-200 rounded-2xl h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-          placeholder="Tell us about yourself..."
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Interests</label>
-        <input
-          type="text"
-          value={editForm.interests.join(', ')}
-          onChange={(e) => updateEditForm('interests', e.target.value.split(', ').filter(i => i.trim()))}
-          className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-          placeholder="Meditation, Reading, Yoga..."
-        />
-      </div>
-
-      <div className="flex space-x-3">
-        <button
-          onClick={cancelEditing}
-          className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-2xl font-medium hover:bg-gray-200"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={saveProfile}
-          className="flex-1 py-3 bg-primary text-white rounded-2xl font-medium hover:bg-primary/90"
-        >
-          Save Changes
-        </button>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return <LoadingScreen />;
@@ -450,7 +390,64 @@ const Profile: React.FC = () => {
         {isEditing && (
           <div className="bg-white rounded-3xl p-8 shadow-sm mb-8">
             <h2 className="text-2xl font-light text-gray-800 mb-6">Edit Profile</h2>
-            <ProfileEditor />
+            <div className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => updateEditForm('name', e.target.value)}
+                    className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                  <input
+                    type="text"
+                    value={editForm.location}
+                    onChange={(e) => updateEditForm('location', e.target.value)}
+                    className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                <textarea
+                  value={editForm.bio}
+                  onChange={(e) => updateEditForm('bio', e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-2xl h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Tell us about yourself..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Interests</label>
+                <input
+                  type="text"
+                  value={editForm.interests.join(', ')}
+                  onChange={(e) => updateEditForm('interests', e.target.value.split(', ').filter(i => i.trim()))}
+                  className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Meditation, Reading, Yoga..."
+                />
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={cancelEditing}
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-2xl font-medium hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveProfile}
+                  className="flex-1 py-3 bg-primary text-white rounded-2xl font-medium hover:bg-primary/90"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

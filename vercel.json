@@ -3,7 +3,17 @@
   "buildCommand": "npm run build:client",
   "outputDirectory": "dist/spa",
   "framework": "vite",
+  "functions": {
+    "server/server.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/server/server.js"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

@@ -1,4 +1,5 @@
 import React, { useState, lazy, Suspense, useEffect } from 'react';
+import { Target, Sparkles, Zap, Users2, BookText, Palette, Plus, CheckCircle, PartyPopper } from 'lucide-react';
 
 // Lazy load custom effect components
 const ScrollFloat = lazy(() => import('../components/effects/ScrollFloat'));
@@ -87,12 +88,12 @@ const Goals: React.FC = () => {
   }, []);
 
   const categories = [
-    { id: 'all', name: 'All Goals', icon: '🎯', color: 'bg-gray-100' },
-    { id: 'wellness', name: 'Wellness', icon: '🧘', color: 'bg-green-100' },
-    { id: 'productivity', name: 'Productivity', icon: '⚡', color: 'bg-blue-100' },
-    { id: 'social', name: 'Social', icon: '👥', color: 'bg-purple-100' },
-    { id: 'learning', name: 'Learning', icon: '📚', color: 'bg-yellow-100' },
-    { id: 'creative', name: 'Creative', icon: '🎨', color: 'bg-pink-100' }
+    { id: 'all', name: 'All Goals', icon: Target, color: 'bg-gray-100' },
+    { id: 'wellness', name: 'Wellness', icon: Sparkles, color: 'bg-green-100' },
+    { id: 'productivity', name: 'Productivity', icon: Zap, color: 'bg-blue-100' },
+    { id: 'social', name: 'Social', icon: Users2, color: 'bg-purple-100' },
+    { id: 'learning', name: 'Learning', icon: BookText, color: 'bg-yellow-100' },
+    { id: 'creative', name: 'Creative', icon: Palette, color: 'bg-pink-100' }
   ];
 
   const filteredGoals = selectedCategory === 'all' 
@@ -266,7 +267,7 @@ const Goals: React.FC = () => {
             onClick={() => setShowAddGoal(true)}
             className="bg-primary text-white px-6 py-3 rounded-2xl font-medium hover:bg-primary/90 gentle-hover flex items-center space-x-2"
           >
-            <span>+</span>
+            <Plus className="w-5 h-5" strokeWidth={2} />
             <span>Add Goal</span>
           </button>
         </div>
@@ -363,7 +364,10 @@ const Goals: React.FC = () => {
                 }
               `}
             >
-              <span>{category.icon}</span>
+              {React.createElement(category.icon, {
+                className: "w-5 h-5",
+                strokeWidth: 2
+              })}
               <span>{category.name}</span>
             </button>
           ))}
@@ -407,7 +411,10 @@ const Goals: React.FC = () => {
                           duration={2} 
                           className="text-yellow-500 font-bold text-sm whitespace-nowrap"
                         >
-                          🎉 Nice work!
+                          <span className="flex items-center gap-1">
+                            <PartyPopper className="w-4 h-4" strokeWidth={2} />
+                            Nice work!
+                          </span>
                         </FallingText>
                       </div>
                     </Suspense>
@@ -424,7 +431,7 @@ const Goals: React.FC = () => {
                         ) : (
                           goal.title
                         )}
-                        {goal.isCompleted && <span className="ml-2">✅</span>}
+                        {goal.isCompleted && <CheckCircle className="w-5 h-5 ml-2 inline text-green-600" strokeWidth={2} />}
                       </h3>
                       <p className={`text-sm ${goal.isCompleted ? 'text-green-600' : 'text-gray-600'}`}>
                         {goal.description}
@@ -493,7 +500,7 @@ const Goals: React.FC = () => {
 
         {filteredGoals.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎯</div>
+            <Target className="w-16 h-16 mx-auto mb-4 text-gray-400" strokeWidth={2} />
             <h3 className="text-xl font-medium text-gray-800 mb-2">No goals yet</h3>
             <p className="text-gray-600 mb-6">Start by adding your first goal!</p>
             <button

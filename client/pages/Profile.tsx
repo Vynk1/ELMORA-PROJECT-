@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import LoadingScreen from '../components/LoadingScreen';
+import { User, Trophy, BarChart3, TrendingUp, Camera, Baby, Flame, Sparkles, BookOpen, Gem, CloudRain, CloudSun, Sun, MapPin, Target, HeartHandshake, CheckCircle } from 'lucide-react';
 
 interface UserProfile {
   name: string;
@@ -67,7 +68,7 @@ const Profile: React.FC = () => {
         id: '1',
         title: 'First Steps',
         description: 'Completed your first task',
-        icon: '👶',
+        icon: 'Baby',
         unlockedDate: '2024-01-01',
         rarity: 'common'
       },
@@ -75,7 +76,7 @@ const Profile: React.FC = () => {
         id: '2',
         title: 'Week Warrior',
         description: '7-day task completion streak',
-        icon: '🔥',
+        icon: 'Flame',
         unlockedDate: '2024-01-08',
         rarity: 'rare'
       },
@@ -83,7 +84,7 @@ const Profile: React.FC = () => {
         id: '3',
         title: 'Mindful Master',
         description: 'Completed 50 meditation sessions',
-        icon: '🧘',
+        icon: 'Sparkles',
         unlockedDate: '2024-01-20',
         rarity: 'rare'
       },
@@ -91,7 +92,7 @@ const Profile: React.FC = () => {
         id: '4',
         title: 'Journal Journeyer',
         description: 'Written 25 journal entries',
-        icon: '📖',
+        icon: 'BookOpen',
         unlockedDate: '2024-01-25',
         rarity: 'common'
       },
@@ -99,7 +100,7 @@ const Profile: React.FC = () => {
         id: '5',
         title: 'Unstoppable',
         description: '30-day active streak',
-        icon: '💎',
+        icon: 'Gem',
         unlockedDate: '2024-01-30',
         rarity: 'legendary'
       }
@@ -213,7 +214,9 @@ const Profile: React.FC = () => {
         .from('profiles')
         .upsert({
           user_id: user.id,
-          avatar_url: avatarUrl
+          avatar_url: avatarUrl,
+          email: user.email || '',
+          first_name: profile.name.split(' ')[0] || profile.name || 'User'
         }, {
           onConflict: 'user_id'
         });
@@ -268,7 +271,9 @@ const Profile: React.FC = () => {
         .upsert({
           user_id: user.id,
           display_name: editForm.name,
+          first_name: editForm.name.split(' ')[0] || editForm.name,
           bio: editForm.bio,
+          email: user.email || '',
         }, {
           onConflict: 'user_id'
         })
@@ -301,10 +306,10 @@ const Profile: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'overview', name: 'Overview', icon: '👤' },
-    { id: 'achievements', name: 'Achievements', icon: '🏆' },
-    { id: 'stats', name: 'Statistics', icon: '📊' },
-    { id: 'activity', name: 'Activity', icon: '📈' },
+    { id: 'overview', name: 'Overview', icon: User },
+    { id: 'achievements', name: 'Achievements', icon: Trophy },
+    { id: 'stats', name: 'Statistics', icon: BarChart3 },
+    { id: 'activity', name: 'Activity', icon: TrendingUp },
   ];
 
   const rarityColors = {
@@ -313,10 +318,10 @@ const Profile: React.FC = () => {
     legendary: 'bg-purple-100 text-purple-800'
   };
 
-  const moodEmojis = {
-    sad: '🌧️',
-    mid: '⛅',
-    amazing: '☀️'
+  const moodIcons = {
+    sad: CloudRain,
+    mid: CloudSun,
+    amazing: Sun
   };
 
 
@@ -350,7 +355,7 @@ const Profile: React.FC = () => {
                 className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-full hover:bg-primary/90 disabled:opacity-50"
                 title="Change profile photo"
               >
-                {uploading ? '...' : '📷'}
+                {uploading ? '...' : <Camera className="w-4 h-4" strokeWidth={2} />}
               </button>
             </div>
 
@@ -358,8 +363,9 @@ const Profile: React.FC = () => {
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-3xl font-light text-gray-800 mb-2">{profile.name}</h1>
               <p className="text-gray-600 mb-2">{profile.email}</p>
-              <p className="text-gray-500 text-sm mb-3">
-                📍 {profile.location} • Member since {new Date(profile.joinDate).toLocaleDateString()}
+              <p className="text-gray-500 text-sm mb-3 flex items-center justify-center md:justify-start gap-1">
+                <MapPin className="w-4 h-4" strokeWidth={2} />
+                {profile.location || 'Not set'} • Member since {new Date(profile.joinDate).toLocaleDateString()}
               </p>
               <p className="text-gray-700">{profile.bio}</p>
             </div>
@@ -483,7 +489,7 @@ const Profile: React.FC = () => {
                 }
               `}
             >
-              <span>{tab.icon}</span>
+              <tab.icon className="w-5 h-5" strokeWidth={2} />
               <span>{tab.name}</span>
             </button>
           ))}
@@ -513,7 +519,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-3">
                   {profile.goals.map((goal, index) => (
                     <div key={index} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl">
-                      <span className="text-lg">🎯</span>
+                      <Target className="w-5 h-5" strokeWidth={2} />
                       <span className="text-gray-700">{goal}</span>
                     </div>
                   ))}
@@ -524,14 +530,16 @@ const Profile: React.FC = () => {
               <div>
                 <h3 className="text-lg font-medium text-gray-800 mb-4">Recent Mood Patterns</h3>
                 <div className="flex space-x-2">
-                  {profile.moodHistory.slice(0, 7).map((day, index) => (
+                  {profile.moodHistory.slice(0, 7).map((day, index) => {
+                    const MoodIcon = moodIcons[day.mood];
+                    return (
                     <div key={index} className="text-center">
-                      <div className="text-2xl mb-1">{moodEmojis[day.mood]}</div>
+                      <MoodIcon className="w-8 h-8 mx-auto mb-1" strokeWidth={2} />
                       <div className="text-xs text-gray-600">
                         {new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}
                       </div>
                     </div>
-                  ))}
+                  );})}
                 </div>
               </div>
             </div>
@@ -542,10 +550,13 @@ const Profile: React.FC = () => {
             <div>
               <h3 className="text-2xl font-light text-gray-800 mb-6">Your Achievements</h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {profile.achievements.map((achievement) => (
+                {profile.achievements.map((achievement) => {
+                  const iconMap: {[key: string]: any} = { Baby, Flame, Sparkles, BookOpen, Gem };
+                  const AchievementIcon = iconMap[achievement.icon] || Trophy;
+                  return (
                   <div key={achievement.id} className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-6 border border-gray-200">
                     <div className="text-center mb-4">
-                      <div className="text-4xl mb-2">{achievement.icon}</div>
+                      <AchievementIcon className="w-12 h-12 mx-auto mb-2" strokeWidth={2} />
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${rarityColors[achievement.rarity]}`}>
                         {achievement.rarity}
                       </span>
@@ -556,7 +567,7 @@ const Profile: React.FC = () => {
                       Unlocked: {new Date(achievement.unlockedDate).toLocaleDateString()}
                     </div>
                   </div>
-                ))}
+                );})}
               </div>
             </div>
           )}
@@ -653,22 +664,24 @@ const Profile: React.FC = () => {
               
               <div className="space-y-4">
                 {[
-                  { time: '2 hours ago', action: 'Completed daily meditation', icon: '🧘', color: 'text-green-600' },
-                  { time: '5 hours ago', action: 'Finished 8 of 10 tasks', icon: '✅', color: 'text-blue-600' },
-                  { time: '1 day ago', action: 'Wrote journal entry: "Feeling grateful"', icon: '📖', color: 'text-purple-600' },
-                  { time: '1 day ago', action: 'Sent encouragement to Sarah M.', icon: '💌', color: 'text-pink-600' },
-                  { time: '2 days ago', action: 'Achieved 7-day streak!', icon: '🔥', color: 'text-orange-600' },
-                  { time: '3 days ago', action: 'Unlocked "Mindful Master" achievement', icon: '🏆', color: 'text-yellow-600' },
-                  { time: '3 days ago', action: 'Completed goal: "Read 2 books this month"', icon: '🎯', color: 'text-indigo-600' },
-                ].map((activity, index) => (
+                  { time: '2 hours ago', action: 'Completed daily meditation', icon: Sparkles, color: 'text-green-600' },
+                  { time: '5 hours ago', action: 'Finished 8 of 10 tasks', icon: CheckCircle, color: 'text-blue-600' },
+                  { time: '1 day ago', action: 'Wrote journal entry: "Feeling grateful"', icon: BookOpen, color: 'text-purple-600' },
+                  { time: '1 day ago', action: 'Sent encouragement to Sarah M.', icon: HeartHandshake, color: 'text-pink-600' },
+                  { time: '2 days ago', action: 'Achieved 7-day streak!', icon: Flame, color: 'text-orange-600' },
+                  { time: '3 days ago', action: 'Unlocked "Mindful Master" achievement', icon: Trophy, color: 'text-yellow-600' },
+                  { time: '3 days ago', action: 'Completed goal: "Read 2 books this month"', icon: Target, color: 'text-indigo-600' },
+                ].map((activity, index) => {
+                  const ActivityIcon = activity.icon;
+                  return (
                   <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-2xl">
-                    <span className="text-2xl">{activity.icon}</span>
+                    <ActivityIcon className={`w-6 h-6 ${activity.color}`} strokeWidth={2} />
                     <div className="flex-1">
                       <p className="text-gray-800">{activity.action}</p>
                       <p className="text-sm text-gray-500">{activity.time}</p>
                     </div>
                   </div>
-                ))}
+                );})}
               </div>
             </div>
           )}

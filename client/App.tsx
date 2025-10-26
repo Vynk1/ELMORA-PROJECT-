@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
 import { TaskProvider } from "./contexts/TaskContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { supabase } from "./lib/supabase";
 import LoadingScreen from "./components/LoadingScreen";
 import MoodSelection from "./pages/MoodSelection";
@@ -41,13 +42,15 @@ import { type MoodColors } from "./components/MoodColorPicker";
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <AppProvider>
-          <TaskProvider>
-            <AppContent />
-          </TaskProvider>
-        </AppProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            <TaskProvider>
+              <AppContent />
+            </TaskProvider>
+          </AppProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

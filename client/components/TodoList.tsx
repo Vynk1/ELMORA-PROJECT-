@@ -1,6 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import FlowerGrowthWrapper from './FlowerGrowthWrapper';
 import { useTaskContext, type TodoItem } from '../contexts/TaskContext';
+import { Sprout, PartyPopper, Sparkles } from 'lucide-react';
 
 // Lazy load effect components
 const CountUp = lazy(() => import('./effects/CountUp'));
@@ -86,19 +87,20 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
     <div className="bg-white rounded-3xl p-6 shadow-lg border border-border">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-light text-foreground mb-2">Daily Tasks</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
           {!prefersReducedMotion ? (
-            <Suspense fallback="Complete tasks to grow your flower 🌱">
+            <Suspense fallback={<><span>Complete tasks to grow your flower</span><Sprout className="w-4 h-4 inline" strokeWidth={2} /></>}>
               <TextTrail 
-                text="Complete tasks to grow your flower 🌱" 
+                text="Complete tasks to grow your flower" 
                 speed={0.8} 
                 stagger={0.04}
                 className="text-sm text-muted-foreground"
               />
             </Suspense>
           ) : (
-            "Complete tasks to grow your flower 🌱"
+            <span>Complete tasks to grow your flower</span>
           )}
+          <Sprout className="w-4 h-4" strokeWidth={2} />
         </p>
         <div className="mt-2 text-lg font-medium text-primary" aria-live="polite">
           <Suspense fallback={`${completionPercentage}% Complete`}>
@@ -142,9 +144,10 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
               <FallingText 
                 trigger={showTaskCompleteToast} 
                 duration={1.4} 
-                className="text-green-600 font-medium text-sm whitespace-nowrap bg-white/90 px-3 py-1 rounded-full shadow-sm"
+                className="text-green-600 font-medium text-sm whitespace-nowrap bg-white/90 px-3 py-1 rounded-full shadow-sm flex items-center gap-1"
               >
-                Nice — your plant grew! 🌱
+                <span>Nice — your plant grew!</span>
+                <Sprout className="w-4 h-4" strokeWidth={2} />
               </FallingText>
             </div>
           </Suspense>
@@ -153,8 +156,9 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
         {/* Static toast for reduced motion */}
         {showTaskCompleteToast && prefersReducedMotion && (
           <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
-            <div className="text-green-600 font-medium text-sm whitespace-nowrap bg-white/90 px-3 py-1 rounded-full shadow-sm">
-              Nice — your plant grew! 🌱
+            <div className="text-green-600 font-medium text-sm whitespace-nowrap bg-white/90 px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
+              <span>Nice — your plant grew!</span>
+              <Sprout className="w-4 h-4" strokeWidth={2} />
             </div>
           </div>
         )}
@@ -269,8 +273,9 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
       {/* Enhanced Completion message with FallingText */}
       {completionPercentage >= 70 && (
         <div className="mt-4 p-4 bg-gradient-to-r from-green-100 to-pink-100 rounded-xl text-center relative">
-          <p className="text-sm font-medium text-green-800">
-            🎉 Great job! You're earning reward points today!
+          <p className="text-sm font-medium text-green-800 flex items-center justify-center gap-2">
+            <PartyPopper className="w-5 h-5" strokeWidth={2} />
+            Great job! You're earning reward points today!
           </p>
           {completionPercentage === 100 && !prefersReducedMotion && (
             <Suspense fallback={null}>
@@ -278,9 +283,10 @@ const TodoList: React.FC<TodoListProps> = ({ onCompletionChange }) => {
                 <FallingText 
                   trigger={completionPercentage === 100} 
                   duration={2.5} 
-                  className="text-yellow-500 font-bold text-xs whitespace-nowrap"
+                  className="text-yellow-500 font-bold text-xs whitespace-nowrap flex items-center gap-1"
                 >
-                  ✨ Perfect day!
+                  <Sparkles className="w-4 h-4" strokeWidth={2} />
+                  Perfect day!
                 </FallingText>
               </div>
             </Suspense>

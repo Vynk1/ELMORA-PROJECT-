@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useApp } from "../contexts/AppContext";
 import { t, type Language } from "../utils/translations";
 import { useReducedMotion } from "../utils/withReducedMotion";
+import { Bell, Lock, Settings as SettingsIcon, User, HardDrive, AlertTriangle } from 'lucide-react';
 
 // Lazy load effect components with minimal usage
 const DecryptText = lazy(() => import('../components/effects/DecryptedText'));
@@ -99,11 +100,11 @@ const Settings: React.FC = () => {
   };
 
   const sections = [
-    { id: "notifications", name: "Notifications", icon: "🔔" },
-    { id: "privacy", name: "Privacy", icon: "🔒" },
-    { id: "preferences", name: "Preferences", icon: "⚙️" },
-    { id: "account", name: "Account", icon: "👤" },
-    { id: "data", name: "Data & Storage", icon: "💾" },
+    { id: "notifications", name: "Notifications", icon: Bell },
+    { id: "privacy", name: "Privacy", icon: Lock },
+    { id: "preferences", name: "Preferences", icon: SettingsIcon },
+    { id: "account", name: "Account", icon: User },
+    { id: "data", name: "Data & Storage", icon: HardDrive },
   ];
 
   const exportData = () => {
@@ -163,7 +164,7 @@ const Settings: React.FC = () => {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-3xl p-8 max-w-md w-full">
           <div className="text-center mb-6">
-            <div className="text-4xl mb-4">⚠️</div>
+            <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" strokeWidth={2} />
             <h3 className="text-xl font-medium text-gray-800 mb-2">
               Delete Account
             </h3>
@@ -241,7 +242,10 @@ const Settings: React.FC = () => {
                       }
                     `}
                   >
-                    <span>{section.icon}</span>
+                    {React.createElement(section.icon, {
+                      className: "w-5 h-5",
+                      strokeWidth: 2
+                    })}
                     <span className="font-medium">{section.name}</span>
                   </button>
                 ))}
@@ -337,8 +341,9 @@ const Settings: React.FC = () => {
                       {settings.privacy.profileVisibility === 'public' && (
                         <div className="mt-2">
                           <Suspense fallback={
-                            <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-2">
-                              ⚠️ Public profile enabled — your activity may be visible to anyone
+                            <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-2 flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4" strokeWidth={2} />
+                              Public profile enabled — your activity may be visible to anyone
                             </div>
                           }>
                             <TrueFocus 
@@ -346,8 +351,9 @@ const Settings: React.FC = () => {
                               glowColor="rgba(245, 158, 11, 0.3)" 
                               disabled={prefersReducedMotion}
                             >
-                              <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-2 focus:outline focus:outline-2 focus:outline-amber-400">
-                                ⚠️ <strong>Public profile enabled</strong> — your activity may be visible to anyone
+                              <div className="text-sm text-amber-700 bg-amber-50 rounded-lg p-2 focus:outline focus:outline-2 focus:outline-amber-400 flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4" strokeWidth={2} />
+                                <strong>Public profile enabled</strong> — your activity may be visible to anyone
                               </div>
                             </TrueFocus>
                           </Suspense>

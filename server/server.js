@@ -11,20 +11,32 @@ dotenv.config();
 const app = express();
 
 // Enable CORS for all routes
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:8080',
-    'http://localhost:8081',
-    'http://localhost:3000',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:8081',
-    'http://127.0.0.1:3000'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:8080',
+  'http://localhost:8081',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:8081',
+  'http://127.0.0.1:3000'
+];
+
+// In production (Vercel), allow all vercel.app domains
+if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+  app.use(cors({
+    origin: true, // Allow all origins in production
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+} else {
+  app.use(cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+}
 
 app.use(express.json());
 
@@ -1783,11 +1795,13 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Mental wellbeing API is running' });
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Mental Wellbeing API running on port ${PORT}`);
-});
+// Only start server if not running in serverless environment (Vercel)
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Mental Wellbeing API running on port ${PORT}`);
+  });
+}
 
 export default app;
 

@@ -12,6 +12,7 @@ import {
   EffectWrapper 
 } from '../../utils/reactBitsLoader';
 import CountUp from '../effects/CountUp';
+import { Play, Pause, SkipForward, Volume, Volume1, Volume2, VolumeX, RotateCcw, Hourglass, AlertCircle, PartyPopper, Coffee } from 'lucide-react';
 
 // Create simple fallback components for unavailable effects
 const VariableProximity: React.FC<{ children: React.ReactNode }> = ({ children }) => <>{children}</>;
@@ -489,7 +490,8 @@ const PomodoroCard: React.FC<PomodoroCardProps> = ({
           className={`px-4 py-3 bg-white/20 ${colors.textPrimary} rounded-2xl font-medium transition-all hover:bg-white/30 focus:outline-none focus:ring-4 focus:ring-opacity-50`}
           aria-label="Reset timer"
         >
-          🔄 Reset
+          <RotateCcw className="w-4 h-4 mr-1 inline-block" strokeWidth={2} />
+          Reset
         </button>
       </div>
 
@@ -509,9 +511,9 @@ const PomodoroCard: React.FC<PomodoroCardProps> = ({
                 musicState.isPlaying ? 'Pause focus music' : 'Play focus music'
               }
             >
-              {musicState.isLoading ? '⏳' : 
-               musicState.hasError ? '⚠️' :
-               musicState.isPlaying ? '⏸️' : '▶️'}
+              {musicState.isLoading ? <Hourglass className="w-5 h-5" strokeWidth={2} /> : 
+               musicState.hasError ? <AlertCircle className="w-5 h-5" strokeWidth={2} /> :
+               musicState.isPlaying ? <Pause className="w-5 h-5" strokeWidth={2} /> : <Play className="w-5 h-5" strokeWidth={2} />}
             </button>
             
             <div>
@@ -539,14 +541,16 @@ const PomodoroCard: React.FC<PomodoroCardProps> = ({
             className={`p-2 ${colors.textSecondary} hover:${colors.textPrimary} transition-colors focus:outline-none`}
             aria-label="Next track"
           >
-            ⏭️
+            <SkipForward className="w-5 h-5" strokeWidth={2} />
           </button>
         </div>
         
         {/* Volume Control - Always visible */}
         <div className="mt-3 flex items-center space-x-2">
           <span className={`text-xs ${colors.textSecondary}`}>
-            {musicState.volume === 0 ? '🔇' : musicState.volume < 0.5 ? '🔉' : '🔊'}
+            {musicState.volume === 0 ? <VolumeX className="w-4 h-4" strokeWidth={2} /> : 
+             musicState.volume < 0.5 ? <Volume1 className="w-4 h-4" strokeWidth={2} /> : 
+             <Volume2 className="w-4 h-4" strokeWidth={2} />}
           </span>
           <div className="flex-1 relative">
             <input
@@ -585,8 +589,12 @@ const PomodoroCard: React.FC<PomodoroCardProps> = ({
       {/* Completion Toast */}
       {showCompletionMessage && (
         <div className={`fixed top-4 right-4 ${colors.cardBg} rounded-2xl p-4 shadow-lg border border-white/30 z-50 completion-toast`}>
-          <div className={`font-medium ${colors.textPrimary} mb-1`}>
-            {lastCompletedPhase === 'focus' ? '🎉 Focus Session Complete!' : '☕ Break Time Over!'}
+          <div className={`font-medium ${colors.textPrimary} mb-1 flex items-center gap-2`}>
+            {lastCompletedPhase === 'focus' ? (
+              <><PartyPopper className="w-5 h-5" strokeWidth={2} /> Focus Session Complete!</>
+            ) : (
+              <><Coffee className="w-5 h-5" strokeWidth={2} /> Break Time Over!</>
+            )}
           </div>
           <div className={`text-sm ${colors.textSecondary}`}>
             {lastCompletedPhase === 'focus' 

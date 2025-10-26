@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { type MoodType } from '../components/MoodColorSwitcher';
 import PomodoroCard from '../components/tasks/PomodoroCard';
 import { useTaskContext } from '../contexts/TaskContext';
+import { Timer, Lightbulb, BarChart3 } from 'lucide-react';
 
 interface PomodoroProps {
   currentMood: MoodType;
@@ -74,7 +75,7 @@ const Pomodoro: React.FC<PomodoroProps> = ({
   const handleFocusSessionComplete = useCallback((sessionData: { duration: number; timestamp: Date }) => {
     // Add a special "Focus Session" task as completed
     addTodo(
-      `🧘 Focus Session - ${sessionData.duration} min (${sessionData.timestamp.toLocaleTimeString()})`,
+      `Focus Session - ${sessionData.duration} min (${sessionData.timestamp.toLocaleTimeString()})`,
       'wellness',
       true // Mark as completed
     );
@@ -94,7 +95,7 @@ const Pomodoro: React.FC<PomodoroProps> = ({
     // Show success message
     setTimeout(() => {
       const streakMessage = streakBonus > 0 ? ` +${streakBonus} streak bonus!` : '';
-      alert(`🎉 Focus session complete! +${totalPoints} points earned!${streakMessage}`);
+      alert(`Focus session complete! +${totalPoints} points earned!${streakMessage}`);
     }, 500);
   }, [addTodo, userPoints, onPointsUpdate, currentStreak]);
 
@@ -113,8 +114,9 @@ const Pomodoro: React.FC<PomodoroProps> = ({
       <div className="p-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className={`text-4xl font-light mb-4 ${colors.textColor}`}>
-            🍅 Pomodoro Focus
+          <h1 className={`text-4xl font-light mb-4 ${colors.textColor} flex items-center justify-center gap-3`}>
+            <Timer className="w-10 h-10" strokeWidth={2} />
+            Pomodoro Focus
           </h1>
           <p className={`text-lg ${colors.textColor} opacity-90 mb-6`}>
             Stay focused with the Pomodoro Technique and ambient sounds
@@ -174,8 +176,9 @@ const Pomodoro: React.FC<PomodoroProps> = ({
           <div className="grid md:grid-cols-2 gap-8">
             {/* Focus Tips */}
             <div className={`${colors.cardBg} backdrop-blur-sm rounded-3xl p-6 border border-white/20`}>
-              <h3 className={`text-lg font-medium ${colors.textColor} mb-4 flex items-center`}>
-                💡 Focus Tips
+              <h3 className={`text-lg font-medium ${colors.textColor} mb-4 flex items-center gap-2`}>
+                <Lightbulb className="w-5 h-5" strokeWidth={2} />
+                Focus Tips
               </h3>
               <div className="space-y-3">
                 <div className={`text-sm ${colors.textColor} opacity-90 flex items-start space-x-2`}>
@@ -199,8 +202,9 @@ const Pomodoro: React.FC<PomodoroProps> = ({
 
             {/* Session History */}
             <div className={`${colors.cardBg} backdrop-blur-sm rounded-3xl p-6 border border-white/20`}>
-              <h3 className={`text-lg font-medium ${colors.textColor} mb-4 flex items-center`}>
-                📊 Today's Progress
+              <h3 className={`text-lg font-medium ${colors.textColor} mb-4 flex items-center gap-2`}>
+                <BarChart3 className="w-5 h-5" strokeWidth={2} />
+                Today's Progress
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -236,8 +240,9 @@ const Pomodoro: React.FC<PomodoroProps> = ({
         {/* Pomodoro Technique Info */}
         <div className="max-w-2xl mx-auto mt-8">
           <div className={`${colors.cardBg} backdrop-blur-sm rounded-3xl p-6 border border-white/20 text-center`}>
-            <h3 className={`text-lg font-medium ${colors.textColor} mb-3`}>
-              🍅 The Pomodoro Technique
+            <h3 className={`text-lg font-medium ${colors.textColor} mb-3 flex items-center justify-center gap-2`}>
+              <Timer className="w-5 h-5" strokeWidth={2} />
+              The Pomodoro Technique
             </h3>
             <p className={`text-sm ${colors.textColor} opacity-90 mb-4`}>
               Work in focused 25-minute intervals, followed by 5-minute breaks. 

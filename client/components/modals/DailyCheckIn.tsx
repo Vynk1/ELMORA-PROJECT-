@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Smile, Frown, Meh, Annoyed, Moon, Zap, CloudRain, Sun, CloudSun, Home, Users, PartyPopper, Pause, Hourglass, CheckCircle2 } from 'lucide-react';
 
 interface CheckInData {
   mood: string;
@@ -47,42 +48,42 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ isOpen, onClose, onComplete
   const [overallSatisfaction, setOverallSatisfaction] = useState(5);
 
   const moodOptions = [
-    { value: 'excited', emoji: '🤩', label: 'Excited' },
-    { value: 'happy', emoji: '😊', label: 'Happy' },
-    { value: 'calm', emoji: '😌', label: 'Calm' },
-    { value: 'neutral', emoji: '😐', label: 'Neutral' },
-    { value: 'tired', emoji: '😴', label: 'Tired' },
-    { value: 'stressed', emoji: '😰', label: 'Stressed' },
-    { value: 'sad', emoji: '😢', label: 'Sad' },
-    { value: 'anxious', emoji: '😟', label: 'Anxious' },
-    { value: 'frustrated', emoji: '😤', label: 'Frustrated' },
-    { value: 'overwhelmed', emoji: '🤯', label: 'Overwhelmed' }
+    { value: 'excited', icon: Zap, label: 'Excited' },
+    { value: 'happy', icon: Smile, label: 'Happy' },
+    { value: 'calm', icon: CloudSun, label: 'Calm' },
+    { value: 'neutral', icon: Meh, label: 'Neutral' },
+    { value: 'tired', icon: Moon, label: 'Tired' },
+    { value: 'stressed', icon: Annoyed, label: 'Stressed' },
+    { value: 'sad', icon: Frown, label: 'Sad' },
+    { value: 'anxious', icon: CloudRain, label: 'Anxious' },
+    { value: 'frustrated', icon: Annoyed, label: 'Frustrated' },
+    { value: 'overwhelmed', icon: CloudRain, label: 'Overwhelmed' }
   ];
 
   const activityOptions = [
-    { value: 'none', label: 'None', emoji: '🛋️' },
-    { value: 'light', label: 'Light', emoji: '🚶' },
-    { value: 'moderate', label: 'Moderate', emoji: '🏃' },
-    { value: 'intense', label: 'Intense', emoji: '🏋️' }
+    { value: 'none', label: 'None', icon: Home },
+    { value: 'light', label: 'Light', icon: Sun },
+    { value: 'moderate', label: 'Moderate', icon: Zap },
+    { value: 'intense', label: 'Intense', icon: Zap }
   ];
 
   const socialOptions = [
-    { value: 'none', label: 'None', emoji: '🏠' },
-    { value: 'few', label: 'Few', emoji: '👥' },
-    { value: 'moderate', label: 'Moderate', emoji: '👫' },
-    { value: 'many', label: 'Many', emoji: '🎉' }
+    { value: 'none', label: 'None', icon: Home },
+    { value: 'few', label: 'Few', icon: Users },
+    { value: 'moderate', label: 'Moderate', icon: Users },
+    { value: 'many', label: 'Many', icon: PartyPopper }
   ];
 
   const weatherOptions = [
-    { value: 'positive', label: 'Positive', emoji: '☀️' },
-    { value: 'neutral', label: 'Neutral', emoji: '⛅' },
-    { value: 'negative', label: 'Negative', emoji: '🌧️' }
+    { value: 'positive', label: 'Positive', icon: Sun },
+    { value: 'neutral', label: 'Neutral', icon: CloudSun },
+    { value: 'negative', label: 'Negative', icon: CloudRain }
   ];
 
   const goalsOptions = [
-    { value: 'not_started', label: 'Not Started', emoji: '⏸️' },
-    { value: 'partial', label: 'In Progress', emoji: '⏳' },
-    { value: 'completed', label: 'Completed', emoji: '✅' }
+    { value: 'not_started', label: 'Not Started', icon: Pause },
+    { value: 'partial', label: 'In Progress', icon: Hourglass },
+    { value: 'completed', label: 'Completed', icon: CheckCircle2 }
   ];
 
   const emotionOptions = [
@@ -213,7 +214,7 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ isOpen, onClose, onComplete
                       }
                     `}
                   >
-                    <div className="text-xl mb-1">{mood.emoji}</div>
+                    <mood.icon className="w-6 h-6 mx-auto mb-1" strokeWidth={2} />
                     <div className="text-xs font-medium">{mood.label}</div>
                   </button>
                 ))}
@@ -245,7 +246,7 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ isOpen, onClose, onComplete
                       }
                     `}
                   >
-                    <div className="text-lg mb-1">{activity.emoji}</div>
+                    <activity.icon className="w-5 h-5 mx-auto mb-1" strokeWidth={2} />
                     <div className="text-xs">{activity.label}</div>
                   </button>
                 ))}
@@ -270,7 +271,7 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ isOpen, onClose, onComplete
                       }
                     `}
                   >
-                    <div className="text-lg mb-1">{social.emoji}</div>
+                    <social.icon className="w-5 h-5 mx-auto mb-1" strokeWidth={2} />
                     <div className="text-xs">{social.label}</div>
                   </button>
                 ))}
@@ -300,7 +301,7 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ isOpen, onClose, onComplete
                       }
                     `}
                   >
-                    <div className="text-2xl mb-2">{goal.emoji}</div>
+                    <goal.icon className="w-8 h-8 mx-auto mb-2" strokeWidth={2} />
                     <div className="text-sm font-medium">{goal.label}</div>
                   </button>
                 ))}
@@ -325,7 +326,7 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ isOpen, onClose, onComplete
                       }
                     `}
                   >
-                    <div className="text-2xl mb-2">{weather.emoji}</div>
+                    <weather.icon className="w-8 h-8 mx-auto mb-2" strokeWidth={2} />
                     <div className="text-sm font-medium">{weather.label}</div>
                   </button>
                 ))}

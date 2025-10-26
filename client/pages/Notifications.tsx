@@ -1,4 +1,5 @@
 import React from 'react';
+import { Bell, Lightbulb } from 'lucide-react';
 
 const Notifications: React.FC = () => {
   return (
@@ -14,7 +15,7 @@ const Notifications: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-3xl p-8 shadow-lg border border-border text-center">
-          <div className="text-6xl mb-4">🔔</div>
+          <Bell className="w-16 h-16 mx-auto mb-4 text-gray-400" strokeWidth={2} />
           <h2 className="text-2xl font-medium text-foreground mb-4">
             No Notifications Yet
           </h2>
@@ -23,8 +24,9 @@ const Notifications: React.FC = () => {
             you'll see friend requests, encouragement messages, and milestone celebrations here.
           </p>
           <div className="bg-muted rounded-2xl p-4">
-            <p className="text-sm text-muted-foreground">
-              💡 <strong>Coming soon:</strong> Friend requests, achievement celebrations, and daily motivation
+            <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+              <Lightbulb className="w-4 h-4" strokeWidth={2} />
+              <strong>Coming soon:</strong> Friend requests, achievement celebrations, and daily motivation
             </p>
           </div>
         </div>

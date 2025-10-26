@@ -1,4 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
+import { Zap, Smile, CloudSun, Meh, Moon, Annoyed, Frown, CloudRain } from "lucide-react";
 
 // Lazy load custom effect components
 const TrueFocus = lazy(() => import('../effects/TrueFocus'));
@@ -42,19 +43,19 @@ const AICheckIn: React.FC<AICheckInProps> = ({
   }, []);
 
   const moodOptions = [
-    { value: "excited", emoji: "🤩", label: "Excited", color: "bg-yellow-500" },
-    { value: "happy", emoji: "😊", label: "Happy", color: "bg-green-500" },
-    { value: "calm", emoji: "😌", label: "Calm", color: "bg-blue-500" },
-    { value: "neutral", emoji: "😐", label: "Neutral", color: "bg-gray-500" },
-    { value: "tired", emoji: "😴", label: "Tired", color: "bg-purple-500" },
+    { value: "excited", icon: Zap, label: "Excited", color: "bg-yellow-500" },
+    { value: "happy", icon: Smile, label: "Happy", color: "bg-green-500" },
+    { value: "calm", icon: CloudSun, label: "Calm", color: "bg-blue-500" },
+    { value: "neutral", icon: Meh, label: "Neutral", color: "bg-gray-500" },
+    { value: "tired", icon: Moon, label: "Tired", color: "bg-purple-500" },
     {
       value: "stressed",
-      emoji: "😰",
+      icon: Annoyed,
       label: "Stressed",
       color: "bg-orange-500",
     },
-    { value: "sad", emoji: "😢", label: "Sad", color: "bg-blue-700" },
-    { value: "anxious", emoji: "😟", label: "Anxious", color: "bg-red-500" },
+    { value: "sad", icon: Frown, label: "Sad", color: "bg-blue-700" },
+    { value: "anxious", icon: CloudRain, label: "Anxious", color: "bg-red-500" },
   ];
 
   const generateAIInsight = async () => {
@@ -198,7 +199,7 @@ Remember: ${gratitude ? `Your gratitude for "${gratitude}" shows a positive mind
                         }
                       `}
                     >
-                      <div className="text-2xl mb-1">{mood.emoji}</div>
+                      <mood.icon className="w-6 h-6 mx-auto mb-1" strokeWidth={2} />
                       <div className="text-xs font-medium">{mood.label}</div>
                     </button>
                   ))}

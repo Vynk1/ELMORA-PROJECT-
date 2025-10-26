@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTaskContext } from '../contexts/TaskContext';
+import { Footprints, Droplets, Sparkles, HeartHandshake, Phone, BookText, Trash2, X, Plus } from 'lucide-react';
 
 interface QuickAddProps {
   onTaskAdded?: (task: string, category: string) => void;
@@ -12,18 +13,18 @@ const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
   const [selectedCategory, setSelectedCategory] = useState("wellness");
 
   const quickTasks = [
-    { text: "Take a 10-minute walk", category: "wellness", icon: "🚶" },
-    { text: "Drink a glass of water", category: "wellness", icon: "💧" },
-    { text: "Do 5 minutes of meditation", category: "wellness", icon: "🧘" },
+    { text: "Take a 10-minute walk", category: "wellness", icon: Footprints },
+    { text: "Drink a glass of water", category: "wellness", icon: Droplets },
+    { text: "Do 5 minutes of meditation", category: "wellness", icon: Sparkles },
     {
       text: "Write 3 things I'm grateful for",
       category: "wellness",
-      icon: "🙏",
+      icon: HeartHandshake,
     },
-    { text: "Call a friend or family member", category: "social", icon: "📞" },
-    { text: "Tidy up my workspace", category: "productivity", icon: "🧹" },
-    { text: "Read for 15 minutes", category: "learning", icon: "📚" },
-    { text: "Do some stretching", category: "wellness", icon: "🤸" },
+    { text: "Call a friend or family member", category: "social", icon: Phone },
+    { text: "Tidy up my workspace", category: "productivity", icon: Trash2 },
+    { text: "Read for 15 minutes", category: "learning", icon: BookText },
+    { text: "Do some stretching", category: "wellness", icon: Sparkles },
   ];
 
   const categories = [
@@ -45,7 +46,7 @@ const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
     const button = document.activeElement as HTMLButtonElement;
     if (button) {
       const originalText = button.textContent;
-      button.textContent = "✓ Added!";
+      button.textContent = "Added!";
       button.style.background = "#10b981";
       setTimeout(() => {
         button.textContent = originalText;
@@ -65,7 +66,7 @@ const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
       setTaskText("");
       setShowForm(false);
       // Show success notification
-      alert("Task added successfully! 🎉");
+      alert("Task added successfully!");
     }
   };
 
@@ -78,7 +79,7 @@ const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
           className="p-2 text-primary hover:bg-primary/10 rounded-xl transition-colors"
           title="Add custom task"
         >
-          {showForm ? "✕" : "➕"}
+          {showForm ? <X className="w-5 h-5" strokeWidth={2} /> : <Plus className="w-5 h-5" strokeWidth={2} />}
         </button>
       </div>
 
@@ -133,7 +134,7 @@ const QuickAdd: React.FC<QuickAddProps> = ({ onTaskAdded }) => {
             onClick={() => handleQuickAdd(task.text, task.category)}
             className="w-full text-left p-3 rounded-xl hover:bg-gray-50 transition-colors flex items-center space-x-3 border border-gray-100 hover:border-primary/20"
           >
-            <span className="text-lg">{task.icon}</span>
+            <task.icon className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm text-gray-700 flex-1">{task.text}</span>
             <span
               className={`

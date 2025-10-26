@@ -2,6 +2,7 @@ import React, { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import TodoList from '../components/TodoList';
 import { useTaskContext } from '../contexts/TaskContext';
 import { type MoodType } from '../components/MoodColorSwitcher';
+import { Calendar, Sparkles, Users2, BookText, Palette, Footprints, Droplets, Phone, ListTodo, Target, Gift } from 'lucide-react';
 
 // Lazy load effect components
 const CountUp = lazy(() => import('../components/effects/CountUp'));
@@ -81,11 +82,11 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
   };
 
   const categories = [
-    { id: 'daily', name: 'Daily Tasks', icon: '📅' },
-    { id: 'wellness', name: 'Wellness', icon: '🧘' },
-    { id: 'social', name: 'Social', icon: '👥' },
-    { id: 'learning', name: 'Learning', icon: '📚' },
-    { id: 'creative', name: 'Creative', icon: '🎨' },
+    { id: 'daily', name: 'Daily Tasks', icon: Calendar },
+    { id: 'wellness', name: 'Wellness', icon: Sparkles },
+    { id: 'social', name: 'Social', icon: Users2 },
+    { id: 'learning', name: 'Learning', icon: BookText },
+    { id: 'creative', name: 'Creative', icon: Palette },
   ];
 
   const handleTaskCompletion = useCallback((percentage: number) => {
@@ -126,7 +127,7 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
                   }
                 `}
               >
-                <span>{category.icon}</span>
+                <category.icon className="w-5 h-5" strokeWidth={2} />
                 <span>{category.name}</span>
               </button>
             ))}
@@ -242,38 +243,38 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
               </h3>
               <div className="space-y-3">
                 <button 
-                  onClick={() => addTodo('Take a 10-minute walk 🚶', 'wellness')}
+                  onClick={() => addTodo('Take a 10-minute walk', 'wellness')}
                   className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
                 >
-                  <span>🚶</span>
+                  <Footprints className="w-5 h-5" strokeWidth={2} />
                   <span>Take a 10-min walk</span>
                 </button>
                 <button 
-                  onClick={() => addTodo('Drink a glass of water 💧', 'wellness')}
+                  onClick={() => addTodo('Drink a glass of water', 'wellness')}
                   className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
                 >
-                  <span>💧</span>
+                  <Droplets className="w-5 h-5" strokeWidth={2} />
                   <span>Drink a glass of water</span>
                 </button>
                 <button 
-                  onClick={() => addTodo('Call a friend or family member 📞', 'social')}
+                  onClick={() => addTodo('Call a friend or family member', 'social')}
                   className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
                 >
-                  <span>📞</span>
+                  <Phone className="w-5 h-5" strokeWidth={2} />
                   <span>Call a friend or family</span>
                 </button>
                 <button 
-                  onClick={() => addTodo('Write 3 things I\'m grateful for 📝', 'wellness')}
+                  onClick={() => addTodo('Write 3 things I\'m grateful for', 'wellness')}
                   className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
                 >
-                  <span>📝</span>
+                  <ListTodo className="w-5 h-5" strokeWidth={2} />
                   <span>Write 3 gratitudes</span>
                 </button>
                 <button 
-                  onClick={() => addTodo('Do 5 minutes of meditation 🧘', 'wellness')}
+                  onClick={() => addTodo('Do 5 minutes of meditation', 'wellness')}
                   className={`w-full text-left p-3 rounded-xl hover:bg-white/20 transition-colors flex items-center space-x-3 ${colors.textColor} text-sm`}
                 >
-                  <span>🧘</span>
+                  <Sparkles className="w-5 h-5" strokeWidth={2} />
                   <span>5-minute meditation</span>
                 </button>
               </div>
@@ -284,7 +285,7 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
               <h3 className={`font-medium ${colors.textColor} mb-3`}>
                 Weekly Goal
               </h3>
-              <div className="text-3xl mb-2">🎯</div>
+              <Target className="w-12 h-12 mx-auto mb-2" strokeWidth={2} />
               <p className={`text-sm ${colors.textColor} opacity-90 mb-4`}>
                 Complete 70% of tasks for 5 days
               </p>
@@ -304,7 +305,7 @@ const Tasks: React.FC<TasksProps> = ({ currentMood, userPoints, onPointsUpdate }
               <h3 className={`font-medium ${colors.textColor} mb-3`}>
                 Next Reward
               </h3>
-              <div className="text-3xl mb-2">🎁</div>
+              <Gift className="w-12 h-12 mx-auto mb-2" strokeWidth={2} />
               <p className={`text-sm ${colors.textColor} opacity-90 mb-2`}>
                 Coffee Shop BOGO
               </p>

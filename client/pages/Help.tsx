@@ -1,4 +1,5 @@
 import React from 'react';
+import { Mail, LifeBuoy, Lightbulb, Sparkles, BookOpen, Users } from 'lucide-react';
 
 const Help: React.FC = () => {
   return (
@@ -56,7 +57,7 @@ const Help: React.FC = () => {
             <div className="space-y-6">
               <div className="flex items-start space-x-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <span className="text-primary">💌</span>
+                  <Mail className="w-5 h-5 text-primary" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground mb-1">Email Support</h3>
@@ -71,7 +72,7 @@ const Help: React.FC = () => {
 
               <div className="flex items-start space-x-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <span className="text-primary">🆘</span>
+                  <LifeBuoy className="w-5 h-5 text-primary" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground mb-1">Crisis Support</h3>
@@ -91,7 +92,7 @@ const Help: React.FC = () => {
 
               <div className="flex items-start space-x-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <span className="text-primary">💡</span>
+                  <Lightbulb className="w-5 h-5 text-primary" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground mb-1">Feedback</h3>
@@ -114,7 +115,7 @@ const Help: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div>
               <div className="w-12 h-12 bg-soft-blue/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl">🧘</span>
+                <Sparkles className="w-8 h-8 text-blue-600" strokeWidth={2} />
               </div>
               <h3 className="font-medium text-foreground mb-2">Mindfulness</h3>
               <p className="text-sm text-muted-foreground">
@@ -124,7 +125,7 @@ const Help: React.FC = () => {
             
             <div>
               <div className="w-12 h-12 bg-soft-green/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl">📚</span>
+                <BookOpen className="w-8 h-8 text-green-600" strokeWidth={2} />
               </div>
               <h3 className="font-medium text-foreground mb-2">Resources</h3>
               <p className="text-sm text-muted-foreground">
@@ -134,7 +135,7 @@ const Help: React.FC = () => {
             
             <div>
               <div className="w-12 h-12 bg-soft-purple/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl">🤝</span>
+                <Users className="w-8 h-8 text-purple-600" strokeWidth={2} />
               </div>
               <h3 className="font-medium text-foreground mb-2">Community</h3>
               <p className="text-sm text-muted-foreground">

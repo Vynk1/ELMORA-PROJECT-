@@ -6,6 +6,7 @@ import QuickAdd from "../components/QuickAdd";
 import AIPersonalizationPanel from "../components/AIPersonalizationPanel";
 import WellnessTrends from "../components/WellnessTrends";
 import DailyCheckIn from "../components/modals/DailyCheckIn";
+import { CheckCircle2, Sparkles, Heart, BarChart3, Brain, ListTodo, BookOpen, Target, Users2 } from "lucide-react";
 
 // Lazy load custom effect components for performance
 const VariableProximity = lazy(() => import('../components/effects/VariableProximity'));
@@ -190,7 +191,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     {
       title: hasCheckedInToday ? "Check-in Complete ✓" : "Daily Check-in",
       description: hasCheckedInToday ? "Already completed today" : "Track your comprehensive wellness",
-      icon: hasCheckedInToday ? "✅" : "✨",
+      icon: hasCheckedInToday ? CheckCircle2 : Sparkles,
       action: () => setShowDailyCheckIn(true),
       color: hasCheckedInToday ? "from-green-400 to-emerald-400" : "from-purple-400 to-pink-400",
       disabled: hasCheckedInToday,
@@ -198,49 +199,49 @@ const Dashboard: React.FC<DashboardProps> = ({
     {
       title: "Wellness Analytics",
       description: "View your wellness trends and insights",
-      icon: "📊",
+      icon: BarChart3,
       action: () => setShowWellnessTrends(true),
       color: "from-blue-400 to-indigo-400",
     },
     {
       title: "AI Wellbeing Report",
       description: "Get personalized mental health insights",
-      icon: "🧠",
+      icon: Brain,
       link: "/health-assessment",
       color: "from-indigo-400 to-purple-400",
     },
     {
       title: "My Tasks",
       description: "View and manage your daily tasks",
-      icon: "📝",
+      icon: ListTodo,
       link: "/tasks",
       color: "from-blue-400 to-cyan-400",
     },
     {
       title: "Meditation",
       description: "Start a mindfulness session",
-      icon: "🧘",
+      icon: Sparkles,
       link: "/meditation",
       color: "from-green-400 to-emerald-400",
     },
     {
       title: "Journal",
       description: "Write about your day",
-      icon: "📖",
+      icon: BookOpen,
       link: "/journal",
       color: "from-indigo-400 to-purple-400",
     },
     {
       title: "Goals",
       description: "Track your progress",
-      icon: "🎯",
+      icon: Target,
       link: "/goals",
       color: "from-orange-400 to-red-400",
     },
     {
       title: "Find Friends",
       description: "Connect with like-minded people",
-      icon: "👥",
+      icon: Users2,
       link: "/friends",
       color: "from-pink-400 to-rose-400",
     },
@@ -464,7 +465,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               transform hover:scale-105 border border-white/20
             `}
           >
-            <span>📊</span>
+            <BarChart3 className="w-5 h-5" strokeWidth={2} />
             <span>View Wellness Analytics</span>
           </button>
         </div>
@@ -497,7 +498,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     ${!action.link ? 'w-full' : ''}
                   `}
                 >
-                  <div className="text-4xl mb-4">{action.icon}</div>
+                  <action.icon className="w-12 h-12 mb-4 mx-auto" strokeWidth={2} />
                   <h3 className="text-xl font-medium mb-2">{action.title}</h3>
                   <p className="text-sm opacity-90">{action.description}</p>
                 </ActionComponent>
@@ -510,7 +511,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div
           className={`${moodContent.cardBg} backdrop-blur-sm rounded-3xl p-8 text-center border border-white/20 mb-8`}
         >
-          <div className="text-4xl mb-4">💜</div>
+          <Heart className="w-12 h-12 mx-auto mb-4 fill-current" strokeWidth={2} />
           <h3 className={`text-xl font-medium ${moodContent.textColor} mb-3`}>
             Daily Affirmation
           </h3>
@@ -547,33 +548,35 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className="space-y-4">
               {[
                 {
-                  icon: "✅",
+                  icon: CheckCircle2,
                   text: "Completed 8 of 10 daily tasks",
                   time: "2 hours ago",
                 },
                 {
-                  icon: "🧘",
+                  icon: Sparkles,
                   text: "Finished 10-minute meditation",
                   time: "4 hours ago",
                 },
                 {
-                  icon: "📖",
+                  icon: BookOpen,
                   text: "Wrote a journal entry",
                   time: "1 day ago",
                 },
                 {
-                  icon: "💌",
+                  icon: Heart,
                   text: "Sent encouragement to a friend",
                   time: "1 day ago",
                 },
                 ...recentlyAddedTasks.map((item, index) => ({
-                  icon: "📝",
+                  icon: ListTodo,
                   text: `Added task: ${item.task}`,
                   time: "Just now",
                 })),
-              ].map((activity, index) => (
+              ].map((activity, index) => {
+                const ActivityIcon = activity.icon;
+                return (
                 <div key={index} className="flex items-center space-x-4">
-                  <span className="text-2xl">{activity.icon}</span>
+                  <ActivityIcon className="w-6 h-6" strokeWidth={2} />
                   <div className="flex-1">
                     <p className={`${moodContent.textColor} opacity-90`}>
                       {activity.text}
@@ -585,7 +588,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </p>
                   </div>
                 </div>
-              ))}
+              );})}
             </div>
             <div className="mt-6 text-center">
               <Link

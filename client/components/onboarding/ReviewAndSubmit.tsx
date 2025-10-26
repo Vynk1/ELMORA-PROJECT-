@@ -30,36 +30,75 @@ export default function ReviewAndSubmit() {
     setSubmitError(null);
     setError(undefined);
 
-    // Skip API call and directly show hardcoded insights
-    console.log('Using hardcoded insights (as requested)');
-    
-    // Calculate a basic score from answers for fallback
-    const basicScore = answers.length * 2.5; // Assume average score
-    const fallbackCategory = basicScore >= 20 ? "Growth Champion" 
-                           : basicScore >= 15 ? "Resilient Builder" 
-                           : "Balanced Explorer";
-    
-    const fallbackInsights = [
-      `Your responses show a ${fallbackCategory.toLowerCase()} mindset.`,
-      "You demonstrate awareness of your emotional patterns.",
-      "You're open to personal growth and development.",
-      "Your self-reflection skills are developing positively."
-    ];
-    
-    const fallbackRecommendations = [
-      "Practice daily mindfulness for 5-10 minutes.",
-      "Keep a weekly reflection journal.",
-      "Set small, achievable personal goals.",
-      "Connect with supportive people regularly."
-    ];
-    
-    // Update context with fallback data
-    updateAi({
-      score: Math.round(basicScore),
-      category: fallbackCategory,
-      insights: fallbackInsights,
-      recommendations: fallbackRecommendations
-    });
+    try {
+      console.log('Calling AI analysis API with answers:', answers);
+      
+      // Call the AI analysis API
+      const response = await fetch('/api/analyze-wellbeing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          answers: answers.map(a => ({
+            id: a.id,
+            choice: a.choice,
+            points: a.points
+          })),
+          basics: {
+            name: basics.name,
+            bio: basics.bio
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API responded with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('AI analysis result:', result);
+      
+      // Update context with AI-generated insights
+      updateAi({
+        score: result.score,
+        category: result.category,
+        insights: result.insights,
+        recommendations: result.recommendations
+      });
+
+    } catch (error) {
+      console.error('AI analysis failed, using fallback:', error);
+      
+      // Fallback to basic scoring if API fails
+      const basicScore = answers.reduce((sum, a) => sum + (a.points || 0), 0);
+      const fallbackCategory = basicScore >= 25 ? "Growth Champion" 
+                             : basicScore >= 19 ? "Resilient Builder" 
+                             : basicScore >= 13 ? "Balanced Explorer"
+                             : basicScore >= 7 ? "Emerging Mindset"
+                             : "Overwhelmed — Needs Support";
+      
+      const fallbackInsights = [
+        `Your responses show a ${fallbackCategory.toLowerCase()} mindset.`,
+        "You demonstrate awareness of your emotional patterns.",
+        "You're open to personal growth and development.",
+        "Your self-reflection skills are developing positively."
+      ];
+      
+      const fallbackRecommendations = [
+        "Practice daily mindfulness for 5-10 minutes.",
+        "Keep a weekly reflection journal.",
+        "Set small, achievable personal goals.",
+        "Connect with supportive people regularly."
+      ];
+      
+      updateAi({
+        score: basicScore,
+        category: fallbackCategory,
+        insights: fallbackInsights,
+        recommendations: fallbackRecommendations
+      });
+    }
     
     // Mark assessment as completed in database and save profile data
     try {
@@ -69,8 +108,10 @@ export default function ReviewAndSubmit() {
           user_id: user.id,
           assessment_completed: true,
           display_name: basics.name,
+          first_name: basics.name.split(' ')[0] || basics.name,
           bio: basics.bio,
-          avatar_url: photo.url || null
+          avatar_url: photo.url || null,
+          email: user.email || ''
         }, {
           onConflict: 'user_id'
         });

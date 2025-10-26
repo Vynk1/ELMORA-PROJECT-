@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
 interface Answer {
   id: string;
@@ -44,20 +44,20 @@ const calculateScore = (answers: Answer[]): number => {
   }, 0);
 };
 
-// Generate AI insights using Google Gemini
+// Generate AI insights using OpenAI
 const generateAIInsights = async (score: number, category: string, name: string, bio: string): Promise<{ insights: string[], recommendations: string[] }> => {
   try {
-    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      console.warn('No Google API key found, using fallback insights');
+      console.warn('No OpenAI API key found, using fallback insights');
       return getFallbackInsights(score, category);
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const openai = new OpenAI({
+      apiKey: apiKey,
+    });
 
-    const prompt = `
-You are a wellness coach analyzing someone's well-being assessment results. 
+    const prompt = `You are a wellness coach analyzing someone's well-being assessment results. 
 
 User Profile:
 - Name: ${name}
@@ -71,9 +71,7 @@ Based on this ${category} score of ${score}/30, provide:
 2. 3-5 specific, actionable recommendations for improvement (each 1-2 sentences)
 
 Keep insights positive but realistic. Focus on growth potential. Use their name when appropriate.
-Format as JSON with "insights" and "recommendations" arrays.
-
-Example format:
+Respond ONLY with a valid JSON object in this exact format:
 {
   "insights": [
     "insight 1 text",
@@ -83,15 +81,32 @@ Example format:
     "recommendation 1 text", 
     "recommendation 2 text"
   ]
-}
-`;
+}`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional wellness coach. Always respond with valid JSON only, no additional text."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 800,
+      response_format: { type: "json_object" }
+    });
+
+    const responseText = completion.choices[0]?.message?.content;
+    if (!responseText) {
+      throw new Error('No response from OpenAI');
+    }
     
     // Parse JSON response
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(responseText);
     
     return {
       insights: parsed.insights || [],

@@ -7,6 +7,7 @@ import ViewProgress from "./modals/ViewProgress";
 import { useApp } from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import { t, type Language } from "../utils/translations";
+import { Home, ListTodo, Timer, BookOpen, Sparkles, Target, Users2, Gift, Settings as SettingsIcon, LogOut, BarChart3, Mail, CloudRain, CloudSun, Sun } from "lucide-react";
 import { 
   VariableProximity, 
   GlareHover, 
@@ -52,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({
   }) => {
     console.log("AI Daily check-in completed:", data);
     alert(
-      `${t("checkInComplete", state.language as Language)} 🎉\n\nAI Insight: ${data.aiInsight.substring(0, 100)}...`,
+      `${t("checkInComplete", state.language as Language)}\n\nAI Insight: ${data.aiInsight.substring(0, 100)}...`,
     );
   };
 
@@ -62,49 +63,49 @@ const Header: React.FC<HeaderProps> = ({
     template?: string;
   }) => {
     console.log("Encouragement sent:", data);
-    alert(`${t("success", state.language as Language)} 💜`);
+    alert(`${t("success", state.language as Language)}`);
   };
 
   const navigation = [
     {
       name: t("home", state.language as Language),
       href: "/dashboard",
-      icon: "🏠",
+      icon: Home,
     },
     {
       name: t("tasks", state.language as Language),
       href: "/tasks",
-      icon: "📝",
+      icon: ListTodo,
     },
     {
       name: "Pomodoro",
       href: "/pomodoro",
-      icon: "🍅",
+      icon: Timer,
     },
     {
       name: t("journal", state.language as Language),
       href: "/journal",
-      icon: "📖",
+      icon: BookOpen,
     },
     {
       name: t("meditation", state.language as Language),
       href: "/meditation",
-      icon: "🧘",
+      icon: Sparkles,
     },
     {
       name: t("goals", state.language as Language),
       href: "/goals",
-      icon: "🎯",
+      icon: Target,
     },
     {
       name: t("friends", state.language as Language),
       href: "/friends",
-      icon: "👥",
+      icon: Users2,
     },
     {
       name: t("rewards", state.language as Language),
       href: "/rewards",
-      icon: "🎁",
+      icon: Gift,
     },
   ];
 
@@ -113,19 +114,19 @@ const Header: React.FC<HeaderProps> = ({
       type: "sad" as MoodType,
       label: "Sad",
       color: "bg-gray-600",
-      emoji: "🌧️",
+      icon: CloudRain,
     },
     {
       type: "mid" as MoodType,
       label: "Mid",
       color: "bg-amber-500",
-      emoji: "⛅",
+      icon: CloudSun,
     },
     {
       type: "amazing" as MoodType,
       label: "Amazing",
       color: "bg-emerald-500",
-      emoji: "☀️",
+      icon: Sun,
     },
   ];
 
@@ -193,7 +194,7 @@ const Header: React.FC<HeaderProps> = ({
                     onClick={() => setMobileNavOpen(false)}
                   >
                     <Magnet disabled={true}>
-                      <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                      <item.icon className="nav-icon w-5 h-5" aria-hidden="true" strokeWidth={2} />
                     </Magnet>
                     <span className="nav-label">{item.name}</span>
                   </Link>
@@ -206,7 +207,7 @@ const Header: React.FC<HeaderProps> = ({
                         className={`top-nav-link ${isActive ? 'active' : ''}`}
                         onClick={() => setMobileNavOpen(false)}
                       >
-                        <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                        <item.icon className="nav-icon w-5 h-5" aria-hidden="true" strokeWidth={2} />
                         <span className="nav-label">{item.name}</span>
                       </Link>
                     }
@@ -218,7 +219,7 @@ const Header: React.FC<HeaderProps> = ({
                         onClick={() => setMobileNavOpen(false)}
                       >
                         <Magnet>
-                          <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                          <item.icon className="nav-icon w-5 h-5" aria-hidden="true" strokeWidth={2} />
                         </Magnet>
                         <span className="nav-label">{item.name}</span>
                       </Link>
@@ -251,7 +252,7 @@ const Header: React.FC<HeaderProps> = ({
               title={t("dailyCheckIn", state.language as Language)}
               aria-label={t("dailyCheckIn", state.language as Language)}
             >
-              ✨
+              <Sparkles className="w-5 h-5" strokeWidth={2} />
             </button>
             <button
               onClick={() => setShowSendEncouragement(true)}
@@ -259,7 +260,7 @@ const Header: React.FC<HeaderProps> = ({
               title="Send Encouragement"
               aria-label="Send encouragement to friends"
             >
-              💌
+              <Mail className="w-5 h-5" strokeWidth={2} />
             </button>
             <button
               onClick={() => setShowViewProgress(true)}
@@ -267,7 +268,7 @@ const Header: React.FC<HeaderProps> = ({
               title="View Progress"
               aria-label="View your progress"
             >
-              📊
+              <BarChart3 className="w-5 h-5" strokeWidth={2} />
             </button>
           </div>
 
@@ -284,7 +285,7 @@ const Header: React.FC<HeaderProps> = ({
                     className={`mood-pill ${mood.type}`}
                     aria-pressed={isActive}
                     aria-label={`Switch to ${mood.label} mood`}
-                    title={`${mood.emoji} ${mood.label}`}
+                    title={mood.label}
                   />
                 }>
                   <EffectWrapper
@@ -295,7 +296,7 @@ const Header: React.FC<HeaderProps> = ({
                         className={`mood-pill ${mood.type}`}
                         aria-pressed={isActive}
                         aria-label={`Switch to ${mood.label} mood`}
-                        title={`${mood.emoji} ${mood.label}`}
+                        title={mood.label}
                       />
                     }
                   >
@@ -305,7 +306,7 @@ const Header: React.FC<HeaderProps> = ({
                         className={`mood-pill ${mood.type}`}
                         aria-pressed={isActive}
                         aria-label={`Switch to ${mood.label} mood`}
-                        title={`${mood.emoji} ${mood.label}`}
+                        title={mood.label}
                       />
                     </ClickSpark>
                   </EffectWrapper>
@@ -320,7 +321,7 @@ const Header: React.FC<HeaderProps> = ({
             className="quick-action"
             aria-label="Open settings"
           >
-            ⚙️
+            <SettingsIcon className="w-5 h-5" strokeWidth={2} />
           </Link>
 
           {/* Sign Out Button */}
@@ -330,7 +331,7 @@ const Header: React.FC<HeaderProps> = ({
             title="Sign Out"
             aria-label="Sign out of account"
           >
-            🚪
+            <LogOut className="w-5 h-5" strokeWidth={2} />
           </button>
 
           {/* Profile Avatar with LogoLoop effect */}

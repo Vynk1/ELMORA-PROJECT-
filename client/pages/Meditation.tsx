@@ -1,6 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import MeditationTimer from '../components/MeditationTimer';
 import { getMeditations, addMeditation } from '../lib/supabaseApi';
+import { Wind, Sparkles, Feather, Heart, Headphones, Lightbulb } from 'lucide-react';
 
 // Lazy load effect components
 const TrueFocus = lazy(() => import('../components/effects/TrueFocus'));
@@ -166,11 +167,11 @@ const Meditation: React.FC = () => {
   ];
 
   const typeIcons = {
-    'breathing': '🫁',
-    'mindfulness': '🧘',
-    'body-scan': '🪶',
-    'loving-kindness': '💝',
-    'guided': '🎧'
+    'breathing': Wind,
+    'mindfulness': Sparkles,
+    'body-scan': Feather,
+    'loving-kindness': Heart,
+    'guided': Headphones
   };
 
   const typeColors = {
@@ -245,7 +246,12 @@ const Meditation: React.FC = () => {
         <div className="max-w-md w-full mx-4 text-white text-center">
           {currentPhase === 'prepare' && (
             <div className="space-y-8">
-              <div className="text-6xl mb-4">{typeIcons[selectedSession.type]}</div>
+              <div className="mb-4">
+                {React.createElement(typeIcons[selectedSession.type], {
+                  className: "w-16 h-16 mx-auto text-white",
+                  strokeWidth: 2
+                })}
+              </div>
               <Suspense fallback={
                 <h2 className="text-2xl font-light mb-4">{selectedSession.title}</h2>
               }>
@@ -288,7 +294,12 @@ const Meditation: React.FC = () => {
 
           {currentPhase === 'meditate' && (
             <div className="space-y-8">
-              <div className="text-4xl mb-4">{typeIcons[selectedSession.type]}</div>
+              <div className="mb-4">
+                {React.createElement(typeIcons[selectedSession.type], {
+                  className: "w-12 h-12 mx-auto text-white",
+                  strokeWidth: 2
+                })}
+              </div>
               <Suspense fallback={
                 <h2 className="text-xl font-light mb-8">{selectedSession.title}</h2>
               }>
@@ -381,7 +392,7 @@ const Meditation: React.FC = () => {
 
           {currentPhase === 'complete' && (
             <div className="space-y-8">
-              <div className="text-6xl mb-4">✨</div>
+              <Sparkles className="w-16 h-16 mx-auto mb-4 text-white" strokeWidth={2} />
               <h2 className="text-2xl font-light mb-4">Meditation Complete</h2>
               <p className="text-white/80 mb-8">
                 Well done! You've completed your {selectedSession.duration}-minute meditation session.
@@ -526,7 +537,10 @@ const Meditation: React.FC = () => {
                   onClick={() => startSession(session)}
                 >
               <div className="flex justify-between items-start mb-4">
-                <div className="text-3xl">{typeIcons[session.type]}</div>
+                {React.createElement(typeIcons[session.type], {
+                  className: "w-8 h-8 text-purple-600",
+                  strokeWidth: 2
+                })}
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${typeColors[session.type]}`}>
                   {session.duration} min
                 </span>
@@ -556,7 +570,7 @@ const Meditation: React.FC = () => {
 
         {/* Daily Tip */}
         <div className="mt-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-3xl p-8 text-white text-center">
-          <div className="text-3xl mb-4">💡</div>
+          <Lightbulb className="w-10 h-10 mx-auto mb-4" strokeWidth={2} />
           <h3 className="text-xl font-medium mb-3">Today's Meditation Tip</h3>
           <p className="text-white/90 max-w-2xl mx-auto">
             Remember that meditation is a practice, not a performance. Be gentle with yourself 

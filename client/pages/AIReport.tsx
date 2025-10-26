@@ -1,6 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Brain, BarChart3, Puzzle, Lightbulb, BookOpen, AlertTriangle, Sparkles, Dumbbell, Rocket, Calendar, Star, Hospital, FileText, Activity, Smile, Smartphone } from 'lucide-react';
 
 // Lazy load effect components
 const ScrollReveal = lazy(() => import('../components/effects/ScrollReveal'));
@@ -188,7 +189,7 @@ const AIReport: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl p-8 max-w-md text-center shadow-lg">
-          <div className="text-6xl mb-4">⚠️</div>
+          <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-orange-500" strokeWidth={2} />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Report Not Found</h2>
           <p className="text-gray-600 mb-6">{error || 'Unable to load the report'}</p>
           <Link
@@ -215,7 +216,7 @@ const AIReport: React.FC = () => {
         }>
           <ScrollReveal duration={0.6} disabled={prefersReducedMotion}>
             <div className="text-center mb-12">
-              <div className="text-6xl mb-4">🧠</div>
+              <Brain className="w-16 h-16 mx-auto mb-4 text-purple-600" strokeWidth={2} />
               <h1 className="text-4xl md:text-5xl font-light text-gray-800 mb-4">
                 Your Mental Wellbeing Report
               </h1>
@@ -302,24 +303,26 @@ const AIReport: React.FC = () => {
         {/* Tab Navigation */}
         <div className="flex flex-wrap gap-2 mb-8 bg-white rounded-2xl p-2 shadow-md">
           {[
-            { key: 'overview', label: 'Overview', icon: '📊' },
-            { key: 'traits', label: 'Psychological Traits', icon: '🧩' },
-            { key: 'recommendations', label: 'Recommendations', icon: '💡' },
-            { key: 'resources', label: 'Resources', icon: '📚' }
-          ].map((tab) => (
+            { key: 'overview', label: 'Overview', icon: BarChart3 },
+            { key: 'traits', label: 'Psychological Traits', icon: Puzzle },
+            { key: 'recommendations', label: 'Recommendations', icon: Lightbulb },
+            { key: 'resources', label: 'Resources', icon: BookOpen }
+          ].map((tab) => {
+            const TabIcon = tab.icon;
+            return (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`flex-1 min-w-[150px] px-4 py-3 rounded-xl font-medium transition-all ${
+              className={`flex items-center justify-center gap-2 flex-1 min-w-[150px] px-4 py-3 rounded-xl font-medium transition-all ${
                 activeTab === tab.key
                   ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
-              <span className="mr-2">{tab.icon}</span>
+              <TabIcon className="w-5 h-5" strokeWidth={2} />
               {tab.label}
             </button>
-          ))}
+          );})}
         </div>
 
         {/* Tab Content */}
@@ -332,7 +335,7 @@ const AIReport: React.FC = () => {
                 <ScrollFloat duration={0.7} delay={0.2} disabled={prefersReducedMotion}>
                   <div className="bg-white rounded-3xl p-8 shadow-lg">
                     <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                      <span className="text-3xl mr-3">🔍</span>
+                      <Activity className="w-8 h-8 mr-3 text-purple-600" strokeWidth={2} />
                       Detailed Analysis
                     </h2>
                     <div className="grid md:grid-cols-2 gap-6">
@@ -355,7 +358,7 @@ const AIReport: React.FC = () => {
                   <ScrollFloat duration={0.7} delay={0.3} disabled={prefersReducedMotion}>
                     <div className="bg-white rounded-3xl p-8 shadow-lg">
                       <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                        <span className="text-3xl mr-3">⚠️</span>
+                        <AlertTriangle className="w-8 h-8 mr-3 text-orange-500" strokeWidth={2} />
                         Areas of Concern
                       </h2>
                       <div className="space-y-4">
@@ -392,13 +395,13 @@ const AIReport: React.FC = () => {
                   <ScrollFloat duration={0.7} delay={0.4} disabled={prefersReducedMotion}>
                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 shadow-lg border-2 border-green-200">
                       <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                        <span className="text-3xl mr-3">✨</span>
+                        <Sparkles className="w-8 h-8 mr-3 text-yellow-500" strokeWidth={2} />
                         Your Strengths
                       </h2>
                       <div className="grid md:grid-cols-2 gap-4">
                         {report.positiveAspects.map((aspect, idx) => (
                           <div key={idx} className="flex items-start space-x-3 bg-white rounded-xl p-4">
-                            <span className="text-2xl">💪</span>
+                            <Dumbbell className="w-6 h-6 text-green-600" strokeWidth={2} />
                             <p className="text-gray-700 flex-1">{aspect}</p>
                           </div>
                         ))}
@@ -490,7 +493,7 @@ const AIReport: React.FC = () => {
                   <ScrollFloat duration={0.7} delay={0.1} disabled={prefersReducedMotion}>
                     <div className="bg-white rounded-3xl p-8 shadow-lg">
                       <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                        <span className="text-3xl mr-3">🚀</span>
+                        <Rocket className="w-8 h-8 mr-3 text-blue-600" strokeWidth={2} />
                         Immediate Actions
                       </h2>
                       <div className="space-y-4">
@@ -517,7 +520,7 @@ const AIReport: React.FC = () => {
                   <ScrollFloat duration={0.7} delay={0.2} disabled={prefersReducedMotion}>
                     <div className="bg-white rounded-3xl p-8 shadow-lg">
                       <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                        <span className="text-3xl mr-3">📅</span>
+                        <Calendar className="w-8 h-8 mr-3 text-purple-600" strokeWidth={2} />
                         Short-term Goals (1-3 months)
                       </h2>
                       <div className="space-y-4">
@@ -544,7 +547,7 @@ const AIReport: React.FC = () => {
                   <ScrollFloat duration={0.7} delay={0.3} disabled={prefersReducedMotion}>
                     <div className="bg-white rounded-3xl p-8 shadow-lg">
                       <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                        <span className="text-3xl mr-3">🌟</span>
+                        <Star className="w-8 h-8 mr-3 text-yellow-500" strokeWidth={2} />
                         Long-term Development
                       </h2>
                       <div className="space-y-4">
@@ -571,7 +574,7 @@ const AIReport: React.FC = () => {
                   <ScrollFloat duration={0.7} delay={0.4} disabled={prefersReducedMotion}>
                     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-lg border-2 border-blue-200">
                       <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-                        <span className="text-3xl mr-3">🏥</span>
+                        <Hospital className="w-8 h-8 mr-3 text-blue-600" strokeWidth={2} />
                         Professional Support Recommended
                       </h2>
                       <div className="bg-white rounded-2xl p-6">
@@ -601,11 +604,11 @@ const AIReport: React.FC = () => {
                 }>
                   <ScrollFloat duration={0.6} delay={idx * 0.1} disabled={prefersReducedMotion}>
                     <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all h-full flex flex-col">
-                      <div className="text-3xl mb-3">
-                        {resource.type === 'book' && '📚'}
-                        {resource.type === 'app' && '📱'}
-                        {resource.type === 'technique' && '🧘'}
-                        {resource.type === 'exercise' && '💪'}
+                      <div className="mb-3">
+                        {resource.type === 'book' && <BookOpen className="w-8 h-8 text-purple-600" strokeWidth={2} />}
+                        {resource.type === 'app' && <Smartphone className="w-8 h-8 text-blue-600" strokeWidth={2} />}
+                        {resource.type === 'technique' && <Sparkles className="w-8 h-8 text-green-600" strokeWidth={2} />}
+                        {resource.type === 'exercise' && <Dumbbell className="w-8 h-8 text-orange-600" strokeWidth={2} />}
                       </div>
                       <span className="text-xs font-semibold text-purple-600 uppercase mb-2">{resource.type}</span>
                       <h3 className="text-lg font-semibold text-gray-800 mb-2">{resource.name}</h3>
@@ -640,21 +643,24 @@ const AIReport: React.FC = () => {
             <div className="mt-12 flex flex-wrap gap-4 justify-center">
               <button
                 onClick={() => window.print()}
-                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all"
+                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all"
               >
-                📄 Download Report
+                <FileText className="w-5 h-5" strokeWidth={2} />
+                Download Report
               </button>
               <Link
                 to="/meditation"
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all"
+                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all"
               >
-                🧘 Start Meditation
+                <Sparkles className="w-5 h-5" strokeWidth={2} />
+                Start Meditation
               </Link>
               <Link
                 to="/journal"
-                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all"
+                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all"
               >
-                📖 Journal Your Thoughts
+                <BookOpen className="w-5 h-5" strokeWidth={2} />
+                Journal Your Thoughts
               </Link>
               <Link
                 to="/dashboard"

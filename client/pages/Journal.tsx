@@ -1,6 +1,7 @@
 import React, { useState, lazy, Suspense, useEffect } from 'react';
 import VoiceJournal from '../components/VoiceJournal';
 import { getJournals, addJournal, deleteJournal } from '../lib/supabaseApi';
+import { Zap, Smile, CloudSun, Meh, MessageCircle, Frown, Annoyed, Lightbulb, Mic, BookOpen, X, AlertTriangle, Sparkles, ChevronRight } from 'lucide-react';
 
 // Lazy load effect components
 const TextCursor = lazy(() => import('../components/effects/TextCursor'));
@@ -63,15 +64,15 @@ const Journal: React.FC = () => {
     }
   };
 
-  const moodEmojis = {
-    'amazing': '🤩',
-    'happy': '😊',
-    'content': '😌',
-    'neutral': '😐',
-    'reflective': '🤔',
-    'sad': '😢',
-    'anxious': '😰',
-    'frustrated': '😤'
+  const moodIcons = {
+    'amazing': Zap,
+    'happy': Smile,
+    'content': CloudSun,
+    'neutral': Meh,
+    'reflective': MessageCircle,
+    'sad': Frown,
+    'anxious': CloudSun,
+    'frustrated': Annoyed
   };
 
   const NewEntryModal = () => {
@@ -143,7 +144,7 @@ const Journal: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">How are you feeling?</label>
               <div className="grid grid-cols-4 gap-3">
-                {Object.entries(moodEmojis).map(([mood, emoji]) => (
+                {Object.entries(moodIcons).map(([mood, IconComponent]) => (
                   <button
                     key={mood}
                     onClick={() => setNewEntry({...newEntry, mood})}
@@ -155,7 +156,7 @@ const Journal: React.FC = () => {
                       }
                     `}
                   >
-                    <div className="text-2xl mb-1">{emoji}</div>
+                    <IconComponent className="w-6 h-6 mx-auto mb-1" strokeWidth={2} />
                     <div className="text-xs capitalize">{mood}</div>
                   </button>
                 ))}
@@ -173,8 +174,11 @@ const Journal: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-700">Journal Content</label>
-                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                  💡 Try voice journaling! Click the 🎤 button
+                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full flex items-center gap-1">
+                  <Lightbulb className="w-3 h-3" strokeWidth={2} />
+                  <span>Try voice journaling! Click the</span>
+                  <Mic className="w-3 h-3" strokeWidth={2} />
+                  <span>button</span>
                 </div>
               </div>
               
@@ -237,7 +241,10 @@ const Journal: React.FC = () => {
                 <span>{new Date(selectedEntry.created_at).toLocaleDateString()}</span>
                 {selectedEntry.mood && (
                   <span className="flex items-center space-x-1">
-                    <span>{moodEmojis[selectedEntry.mood as keyof typeof moodEmojis]}</span>
+                    {React.createElement(moodIcons[selectedEntry.mood as keyof typeof moodIcons] || Meh, {
+                      className: "w-4 h-4",
+                      strokeWidth: 2
+                    })}
                     <span className="capitalize">{selectedEntry.mood}</span>
                   </span>
                 )}
@@ -247,7 +254,7 @@ const Journal: React.FC = () => {
               onClick={() => setSelectedEntry(null)}
               className="text-gray-400 hover:text-gray-600"
             >
-              ✕
+              <X className="w-5 h-5" strokeWidth={2} />
             </button>
           </div>
 
@@ -427,7 +434,7 @@ const Journal: React.FC = () => {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
             <div className="flex items-center space-x-2 text-red-700">
-              <span>⚠️</span>
+              <AlertTriangle className="w-5 h-5" strokeWidth={2} />
               <span className="font-medium">Failed to load journal entries</span>
             </div>
             <p className="text-red-600 text-sm mt-2">{error}</p>
@@ -464,15 +471,16 @@ const Journal: React.FC = () => {
                         <span>{new Date(entry.created_at).toLocaleDateString()}</span>
                         {entry.mood && (
                           <span className="flex items-center space-x-1">
-                            <span>{moodEmojis[entry.mood as keyof typeof moodEmojis]}</span>
+                            {React.createElement(moodIcons[entry.mood as keyof typeof moodIcons] || Meh, {
+                              className: "w-4 h-4",
+                              strokeWidth: 2
+                            })}
                             <span className="capitalize">{entry.mood}</span>
                           </span>
                         )}
                       </div>
                     </div>
-                    <button className="text-gray-400 hover:text-primary">
-                      →
-                    </button>
+                    <ChevronRight className="w-5 h-5 text-gray-400 hover:text-primary" strokeWidth={2} />
                   </div>
 
                   <p className="text-gray-600 mb-4 line-clamp-3">
@@ -510,7 +518,7 @@ const Journal: React.FC = () => {
               {/* Reserved slot for Spline 3D notebook with petals */}
             </div>
             
-            <div className="text-6xl mb-4">📖</div>
+            <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" strokeWidth={2} />
             <h3 className="text-xl font-medium text-gray-800 mb-2">Start your journal</h3>
             <div className="text-gray-600 mb-6">
               <Suspense fallback="No entries yet — write one thing you're grateful for.">
@@ -544,7 +552,10 @@ const Journal: React.FC = () => {
               duration={1.8} 
               className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg font-medium"
             >
-              Saved — well done! ✨
+              <span className="flex items-center gap-1">
+                Saved — well done!
+                <Sparkles className="w-4 h-4" strokeWidth={2} />
+              </span>
             </FallingText>
           </Suspense>
         </div>
@@ -553,8 +564,9 @@ const Journal: React.FC = () => {
       {/* Static saved message for reduced motion */}
       {showSavedMessage && prefersReducedMotion && (
         <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
-          <div className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg font-medium">
-            Saved — well done! ✨
+          <div className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg font-medium flex items-center gap-1">
+            Saved — well done!
+            <Sparkles className="w-4 h-4" strokeWidth={2} />
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import RewardCoupon from '../components/RewardCoupon';
+import { CheckCircle2, Star, Gift, Flame, Trophy, Gem } from 'lucide-react';
 
 // Lazy load effect components
 const CountUp = lazy(() => import('../components/effects/CountUp'));
@@ -65,21 +66,21 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
             <h2 className="text-2xl font-light text-white mb-6 text-center">How It Works</h2>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-4xl mb-3">📝</div>
+                <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-white" strokeWidth={2} />
                 <h3 className="text-lg font-medium text-white mb-2">Complete Tasks</h3>
                 <p className="text-sm text-white/80">
                   Finish 70% or more of your daily tasks to earn reward points
                 </p>
               </div>
               <div className="text-center">
-                <div className="text-4xl mb-3">⭐</div>
+                <Star className="w-12 h-12 mx-auto mb-3 text-white" strokeWidth={2} />
                 <h3 className="text-lg font-medium text-white mb-2">Earn Points</h3>
                 <p className="text-sm text-white/80">
                   Get 5-15 points per day based on your completion rate and streaks
                 </p>
               </div>
               <div className="text-center">
-                <div className="text-4xl mb-3">🎁</div>
+                <Gift className="w-12 h-12 mx-auto mb-3 text-white" strokeWidth={2} />
                 <h3 className="text-lg font-medium text-white mb-2">Unlock Rewards</h3>
                 <p className="text-sm text-white/80">
                   Use your points to unlock coupons and special offers
@@ -94,7 +95,7 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
               <div className="grid md:grid-cols-3 gap-6">
                 <ScrollReveal duration={0.5} delay={0.3} disabled={prefersReducedMotion}>
                   <div className="text-center">
-                    <div className="text-4xl mb-3">📝</div>
+                    <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-white" strokeWidth={2} />
                     <h3 className="text-lg font-medium text-white mb-2">Complete Tasks</h3>
                     <p className="text-sm text-white/80">
                       Finish 70% or more of your daily tasks to earn reward points
@@ -103,7 +104,7 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
                 </ScrollReveal>
                 <ScrollReveal duration={0.5} delay={0.4} disabled={prefersReducedMotion}>
                   <div className="text-center">
-                    <div className="text-4xl mb-3">⭐</div>
+                    <Star className="w-12 h-12 mx-auto mb-3 text-white" strokeWidth={2} />
                     <h3 className="text-lg font-medium text-white mb-2">Earn Points</h3>
                     <p className="text-sm text-white/80">
                       Get 5-15 points per day based on your completion rate and streaks
@@ -112,7 +113,7 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
                 </ScrollReveal>
                 <ScrollReveal duration={0.5} delay={0.5} disabled={prefersReducedMotion}>
                   <div className="text-center">
-                    <div className="text-4xl mb-3">🎁</div>
+                    <Gift className="w-12 h-12 mx-auto mb-3 text-white" strokeWidth={2} />
                     <h3 className="text-lg font-medium text-white mb-2">Unlock Rewards</h3>
                     <p className="text-sm text-white/80">
                       Use your points to unlock coupons and special offers
@@ -137,28 +138,28 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">🔥</span>
+                  <Flame className="w-8 h-8 text-white" strokeWidth={2} />
                 </div>
                 <h3 className="text-sm font-medium text-white mb-1">Week Warrior</h3>
                 <p className="text-xs text-white/80">7-day streak</p>
               </div>
               <div className="text-center opacity-50">
                 <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">🌟</span>
+                  <Star className="w-8 h-8 text-white" strokeWidth={2} />
                 </div>
                 <h3 className="text-sm font-medium text-white mb-1">Super Achiever</h3>
                 <p className="text-xs text-white/80">100 tasks completed</p>
               </div>
               <div className="text-center opacity-50">
                 <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">🏆</span>
+                  <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
                 </div>
                 <h3 className="text-sm font-medium text-white mb-1">Champion</h3>
                 <p className="text-xs text-white/80">30-day streak</p>
               </div>
               <div className="text-center opacity-50">
                 <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">💎</span>
+                  <Gem className="w-8 h-8 text-white" strokeWidth={2} />
                 </div>
                 <h3 className="text-sm font-medium text-white mb-1">Diamond</h3>
                 <p className="text-xs text-white/80">500 points earned</p>
@@ -173,7 +174,7 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
                 <ScrollReveal duration={0.4} delay={0.6} disabled={prefersReducedMotion}>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-2xl">🔥</span>
+                      <Flame className="w-8 h-8 text-white" strokeWidth={2} />
                     </div>
                     <h3 className="text-sm font-medium text-white mb-1">Week Warrior</h3>
                     <p className="text-xs text-white/80">7-day streak</p>
@@ -182,7 +183,7 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
                 <ScrollReveal duration={0.4} delay={0.7} disabled={prefersReducedMotion}>
                   <div className="text-center opacity-50">
                     <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-2xl">🌟</span>
+                      <Star className="w-8 h-8 text-white" strokeWidth={2} />
                     </div>
                     <h3 className="text-sm font-medium text-white mb-1">Super Achiever</h3>
                     <p className="text-xs text-white/80">100 tasks completed</p>
@@ -191,7 +192,7 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
                 <ScrollReveal duration={0.4} delay={0.8} disabled={prefersReducedMotion}>
                   <div className="text-center opacity-50">
                     <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-2xl">🏆</span>
+                      <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
                     </div>
                     <h3 className="text-sm font-medium text-white mb-1">Champion</h3>
                     <p className="text-xs text-white/80">30-day streak</p>
@@ -200,7 +201,7 @@ const Rewards: React.FC<RewardsProps> = ({ userPoints, onPointsUpdate }) => {
                 <ScrollReveal duration={0.4} delay={0.9} disabled={prefersReducedMotion}>
                   <div className="text-center opacity-50">
                     <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-2xl">💎</span>
+                      <Gem className="w-8 h-8 text-white" strokeWidth={2} />
                     </div>
                     <h3 className="text-sm font-medium text-white mb-1">Diamond</h3>
                     <p className="text-xs text-white/80">500 points earned</p>

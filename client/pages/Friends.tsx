@@ -1,4 +1,5 @@
 import React, { useState, lazy, Suspense, useEffect } from "react";
+import { Users2, UserPlus, Mail, MapPin, Heart } from 'lucide-react';
 
 // Lazy load effect components
 const RotatingText = lazy(() => import('../components/effects/RotatingText'));

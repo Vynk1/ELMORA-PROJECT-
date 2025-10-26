@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { sendChatMessage, getChatHistory, deleteChatHistory } from '../lib/supabaseApi';
 import { type MoodType } from './MoodColorSwitcher';
+import { MessageCircle, Brain, Trash2, X, Send, Sparkles, Leaf } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -239,8 +240,12 @@ const PersonalizedChat: React.FC<PersonalizedChatProps> = ({ currentMood }) => {
           <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full animate-ping opacity-20"></div>
           
           {/* Icon */}
-          <span className="relative text-2xl z-10">
-            {hasPersonalizedContext ? '🧠' : '💬'}
+          <span className="relative z-10">
+            {hasPersonalizedContext ? (
+              <Brain className="w-6 h-6" strokeWidth={2} />
+            ) : (
+              <MessageCircle className="w-6 h-6" strokeWidth={2} />
+            )}
           </span>
           
           {/* Notification badge */}
@@ -250,8 +255,14 @@ const PersonalizedChat: React.FC<PersonalizedChatProps> = ({ currentMood }) => {
         </button>
         
         {/* Hover tooltip */}
-        <div className="absolute bottom-16 right-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-          {hasPersonalizedContext ? 'Chat with your AI companion 🌿' : 'Start a conversation'}
+        <div className="absolute bottom-16 right-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none flex items-center gap-1">
+          {hasPersonalizedContext ? (
+            <>
+              Chat with your AI companion <Leaf className="w-3 h-3" strokeWidth={2} />
+            </>
+          ) : (
+            'Start a conversation'
+          )}
         </div>
       </div>
     );
@@ -263,7 +274,7 @@ const PersonalizedChat: React.FC<PersonalizedChatProps> = ({ currentMood }) => {
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-4 rounded-t-2xl flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <span className="text-2xl">🧠</span>
+          <Brain className="w-6 h-6" strokeWidth={2} />
           <div>
             <h3 className="font-semibold">AI Wellness Companion</h3>
             <p className="text-xs opacity-90">
@@ -277,14 +288,14 @@ const PersonalizedChat: React.FC<PersonalizedChatProps> = ({ currentMood }) => {
             className="hover:bg-white/20 p-2 rounded-lg transition-colors"
             title="Clear history"
           >
-            🗑️
+            <Trash2 className="w-4 h-4" strokeWidth={2} />
           </button>
           <button
             onClick={() => setIsOpen(false)}
             className="hover:bg-white/20 p-2 rounded-lg transition-colors"
             title="Close chat"
           >
-            ✕
+            <X className="w-4 h-4" strokeWidth={2} />
           </button>
         </div>
       </div>
@@ -330,7 +341,10 @@ const PersonalizedChat: React.FC<PersonalizedChatProps> = ({ currentMood }) => {
       {/* Quick actions */}
       {messages.length <= 1 && !isTyping && (
         <div className="px-4 py-3 border-t border-gray-200 bg-white/80">
-          <p className="text-xs text-gray-600 mb-2 font-medium">✨ Smart suggestions for you:</p>
+          <p className="text-xs text-gray-600 mb-2 font-medium flex items-center gap-1">
+            <Sparkles className="w-3 h-3" strokeWidth={2} />
+            Smart suggestions for you:
+          </p>
           <div className="grid grid-cols-2 gap-2">
             {smartActions.slice(0, 4).map((action, idx) => (
               <button
@@ -363,9 +377,9 @@ const PersonalizedChat: React.FC<PersonalizedChatProps> = ({ currentMood }) => {
           <button
             onClick={() => sendMessage()}
             disabled={isLoading || !inputMessage.trim()}
-            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center"
           >
-            {isLoading ? '...' : '→'}
+            {isLoading ? '...' : <Send className="w-4 h-4" strokeWidth={2} />}
           </button>
         </div>
       </div>

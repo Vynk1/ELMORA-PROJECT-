@@ -121,3 +121,4 @@ temp/
 !.env.example
 !.gitignore
 !.nvmrc
+.vercel

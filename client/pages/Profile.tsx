@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+import LoadingScreen from '../components/LoadingScreen';
 
 interface UserProfile {
   name: string;
@@ -33,26 +36,28 @@ interface UserProfile {
 }
 
 const Profile: React.FC = () => {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'achievements' | 'stats' | 'activity'>('overview');
+  const [loading, setLoading] = useState(true);
   
   const [profile, setProfile] = useState<UserProfile>({
-    name: 'Vinayak Gupta',
-    email: 'vinayak@gmail.com',
-    joinDate: '2020-01-01',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Prateek',
-    bio: 'On a journey to better mental health and well-being. Taking it one day at a time! 🌱',
-    location: 'New Delhi, India',
-    birthday: '1995-06-15',
-    interests: ['Meditation', 'Reading', 'Nature Walks', 'Yoga', 'Journaling', 'Photography'],
-    goals: ['Daily meditation practice', 'Complete 100 tasks this month', 'Read 2 books'],
+    name: '',
+    email: '',
+    joinDate: '',
+    avatar: '',
+    bio: '',
+    location: '',
+    birthday: '',
+    interests: [],
+    goals: [],
     stats: {
-      tasksCompleted: 234,
-      daysActive: 45,
-      longestStreak: 12,
-      totalPoints: 1456,
-      meditationMinutes: 340,
-      journalEntries: 28,
+      tasksCompleted: 0,
+      daysActive: 0,
+      longestStreak: 0,
+      totalPoints: 0,
+      meditationMinutes: 0,
+      journalEntries: 0,
     },
     achievements: [
       {
@@ -96,19 +101,81 @@ const Profile: React.FC = () => {
         rarity: 'legendary'
       }
     ],
-    moodHistory: [
-      { date: '2024-01-15', mood: 'amazing' },
-      { date: '2024-01-14', mood: 'mid' },
-      { date: '2024-01-13', mood: 'amazing' },
-      { date: '2024-01-12', mood: 'sad' },
-      { date: '2024-01-11', mood: 'mid' },
-      { date: '2024-01-10', mood: 'amazing' },
-      { date: '2024-01-09', mood: 'mid' },
-    ]
+    moodHistory: []
   });
+
+  // Fetch user profile data from database
+  useEffect(() => {
+    async function fetchProfile() {
+      if (!user) return;
+
+      try {
+        setLoading(true);
+        
+        // Fetch profile data
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('display_name, bio, avatar_url, created_at')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Error fetching profile:', profileError);
+        }
+
+        // Fetch email from auth user
+        const email = user.email || '';
+
+        // Generate avatar URL if not set
+        const avatarUrl = profileData?.avatar_url || 
+          `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profileData?.display_name || user.email || 'user')}`;
+
+        // Update profile state with fetched data
+        setProfile(prev => ({
+          ...prev,
+          name: profileData?.display_name || '',
+          email: email,
+          joinDate: profileData?.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+          avatar: avatarUrl,
+          bio: profileData?.bio || '',
+        }));
+      } catch (error) {
+        console.error('Error in fetchProfile:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProfile();
+  }, [user]);
 
   const updateProfile = (field: keyof UserProfile, value: any) => {
     setProfile(prev => ({ ...prev, [field]: value }));
+  };
+
+  const saveProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          display_name: profile.name,
+          bio: profile.bio,
+        })
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        alert('Failed to update profile. Please try again.');
+      } else {
+        setIsEditing(false);
+        alert('Profile updated successfully!');
+      }
+    } catch (error) {
+      console.error('Error in saveProfile:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   const tabs = [
@@ -182,10 +249,7 @@ const Profile: React.FC = () => {
           Cancel
         </button>
         <button
-          onClick={() => {
-            setIsEditing(false);
-            alert('Profile updated successfully!');
-          }}
+          onClick={saveProfile}
           className="flex-1 py-3 bg-primary text-white rounded-2xl font-medium hover:bg-primary/90"
         >
           Save Changes
@@ -193,6 +257,10 @@ const Profile: React.FC = () => {
       </div>
     </div>
   );
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100">

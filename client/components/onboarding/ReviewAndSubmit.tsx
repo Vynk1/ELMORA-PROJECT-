@@ -61,17 +61,22 @@ export default function ReviewAndSubmit() {
       recommendations: fallbackRecommendations
     });
     
-    // Mark assessment as completed in database
+    // Mark assessment as completed in database and save profile data
     try {
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ assessment_completed: true })
+        .update({ 
+          assessment_completed: true,
+          display_name: basics.name,
+          bio: basics.bio,
+          avatar_url: photo.url || null
+        })
         .eq('user_id', user.id);
       
       if (updateError) {
         console.error('Profile update error:', updateError);
       } else {
-        console.log('Profile marked as completed in database');
+        console.log('Profile marked as completed and data saved to database');
       }
     } catch (supabaseError) {
       console.error('Supabase error:', supabaseError);

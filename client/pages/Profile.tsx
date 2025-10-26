@@ -42,6 +42,7 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [editForm, setEditForm] = useState({ name: '', bio: '', location: '', interests: [] as string[] });
   
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
@@ -161,6 +162,24 @@ const Profile: React.FC = () => {
     setProfile(prev => ({ ...prev, [field]: value }));
   };
 
+  const updateEditForm = (field: string, value: any) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const startEditing = () => {
+    setEditForm({
+      name: profile.name,
+      bio: profile.bio,
+      location: profile.location,
+      interests: profile.interests,
+    });
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+  };
+
   const handlePhotoUpload = async (file: File) => {
     if (!user) return;
 
@@ -237,8 +256,8 @@ const Profile: React.FC = () => {
       const { error } = await supabase
         .from('profiles')
         .update({
-          display_name: profile.name,
-          bio: profile.bio,
+          display_name: editForm.name,
+          bio: editForm.bio,
         })
         .eq('user_id', user.id);
 
@@ -246,6 +265,14 @@ const Profile: React.FC = () => {
         console.error('Error updating profile:', error);
         alert('Failed to update profile. Please try again.');
       } else {
+        // Update the main profile state with saved data
+        setProfile(prev => ({
+          ...prev,
+          name: editForm.name,
+          bio: editForm.bio,
+          location: editForm.location,
+          interests: editForm.interests,
+        }));
         setIsEditing(false);
         alert('Profile updated successfully!');
       }
@@ -281,8 +308,8 @@ const Profile: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
           <input
             type="text"
-            value={profile.name}
-            onChange={(e) => updateProfile('name', e.target.value)}
+            value={editForm.name}
+            onChange={(e) => updateEditForm('name', e.target.value)}
             className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -290,8 +317,8 @@ const Profile: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
           <input
             type="text"
-            value={profile.location}
-            onChange={(e) => updateProfile('location', e.target.value)}
+            value={editForm.location}
+            onChange={(e) => updateEditForm('location', e.target.value)}
             className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -300,8 +327,8 @@ const Profile: React.FC = () => {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
         <textarea
-          value={profile.bio}
-          onChange={(e) => updateProfile('bio', e.target.value)}
+          value={editForm.bio}
+          onChange={(e) => updateEditForm('bio', e.target.value)}
           className="w-full p-3 border border-gray-200 rounded-2xl h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
           placeholder="Tell us about yourself..."
         />
@@ -311,8 +338,8 @@ const Profile: React.FC = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">Interests</label>
         <input
           type="text"
-          value={profile.interests.join(', ')}
-          onChange={(e) => updateProfile('interests', e.target.value.split(', ').filter(i => i.trim()))}
+          value={editForm.interests.join(', ')}
+          onChange={(e) => updateEditForm('interests', e.target.value.split(', ').filter(i => i.trim()))}
           className="w-full p-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20"
           placeholder="Meditation, Reading, Yoga..."
         />
@@ -320,7 +347,7 @@ const Profile: React.FC = () => {
 
       <div className="flex space-x-3">
         <button
-          onClick={() => setIsEditing(false)}
+          onClick={cancelEditing}
           className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-2xl font-medium hover:bg-gray-200"
         >
           Cancel
@@ -382,7 +409,7 @@ const Profile: React.FC = () => {
             {/* Action Button */}
             <div>
               <button
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={isEditing ? cancelEditing : startEditing}
                 className="bg-primary text-white px-6 py-3 rounded-2xl font-medium hover:bg-primary/90 transition-colors"
               >
                 {isEditing ? 'Cancel Edit' : 'Edit Profile'}

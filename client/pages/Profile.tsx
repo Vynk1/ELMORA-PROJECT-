@@ -40,6 +40,8 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'achievements' | 'stats' | 'activity'>('overview');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
@@ -119,6 +121,8 @@ const Profile: React.FC = () => {
           .eq('user_id', user.id)
           .single();
 
+        console.log('Profile fetch result:', { profileData, profileError });
+
         if (profileError && profileError.code !== 'PGRST116') {
           console.error('Error fetching profile:', profileError);
         }
@@ -129,6 +133,10 @@ const Profile: React.FC = () => {
         // Generate avatar URL if not set
         const avatarUrl = profileData?.avatar_url || 
           `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profileData?.display_name || user.email || 'user')}`;
+
+        console.log('Avatar URL:', avatarUrl);
+        console.log('Display name:', profileData?.display_name);
+        console.log('Bio:', profileData?.bio);
 
         // Update profile state with fetched data
         setProfile(prev => ({
@@ -151,6 +159,75 @@ const Profile: React.FC = () => {
 
   const updateProfile = (field: keyof UserProfile, value: any) => {
     setProfile(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!user) return;
+
+    try {
+      setUploading(true);
+
+      // Compress and upload image
+      const fileName = `${user.id}_${Date.now()}.jpg`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: publicData } = supabase.storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = publicData.publicUrl;
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Update local state
+      setProfile(prev => ({ ...prev, avatar: avatarUrl }));
+      alert('Profile photo updated successfully!');
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      alert('Failed to upload photo. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Please upload a valid image file (JPEG, PNG, or WebP)');
+        return;
+      }
+
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image must be smaller than 10MB');
+        return;
+      }
+
+      handlePhotoUpload(file);
+    }
   };
 
   const saveProfile = async () => {
@@ -273,10 +350,22 @@ const Profile: React.FC = () => {
               <img
                 src={profile.avatar}
                 alt={profile.name}
-                className="w-24 h-24 rounded-full bg-gray-200"
+                className="w-24 h-24 rounded-full bg-gray-200 object-cover"
               />
-              <button className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-full hover:bg-primary/90">
-                📷
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-full hover:bg-primary/90 disabled:opacity-50"
+                title="Change profile photo"
+              >
+                {uploading ? '...' : '📷'}
               </button>
             </div>
 

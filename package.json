@@ -1,5 +1,16 @@
 {
   "name": "elmora",
+  "version": "1.0.0",
+  "description": "AI-powered wellness application for building positive habits and maintaining mental well-being",
+  "author": "Vinayak Gupta <vinayak@elmora.app>",
+  "contributors": [
+    "Vinayak Gupta (Lead Developer & Full-Stack Implementation)",
+    "Sumit Bhatt (AI Features Developer & Quality Assurance)",
+    "Kanishka Narang (Builder.io Prompt Design & Initial UI Framework)",
+    "Deepanshu (Testing & Support Contributor)",
+    "Vansh Bahl (Presentation & Documentation Contributor)"
+  ],
+  "license": "MIT",
   "private": true,
   "type": "module",
   "pkg": {

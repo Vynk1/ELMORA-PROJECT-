@@ -365,6 +365,43 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 Developed by Vinayak Gupta as part of a hackathon project.
 
+## 👥 Team & Contributions
+
+This project was developed collaboratively as part of a hackathon, with each team member contributing their unique expertise:
+
+### Core Development Team
+
+- **Vinayak Gupta** — Lead Developer & Final Full-Stack Implementation
+  - Full code architecture and system design
+  - Complete UI/UX integration and implementation
+  - Database design and backend infrastructure
+  - Final working functionality and deployment
+  - Project maintainer and technical lead
+
+- **Sumit Bhatt** — AI Features Developer & Quality Assurance
+  - AI-powered features and integrations
+  - Error detection and resolution
+  - Comprehensive testing and quality assurance
+  - Performance optimization
+
+- **Kanishka Narang** — Builder.io Prompt Design & Initial UI Framework
+  - Visual design prompts and Builder.io integration
+  - Initial UI framework and component structure
+  - Design system foundations
+
+- **Deepanshu** — Testing & Support Contributor
+  - Application testing and quality checks
+  - Feature validation and user experience testing
+  - Development support and collaboration
+
+- **Vansh Bahl** — Presentation & Documentation Contributor
+  - Project presentation and storytelling
+  - Documentation contributions
+  - Testing and feedback
+
+### Contributing
+We welcome new contributors! Please see our [Contributing Guidelines](#-contributing) above.
+
 ## 🙏 Acknowledgments
 
 - **Supabase** - Backend-as-a-Service platform
@@ -372,16 +409,6 @@ Developed by Vinayak Gupta as part of a hackathon project.
 - **TailwindCSS** - Utility-first CSS framework
 - **React Community** - Amazing ecosystem and tools
 - **Open Source Contributors** - All the amazing libraries we use
-
-## 👥 Contributors
-
-### Current Team
-- **Vinayak Gupta** - Lead Developer & Project Maintainer & Database Architect
-- **Kanishka Narang** - Frontend Developer
-- **Deepanshu** - Backend Support Developer & UI/UX Designer
-
-### Contributing
-We welcome new contributors! Please see our [Contributing Guidelines](#-contributing) above.
 
 ---
 

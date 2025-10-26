@@ -253,29 +253,47 @@ const Profile: React.FC = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      console.log('Saving profile with data:', {
+        display_name: editForm.name,
+        bio: editForm.bio,
+        user_id: user.id
+      });
+
+      const { data, error } = await supabase
         .from('profiles')
         .update({
           display_name: editForm.name,
           bio: editForm.bio,
         })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select();
+
+      console.log('Update result:', { data, error });
 
       if (error) {
         console.error('Error updating profile:', error);
-        alert('Failed to update profile. Please try again.');
-      } else {
-        // Update the main profile state with saved data
-        setProfile(prev => ({
-          ...prev,
-          name: editForm.name,
-          bio: editForm.bio,
-          location: editForm.location,
-          interests: editForm.interests,
-        }));
-        setIsEditing(false);
-        alert('Profile updated successfully!');
+        alert(`Failed to update profile: ${error.message}`);
+        return;
       }
+
+      if (!data || data.length === 0) {
+        console.warn('No rows updated. Profile might not exist.');
+        alert('Profile not found. Please try again.');
+        return;
+      }
+
+      // Update the main profile state with saved data
+      setProfile(prev => ({
+        ...prev,
+        name: editForm.name,
+        bio: editForm.bio,
+        location: editForm.location,
+        interests: editForm.interests,
+      }));
+      
+      setIsEditing(false);
+      alert('Profile updated successfully!');
+      console.log('Profile saved successfully:', data);
     } catch (error) {
       console.error('Error in saveProfile:', error);
       alert('An error occurred. Please try again.');

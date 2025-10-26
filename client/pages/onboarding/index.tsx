@@ -162,9 +162,13 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
           console.error('Error checking onboarding status:', error);
         }
 
-        // If assessment is already completed, redirect to dashboard
-        if (profile?.assessment_completed) {
-          navigate('/dashboard');
+        // Also check localStorage as backup
+        const localStorageCompleted = localStorage.getItem(`onboarding_completed_${user.id}`) === 'true';
+
+        // If assessment is already completed (in DB or localStorage), redirect to dashboard
+        if (profile?.assessment_completed === true || localStorageCompleted) {
+          console.log('Onboarding already completed, redirecting to dashboard');
+          navigate('/dashboard', { replace: true });
           return;
         }
 

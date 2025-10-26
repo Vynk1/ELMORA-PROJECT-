@@ -61,15 +61,20 @@ export default function ReviewAndSubmit() {
       recommendations: fallbackRecommendations
     });
     
-    // Mark assessment as completed locally (best effort)
+    // Mark assessment as completed in database
     try {
-      await supabase
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({ assessment_completed: true })
-        .eq('id', user.id);
-      console.log('Profile marked as completed');
+        .eq('user_id', user.id);
+      
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+      } else {
+        console.log('Profile marked as completed in database');
+      }
     } catch (supabaseError) {
-      console.log('Profile update failed, but continuing with insights');
+      console.error('Supabase error:', supabaseError);
     }
     
     // Also mark as completed in localStorage as backup

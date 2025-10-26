@@ -153,20 +153,23 @@ export default function AiResults() {
                   try {
                     // Mark assessment as completed in database
                     if (user) {
-                      await supabase
+                      const { error: updateError } = await supabase
                         .from('profiles')
                         .update({ assessment_completed: true })
-                        .eq('id', user.id);
-                      console.log('Assessment marked as completed in database');
+                        .eq('user_id', user.id);
+                      
+                      if (updateError) {
+                        console.error('Error updating assessment status:', updateError);
+                      } else {
+                        console.log('Assessment marked as completed in database');
+                      }
+                      
+                      // Also mark as completed in localStorage as backup
+                      localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+                      console.log('Assessment marked as completed in localStorage');
                     }
                   } catch (error) {
-                    console.error('Error updating assessment status:', error);
-                  }
-                  
-                  // Also mark as completed in localStorage as backup
-                  if (user) {
-                    localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
-                    console.log('Assessment marked as completed in localStorage');
+                    console.error('Error in onboarding completion:', error);
                   }
                   
                   // Force navigation to dashboard with replace to prevent back button issues

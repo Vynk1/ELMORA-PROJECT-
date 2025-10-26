@@ -65,18 +65,20 @@ export default function ReviewAndSubmit() {
     try {
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ 
+        .upsert({ 
+          user_id: user.id,
           assessment_completed: true,
           display_name: basics.name,
           bio: basics.bio,
           avatar_url: photo.url || null
-        })
-        .eq('user_id', user.id);
+        }, {
+          onConflict: 'user_id'
+        });
       
       if (updateError) {
-        console.error('Profile update error:', updateError);
+        console.error('Profile upsert error:', updateError);
       } else {
-        console.log('Profile marked as completed and data saved to database');
+        console.log('Profile created/updated with onboarding data');
       }
     } catch (supabaseError) {
       console.error('Supabase error:', supabaseError);

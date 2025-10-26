@@ -208,11 +208,15 @@ const Profile: React.FC = () => {
 
       const avatarUrl = publicData.publicUrl;
 
-      // Update profile with new avatar URL
+      // Update profile with new avatar URL (upsert to create if doesn't exist)
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: avatarUrl })
-        .eq('user_id', user.id);
+        .upsert({
+          user_id: user.id,
+          avatar_url: avatarUrl
+        }, {
+          onConflict: 'user_id'
+        });
 
       if (updateError) {
         throw updateError;
@@ -261,24 +265,20 @@ const Profile: React.FC = () => {
 
       const { data, error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          user_id: user.id,
           display_name: editForm.name,
           bio: editForm.bio,
+        }, {
+          onConflict: 'user_id'
         })
-        .eq('user_id', user.id)
         .select();
 
-      console.log('Update result:', { data, error });
+      console.log('Upsert result:', { data, error });
 
       if (error) {
         console.error('Error updating profile:', error);
         alert(`Failed to update profile: ${error.message}`);
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        console.warn('No rows updated. Profile might not exist.');
-        alert('Profile not found. Please try again.');
         return;
       }
 

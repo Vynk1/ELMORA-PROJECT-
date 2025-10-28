@@ -144,9 +144,9 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-select mood in development
+  // Auto-select mood (bypassed for all environments)
   useEffect(() => {
-    if (!isLoading && import.meta.env.DEV) {
+    if (!isLoading) {
       setHasSelectedMood(true);
       setCurrentMood('content');
     }
@@ -189,9 +189,10 @@ function AppContent() {
     });
   }
 
-  if (!hasSelectedMood && !import.meta.env.DEV) {
-    return <MoodSelection onMoodSelection={handleMoodSelection} />;
-  }
+  // Mood selection disabled - automatically set to 'content'
+  // if (!hasSelectedMood) {
+  //   return <MoodSelection onMoodSelection={handleMoodSelection} />;
+  // }
 
   return (
     <BrowserRouter>
@@ -299,10 +300,10 @@ function AuthenticatedApp({
     }
   };
 
-  // Show mood selection if user hasn't selected mood yet (and not in dev mode)
-  if (!hasSelectedMood && !import.meta.env.DEV) {
-    return <MoodSelection onMoodSelection={handleMoodSelection} />;
-  }
+  // Mood selection disabled - automatically set to 'content'
+  // if (!hasSelectedMood) {
+  //   return <MoodSelection onMoodSelection={handleMoodSelection} />;
+  // }
 
   return (
     <div className="min-h-screen bg-background">

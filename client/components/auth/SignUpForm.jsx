@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
 import Navbar from '../Navbar'
+import GoogleButton from './GoogleButton'
 
 const SignUpForm = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,13 @@ const SignUpForm = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [isShaking, setIsShaking] = useState(false)
   const navigate = useNavigate()
+
+  const triggerShake = () => {
+    setIsShaking(true)
+    setTimeout(() => setIsShaking(false), 600)
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -20,7 +27,10 @@ const SignUpForm = () => {
       [e.target.name]: e.target.value
     })
     // Clear errors when user starts typing
-    if (error) setError('')
+    if (error) {
+      setError('')
+      setIsShaking(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -195,6 +205,25 @@ const SignUpForm = () => {
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>
           </form>
+
+            {/* Divider */}
+            <div className="my-6 relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500 font-light">or continue with</span>
+              </div>
+            </div>
+
+            {/* Google OAuth Button */}
+            <GoogleButton 
+              disabled={loading} 
+              onError={(error) => {
+                setError(error)
+                triggerShake()
+              }} 
+            />
 
             {/* Login Link */}
             <div className="text-center mt-6">

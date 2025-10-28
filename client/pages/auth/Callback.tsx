@@ -9,60 +9,74 @@ const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+    let timeoutId: NodeJS.Timeout;
+
     const handleAuthCallback = async () => {
       try {
-        // Get the URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        const errorParam = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
+        // Wait for Supabase to process the OAuth hash fragment
+        // The SDK automatically handles this in the background
+        timeoutId = setTimeout(async () => {
+          if (!mounted) return;
 
-        if (errorParam) {
-          setError(errorDescription || errorParam || 'Authentication failed');
-          setLoading(false);
-          return;
-        }
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-        if (!code) {
-          setError('No authorization code received');
-          setLoading(false);
-          return;
-        }
+          if (!mounted) return;
 
-        // Exchange the code for a session
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (sessionError) {
+            console.error('Session error:', sessionError);
+            setError(sessionError.message || 'Failed to get session');
+            setLoading(false);
+            return;
+          }
 
-        if (error) {
-          console.error('Session exchange error:', error);
-          setError(error.message || 'Failed to complete authentication');
-        } else if (data?.user) {
-          // Successfully authenticated
-          console.log('Authentication successful:', data.user.email);
-          
+          if (!session || !session.user) {
+            setError('Authentication failed - no session established');
+            setLoading(false);
+            return;
+          }
+
+          const user = session.user;
+          console.log('Authentication successful:', user.email);
+            
           // Check if user needs onboarding
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('assessment_completed')
-            .eq('user_id', data.user.id)
+            .eq('user_id', user.id)
             .single();
+          
+          if (!mounted) return;
+
+          if (profileError) {
+            console.error('Profile error:', profileError);
+            // Profile might not exist yet, redirect to onboarding
+            navigate('/onboarding', { replace: true });
+            return;
+          }
           
           if (profile?.assessment_completed) {
             navigate('/dashboard', { replace: true });
           } else {
             navigate('/onboarding', { replace: true });
           }
-        } else {
-          setError('Authentication completed but no user found');
-        }
+        }, 1500); // Give Supabase time to process the OAuth callback
+
       } catch (err) {
         console.error('Auth callback error:', err);
-        setError('An unexpected error occurred during authentication');
-      } finally {
-        setLoading(false);
+        if (mounted) {
+          setError('An unexpected error occurred during authentication');
+          setLoading(false);
+        }
       }
     };
 
     handleAuthCallback();
+
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [navigate]);
 
   if (loading) {

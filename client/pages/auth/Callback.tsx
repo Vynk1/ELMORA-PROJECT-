@@ -10,7 +10,7 @@ const AuthCallback: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const handleAuthCallback = async () => {
       try {
